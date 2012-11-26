@@ -8,9 +8,14 @@ Gem::Specification.new do |gem|
   gem.version       = Bosh::Bootstrap::VERSION
   gem.authors       = ["Dr Nic Williams"]
   gem.email         = ["drnicwilliams@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.description   = %q{Bootstrap a micro BOSH universe from one CLI}
+  gem.summary       = <<-EOS
+Now very simple to bootstrap a micro BOSH from a single, local CLI.
+The bootstrapper first creates an inception VM and then uses
+bosh_deployer (bosh micro deploy) to deploy micro BOSH from
+an available stemcell.
+EOS
+  gem.homepage      = "https://github.com/StarkAndWayne/bosh-bootstrap"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
