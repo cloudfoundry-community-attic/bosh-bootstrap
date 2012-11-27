@@ -23,7 +23,6 @@ if [[ "${UPGRADE}X" != "X" || ("$(ruby -v)" == "ruby 1.9.3*") ]]; then
   command rvm install 1.9.3 # oh god this takes a long time
   rvm 1.9.3
   rvm alias create default 1.9.3
-  gem install bundler fog --no-ri --no-rdoc
 else
   echo Ruby 1.9.3 already installed
 fi
