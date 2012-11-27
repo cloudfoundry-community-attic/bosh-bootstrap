@@ -17,7 +17,7 @@ fi
 
 cd /var/vcap/store/stemcells
 if [[ -f $MICRO_BOSH_STEMCELL_NAME ]]; then
-  echo "Stemcell $(`pwd`)/$MICRO_BOSH_STEMCELL_NAME already exists."
+  echo "Stemcell $(pwd)/$MICRO_BOSH_STEMCELL_NAME already exists."
 else
   echo "Downloading public stemcell $MICRO_BOSH_STEMCELL_NAME"
   bosh download public stemcell $MICRO_BOSH_STEMCELL_NAME
