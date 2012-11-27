@@ -22,7 +22,7 @@ module Bosh::Bootstrap
       server = Commander::LocalServer.new
 
       header "Stage 4: Preparing the Inception VM"
-      server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new.commands) # TODO stop on failure
+      server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new.commands)
     end
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
