@@ -44,3 +44,4 @@ There is a set of predefined command methods which give nicer text output. You c
 * `install`
 * `provision`
 * `store`
+* `validate`

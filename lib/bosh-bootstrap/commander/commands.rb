@@ -43,6 +43,12 @@ module Bosh::Bootstrap::Commander
         "storing #{description}", "stored #{description}")
     end
 
+    def validate(description, script)
+      @commands << Command.new(
+        "validate", description, script,
+        "validating #{description}", "validated #{description}")
+    end
+
     # catch-all for commands with generic active/past tense phrases
     def method_missing(command, *args, &blk)
       description, script = args[0..1]

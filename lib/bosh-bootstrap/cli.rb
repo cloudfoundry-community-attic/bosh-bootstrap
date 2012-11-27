@@ -6,6 +6,14 @@ module Bosh::Bootstrap
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
     def local
+      server = Commander::LocalServer.new
+      say "Skipping Stage 3: Create the Inception VM", :yellow
+      say "Stage 4: Preparing the Inception VM", :green
+      server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new.commands)
+    end
+
+    desc "demo", "Show some sample commands"
+    def demo
       commands = Bosh::Bootstrap::Commander::Commands.new do |server|
         server.create "vcap user", <<-BASH
           #!/usr/bin/env bash
