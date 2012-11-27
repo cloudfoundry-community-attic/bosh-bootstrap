@@ -11,6 +11,7 @@ module Bosh::Bootstrap
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
+    method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
     def local
       load_options # from method_options above
 
@@ -97,7 +98,14 @@ module Bosh::Bootstrap
       end
 
       def load_options
-        @fog_config_path = options[:fog] if options[:fog]        
+        settings["fog_path"] = File.expand_path(options[:fog] || "~/.fog")
+
+        if options["upgrade-deps"]
+          settings["upgrade_deps"] = options["upgrade-deps"]
+        else
+          settings.delete("upgrade_deps")
+        end
+        save_settings!
       end
 
       # Previously selected settings are stored in a YAML manifest
@@ -239,7 +247,7 @@ module Bosh::Bootstrap
       end
 
       def fog_config_path
-        File.expand_path(@fog_config_path || "~/.fog")
+        settings.fog_path
       end
 
       def prompt_for_bosh_credentials
