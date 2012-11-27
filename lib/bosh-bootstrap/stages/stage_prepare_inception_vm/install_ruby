@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+if [[ $EUID -ne 0 ]]; then
+  echo "ERROR: This script must be run as root" 1>&2
+  exit 1
+fi
+
+if [[ "$(ruby -v)" == "ruby 1.9.3*" ]]; then
+  echo "install: --no-ri --no-rdoc" > /etc/gemrc
+  echo "update: --no-ri --no-rdoc" >> /etc/gemrc
+  if [[ -x rvm ]]
+  then
+    rvm get stable
+  else
+    curl -L get.rvm.io | bash -s stable
+    source /etc/profile.d/rvm.sh
+  fi
+  command rvm install 1.9.3 # oh god this takes a long time
+  rvm 1.9.3
+  rvm alias create default 1.9.3
+  gem install bundler fog --no-ri --no-rdoc
+else
+  echo Ruby 1.9.3 already installed
+fi

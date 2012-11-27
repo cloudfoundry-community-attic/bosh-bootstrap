@@ -5,6 +5,7 @@ module Bosh::Bootstrap::Stages
         server.validate "ubuntu", script("validate_ubuntu")
         server.create "vcap user", script("create_vcap_user")
         server.install "base packages", script("install_base_packages")
+        server.install "ruby 1.9.3", script("install_ruby")
       end
     end
 
