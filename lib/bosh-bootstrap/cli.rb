@@ -22,7 +22,9 @@ module Bosh::Bootstrap
       server = Commander::LocalServer.new
 
       header "Stage 4: Preparing the Inception VM"
-      server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new.commands)
+      unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new.commands)
+        error "Failed to complete Stage 4: Preparing the Inception VM"
+      end
     end
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
