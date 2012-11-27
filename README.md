@@ -50,6 +50,10 @@ Stage 2: Configuration
 
 BOSH username: drnic
 BOSH password: ********
+Confirming: After BOSH is created, your username will be drnic
+
+Determining latest stable microbosh stemcell... (override: --microbosh-stemcell NAME)
+Confirming: micro BOSH stemcell being used is 
 
 Stage 3: Create the Inception VM
 This bootstrapper uses a VM within the same target region
@@ -87,7 +91,6 @@ $ bosh help micro
 
 Stage 5: Deploying micro BOSH
 
-Determining latest stable microbosh stemcell... (override: --microbosh-stemcell NAME)
 Determined latest stable microbosh stemcell: microbosh-aws-0.6.7
 Downloading stemcell microbosh-aws-0.6.7 into /var/vcap/store/stemcells....
 

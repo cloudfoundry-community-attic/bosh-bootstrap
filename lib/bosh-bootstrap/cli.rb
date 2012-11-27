@@ -54,14 +54,17 @@ module Bosh::Bootstrap
           confirm "No specific region/data center for #{settings.provider}"
         end
 
-        if settings[:bosh_username]
-          header "Stage 2: Configuration",
-            :skipping => "Already provided BOSH credentials"
-        else
-          header "Stage 2: Configuration"
+        header "Stage 2: Configuration"
+        unless settings[:bosh_username]
           prompt_for_bosh_credentials
         end
         confirm "After BOSH is created, your username will be #{settings.bosh_username}"
+
+        unless settings[:micro_bosh_stemcell_name]
+          settings[:micro_bosh_stemcell_name] = micro_bosh_stemcell_name
+          save_settings!
+        end
+        confirm "Micro BOSH will be created with stemcell #{settings.micro_bosh_stemcell_name}"
       end
 
       # Display header for a new section of the bootstrapper
@@ -143,12 +146,16 @@ module Bosh::Bootstrap
       # Currently detects following fog providers:
       # * AWS
       #
-      # At the end, @iaas_credentials contains the credentials for target IaaS
+      # At the end, settings.iaas_credentials contains the credentials for target IaaS
       # and :provider key for the IaaS name.
       #
       #   {:provider=>"AWS",
       #    :aws_access_key_id=>"PERSONAL_ACCESS_KEY",
       #    :aws_secret_access_key=>"PERSONAL_SECRET"}
+      #
+      # settings.provider is the provider name
+      # settings.bosh_provider is the BOSH name for the provider (aws,vsphere,openstack)
+      #   so as to local stemcells (see +micro_bosh_stemcell_name+)
       def choose_fog_provider
         @fog_providers = {}
         fog_config.inject({}) do |iaas_options, fog_profile|
@@ -174,6 +181,10 @@ module Bosh::Bootstrap
         end
         settings[:iaas_credentials] = @iaas_credentials
         settings[:provider] = @iaas_credentials[:provider]
+        settings[:bosh_provider] = case @iaas_credentials[:provider].to_sym
+        when :AWS
+          "aws"
+        end
         save_settings!
       end
 
@@ -230,6 +241,18 @@ module Bosh::Bootstrap
         settings[:bosh_username] = prompt.ask("BOSH username: ") { |q| q.default = `whoami`.strip }
         settings[:bosh_password] = prompt.ask("BOSH password: ") { |q| q.echo = "x" }
         save_settings!
+      end
+
+      # Returns the latest micro-bosh stemcell
+      # for the target provider (aws, vsphere, openstack)
+      def micro_bosh_stemcell_name
+        @micro_bosh_stemcell_name ||= begin
+          provider = settings.bosh_provider # aws, vsphere, openstack
+          scope = ",stable" # latest stable micro-bosh stemcell by default
+          bosh_stemcells_cmd = "bosh public stemcells --tags micro,#{provider}#{scope}"
+          say "Locating micro-bosh stemcell, running '#{bosh_stemcells_cmd}'..."
+          `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | head -n 1`
+        end
       end
 
       def cyan; "\033[36m" end

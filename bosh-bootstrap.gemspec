@@ -27,4 +27,5 @@ EOS
   gem.add_dependency "settingslogic"
   gem.add_dependency "POpen4"
   gem.add_dependency "fog"
+  gem.add_dependency "bosh_cli"
 end
