@@ -118,6 +118,18 @@ Director
   CPI       aws
 ```
 
+## Local usage
+
+Instead of creating a new Inception VM, if you already have an Ubuntu VM on the target infrastructure region network then you can use it with the `--local` flag.
+
+```
+$ bosh-bootstrap --local
+```
+
+You will still be prompted for infrastructure details (a VM does not necessarily know how to talk to its own infrastructure).
+
+Running this command will install packages, an Ruby via RVM, and the BOSH rubygems on your local VM. It will then use the local VM to create the micro BOSH via BOSH deployer (`bosh micro deploy`).
+
 ## Advanced usage
 
 
