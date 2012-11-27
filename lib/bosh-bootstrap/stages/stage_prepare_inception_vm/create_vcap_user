@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Create vcap user & public keys
+# Re-use new public keys for root user
+#
+# Options:
+# * $ORIGUSER - another local user with authorized_keys for SSH access; will be copied to vcap user
+
 if [[ $EUID -ne 0 ]]; then
   echo "ERROR: This script must be run as root" 1>&2
   exit 1
@@ -14,26 +20,33 @@ if [[ -f /home/vcap/.ssh/id_rsa ]]
 then
   echo "public keys for vcap already exist, skipping..."
 else
+  echo "creating public keys for vcap/root user..."
   su -c "ssh-keygen -f ~/.ssh/id_rsa -N ''" vcap
 fi
 
+# Include same public keys for root user
+echo "copy vcap public keys to root user..."
+mkdir -p ~/.ssh/
+cp ~vcap/.ssh/id_rsa* ~/.ssh/
+
 bosh_app_dir=/var/vcap
 mkdir -p ${bosh_app_dir}
-mkdir -p ${bosh_app_dir}/bosh
-export PATH=${bosh_app_dir}/bosh/bin:$PATH
-mkdir -p ${bosh_app_dir}/deploy ${bosh_app_dir}/store mkdir ${bosh_app_dir}/deployments
-chown vcap:vcap ${bosh_app_dir}/deploy ${bosh_app_dir}/store ${bosh_app_dir}/deployments
-echo "export PATH=${bosh_app_dir}/bosh/bin:\$PATH" >> /root/.bashrc
-echo "export PATH=${bosh_app_dir}/bosh/bin:\$PATH" >> /home/vcap/.bashrc
+for path in microboshes deployments releases repos stemcells
+do
+  echo "creating ${bosh_app_dir}/store/${path}"
+  mkdir -p ${bosh_app_dir}/store/${path}
+  chown vcap:vcap ${bosh_app_dir}/store/${path}
+done
 
 if [[ -n $ORIGUSER ]]
 then
+  echo "copying user '$ORIGUSER' authorized_keys to vcap user"
   cp /home/${ORIGUSER}/.ssh/authorized_keys ${bosh_app_dir}/
   cp /home/${ORIGUSER}/.ssh/authorized_keys /home/vcap/.ssh/authorized_keys
+  echo "copying user '$ORIGUSER' .bashrc to vcap user"
   cp /home/${ORIGUSER}/.bashrc /home/vcap/
-  echo "export PATH=${bosh_app_dir}/bosh/bin:\$PATH" >> /home/${ORIGUSER}/.bashrc
 else
-  echo "Skipping copying authorized_keys to vcap user"
-  echo "Skipping copying .bashrc to vcap user"
+  echo "skipping copying authorized_keys to vcap user"
+  echo "skipping copying .bashrc to vcap user"
 fi
 
