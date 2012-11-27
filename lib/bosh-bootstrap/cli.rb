@@ -25,6 +25,15 @@ module Bosh::Bootstrap
       server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new.commands) # TODO stop on failure
     end
 
+    desc "local", "Bootstrap bosh, using local server as inception VM"
+    method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
+    def remote
+      load_options # from method_options above
+
+      stage_1_and_stage_2
+      
+    end
+
     no_tasks do
       def stage_1_and_stage_2
         if settings[:provider]
