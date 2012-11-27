@@ -19,8 +19,11 @@ module Bosh::Bootstrap
       choose_fog_provider
       confirm "Using #{provider_name} infrastructure provider."
 
-      choose_provider_region
-      confirm "Using #{provider_name} #{region_code} region."
+      if choose_provider_region
+        confirm "Using #{provider_name} #{region_code} region."
+      else
+        confirm "No specific region/data center for #{provider_name}"
+      end
 
       header "Stage 2: Configuration"
 
@@ -132,10 +135,16 @@ module Bosh::Bootstrap
         end
       end
 
+      # Ask user to provide region information (URI)
+      # or choose from a known list of regions (e.g. AWS)
+      # Return true if region selected (@region_code is set)
+      # Else return false
       def choose_provider_region
         case provider_name.to_sym
         when :AWS
           choose_aws_region
+        else
+          false
         end
       end
 
@@ -146,6 +155,7 @@ module Bosh::Bootstrap
             menu.choice(region) { @aws_region = region; @region_code = region }
           end
         end
+        true
       end
 
       # supported by fog
