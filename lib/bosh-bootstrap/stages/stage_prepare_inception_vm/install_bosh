@@ -31,5 +31,5 @@ if [[ $INSTALL_BOSH_FROM_SOURCE ]]; then
   bundle install --without=development test
   bundle exec rake install
 else
-  gem install bosh_cli bosh_deployer
+  gem install bosh_cli bosh_deployer --no-rdoc --no-ri
 fi
