@@ -3,6 +3,7 @@
 # Install BOSH CLI
 #
 # Options:
+# * $UPGRADE - re-install or upgrade gems if already installed
 # * $INSTALL_BOSH_FROM_SOURCE - install from bosh git repo
 
 if [[ $EUID -ne 0 ]]; then
