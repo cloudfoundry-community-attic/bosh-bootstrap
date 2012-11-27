@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Downloads a public stemcell for CPI into /var/vcap/store/stemcells/
+#
+# Required:
+# * $MICRO_BOSH_STEMCELL_NAME - public stemcell name to be downloaded
+
+if [[ $EUID -ne 0 ]]; then
+  echo "ERROR: This script must be run as root" 1>&2
+  exit 1
+fi
+
+if [[ "${MICRO_BOSH_STEMCELL_NAME}X" == "X" ]]; then
+  echo 'INTERNAL ERROR: Missing $MICRO_BOSH_STEMCELL_NAME environment variable'
+  exit 1
+fi
+
+cd /var/vcap/store/stemcells
+bosh download public stemcell $MICRO_BOSH_STEMCELL_NAME

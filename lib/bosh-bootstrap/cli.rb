@@ -25,6 +25,11 @@ module Bosh::Bootstrap
       unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new.commands)
         error "Failed to complete Stage 4: Preparing the Inception VM"
       end
+      
+      header "Stage 5: Deploying micro BOSH"
+      unless server.run(Bosh::Bootstrap::Stages::MicroBoshDeploy.new.commands)
+        error "Failed to complete Stage 5: Deploying micro BOSH"
+      end
     end
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
