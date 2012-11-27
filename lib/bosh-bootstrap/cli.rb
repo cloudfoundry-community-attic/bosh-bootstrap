@@ -8,7 +8,6 @@ module Bosh::Bootstrap
     include Thor::Actions
 
     attr_reader :iaas_credentials
-    attr_reader :region_code
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
@@ -20,12 +19,14 @@ module Bosh::Bootstrap
       confirm "Using #{provider_name} infrastructure provider."
 
       if choose_provider_region
-        confirm "Using #{provider_name} #{region_code} region."
+        confirm "Using #{provider_name} #{settings.region_code} region."
       else
         confirm "No specific region/data center for #{provider_name}"
       end
 
       header "Stage 2: Configuration"
+      prompt_for_bosh_credentials
+      confirm "After BOSH is created, your username will be #{settings.bosh_username}"
 
       header "Skipping Stage 3: Create the Inception VM",
         :skipping => "Running in local mode instead. This is the Inception VM. POW!"
@@ -64,17 +65,29 @@ module Bosh::Bootstrap
       end
 
       # Previously selected settings are stored in a YAML manifest
+      # Protects the manifest file with user-only priveleges
       def settings
         @settings ||= begin
-          manifest_path = File.expand_path("~/.bosh_bootstrap/manifest.yml")
-          FileUtils.mkdir_p(File.dirname(manifest_path))
-          unless File.exists?(manifest_path)
-            File.open(manifest_path, "w") do |file|
+          FileUtils.mkdir_p(File.dirname(settings_path))
+          unless File.exists?(settings_path)
+            File.open(settings_path, "w") do |file|
               file << {}.to_yaml
             end
           end
-          Settingslogic.new(manifest_path)
+          FileUtils.chmod 0600, settings_path
+          Settingslogic.new(settings_path)
         end
+      end
+
+      def save_settings!
+        File.open(settings_path, "w") do |file|
+          raw_settings_yaml = settings.to_yaml.gsub(" !ruby/hash:Settingslogic", "")
+          file << raw_settings_yaml
+        end
+      end
+
+      def settings_path
+        File.expand_path("~/.bosh_bootstrap/manifest.yml")
       end
 
       # Displays a prompt for known IaaS that are configured
@@ -133,6 +146,9 @@ module Bosh::Bootstrap
         else
           @iaas_credentials = @fog_providers.values.first
         end
+        settings[:iaas_credentials] = @iaas_credentials
+        settings[:provider] = provider_name
+        save_settings!
       end
 
       # Ask user to provide region information (URI)
@@ -152,7 +168,11 @@ module Bosh::Bootstrap
         HighLine.new.choose do |menu|
           menu.prompt = "Choose AWS region:  "
           aws_regions.each do |region|
-            menu.choice(region) { @aws_region = region; @region_code = region }
+            menu.choice(region) do
+              settings[:aws_region] = region
+              settings[:region_code] = region
+              save_settings!
+            end
           end
         end
         true
@@ -181,6 +201,14 @@ module Bosh::Bootstrap
       def provider_name
         raise "run choose_fog_provider first" unless @iaas_credentials
         @iaas_credentials[:provider]
+      end
+
+      def prompt_for_bosh_credentials
+        prompt = HighLine.new
+        say "Please enter a user/password for the BOSH that will be created."
+        settings[:bosh_username] = prompt.ask("BOSH username: ") { |q| q.default = `whoami`.strip }
+        settings[:bosh_password] = prompt.ask("BOSH password: ") { |q| q.echo = "x" }
+        save_settings!
       end
 
       def cyan; "\033[36m" end
