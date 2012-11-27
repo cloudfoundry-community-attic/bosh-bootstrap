@@ -13,6 +13,7 @@ module Bosh::Bootstrap
     def local
       header "Stage 1: Choose infrastructure"
       choose_fog_provider
+      confirm "Using #{iaas_name} infrastructure provider."
 
       header "Stage 2: Configuration"
 
@@ -41,6 +42,11 @@ module Bosh::Bootstrap
       def error(message)
         say message, :red
         exit 1
+      end
+
+      def confirm(message)
+        say "Confirming: #{message}", green
+        say "" # bonus golden whitespace
       end
 
       # Previously selected settings are stored in a YAML manifest
@@ -105,8 +111,6 @@ module Bosh::Bootstrap
           @fog_providers.each do |label, credentials|
             menu.choice(label) do
               @iaas_credentials = credentials
-              require "pp"
-              pp @iaas_credentials
             end
           end
         end
@@ -123,6 +127,11 @@ module Bosh::Bootstrap
 
       def fog_config_file
         File.expand_path("~/.fog")
+      end
+
+      def iaas_name
+        raise "run choose_fog_provider first" unless @iaas_credentials
+        @iaas_credentials[:provider]
       end
 
       def cyan; "\033[36m" end
