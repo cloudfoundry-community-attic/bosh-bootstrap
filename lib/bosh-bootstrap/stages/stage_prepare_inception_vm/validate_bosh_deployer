@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Validate that BOSH deployer is ready
+
+if [[ $EUID -ne 0 ]]; then
+  echo "ERROR: This script must be run as root" 1>&2
+  exit 1
+fi
+
+echo "Testing for 'bosh micro deploy' command..."
+
+bosh_output=$(bosh --no-color help micro)
+if [[ "$(echo $bosh_output | grep 'micro deploy')" == "" ]]; then
+  echo "Failed to install 'bosh micro deploy'. Please investigate issue and report root cause so we can fix it."
+  exit 1
+else
+  echo "Successfully installed bosh deployer (bosh micro deploy)"
+  exit 0
+fi
