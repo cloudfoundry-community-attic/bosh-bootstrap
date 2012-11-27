@@ -20,6 +20,7 @@ class Bosh::Bootstrap::Commander::LocalServer
             logfile.puts err
             STDERR.puts err if logfile != STDERR
           end
+          logfile.flush
         end
         unless status.success?
           Thor::Base.shell.new.say_status "error", "#{command.full_present_tense}", :red
