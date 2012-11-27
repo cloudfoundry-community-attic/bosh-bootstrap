@@ -25,7 +25,8 @@ class Bosh::Bootstrap::Commander::Command
   # Stores the script on the local filesystem in a temporary directory
   # Returns path
   def as_file(&block)
-    script_path = File.join(ENV['TMPDIR'], to_filename)
+    tmpdir = ENV['TMPDIR'] || "/tmp"
+    script_path = File.join(tmpdir, to_filename)
     File.open(script_path, "w") do |f|
       f << @script
     end
