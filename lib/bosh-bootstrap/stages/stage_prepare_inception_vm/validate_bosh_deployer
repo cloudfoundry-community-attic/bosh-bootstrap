@@ -12,6 +12,8 @@ echo "Testing for 'bosh micro deploy' command..."
 bosh_output=$(bosh --no-color help micro)
 if [[ "$(echo $bosh_output | grep 'micro deploy')" == "" ]]; then
   echo "Failed to install 'bosh micro deploy'. Please investigate issue and report root cause so we can fix it."
+  echo "Output of 'bosh --no-color help micro':"
+  echo $bosh_output
   exit 1
 else
   echo "Successfully installed bosh deployer (bosh micro deploy)"
