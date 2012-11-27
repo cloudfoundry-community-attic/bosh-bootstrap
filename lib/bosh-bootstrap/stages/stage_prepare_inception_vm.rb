@@ -1,5 +1,11 @@
 module Bosh::Bootstrap::Stages
   class StagePrepareInceptionVm
+    attr_reader :settings
+
+    def initialize(settings)
+      @settings = settings
+    end
+
     def commands
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
         server.validate "ubuntu", script("validate_ubuntu")

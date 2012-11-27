@@ -1,5 +1,11 @@
 module Bosh::Bootstrap::Stages
   class MicroBoshDeploy
+    attr_reader :settings
+
+    def initialize(settings)
+      @settings = settings
+    end
+
     def commands
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
         server.download "micro-bosh stemcell", script("download_micro_bosh_stemcell",
