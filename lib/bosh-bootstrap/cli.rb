@@ -72,6 +72,8 @@ module Bosh::Bootstrap
       # 2. AWS (bosh)
       # Choose infrastructure:  1
       #
+      # If .fog config only contains one provider, do not prompt.
+      #
       # fog config file looks like:
       # :default:
       #   :aws_access_key_id:     PERSONAL_ACCESS_KEY
@@ -106,13 +108,17 @@ module Bosh::Bootstrap
             }
           end
         end
-        HighLine.new.choose do |menu|
-          menu.prompt = "Choose infrastructure:  "
-          @fog_providers.each do |label, credentials|
-            menu.choice(label) do
-              @iaas_credentials = credentials
+        if @fog_providers.keys.size > 1
+          HighLine.new.choose do |menu|
+            menu.prompt = "Choose infrastructure:  "
+            @fog_providers.each do |label, credentials|
+              menu.choice(label) do
+                @iaas_credentials = credentials
+              end
             end
           end
+        else
+          @iaas_credentials = @fog_providers.values.first
         end
       end
 
