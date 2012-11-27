@@ -36,3 +36,12 @@ commands = Bosh::Bootstrap::Commander::Commands.new do |server|
   BASH
 end
 ```
+
+You can invoke any method upon `server` and it will be supported as the command name. The name of the method invoked is semantically meaningless; it is a convenience. There is a set of predefined command methods which give nicer text output:
+
+* `assign`
+* `create`
+* `download`
+* `install`
+* `provision`
+* `store`
