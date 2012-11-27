@@ -8,15 +8,19 @@ module Bosh::Bootstrap
     include Thor::Actions
 
     attr_reader :iaas_credentials
+    attr_reader :region_code
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
     def local
-      @fog_config_path = options[:fog] if options[:fog]
+      load_options # from method_options above
 
       header "Stage 1: Choose infrastructure"
       choose_fog_provider
-      confirm "Using #{iaas_name} infrastructure provider."
+      confirm "Using #{provider_name} infrastructure provider."
+
+      choose_provider_region
+      confirm "Using #{provider_name} #{region_code} region."
 
       header "Stage 2: Configuration"
 
@@ -50,6 +54,10 @@ module Bosh::Bootstrap
       def confirm(message)
         say "Confirming: #{message}", green
         say "" # bonus golden whitespace
+      end
+
+      def load_options
+        @fog_config_path = options[:fog] if options[:fog]        
       end
 
       # Previously selected settings are stored in a YAML manifest
@@ -104,6 +112,7 @@ module Bosh::Bootstrap
         fog_config.inject({}) do |iaas_options, fog_profile|
           profile_name, keys = fog_profile
           if keys[:aws_access_key_id]
+            # TODO does fog have inbuilt detection algorithm?
             @fog_providers["AWS (#{profile_name})"] = {
               :provider => "AWS",
               :aws_access_key_id => keys[:aws_access_key_id],
@@ -115,14 +124,34 @@ module Bosh::Bootstrap
           HighLine.new.choose do |menu|
             menu.prompt = "Choose infrastructure:  "
             @fog_providers.each do |label, credentials|
-              menu.choice(label) do
-                @iaas_credentials = credentials
-              end
+              menu.choice(label) { @iaas_credentials = credentials }
             end
           end
         else
           @iaas_credentials = @fog_providers.values.first
         end
+      end
+
+      def choose_provider_region
+        case provider_name.to_sym
+        when :AWS
+          choose_aws_region
+        end
+      end
+
+      def choose_aws_region
+        HighLine.new.choose do |menu|
+          menu.prompt = "Choose AWS region:  "
+          aws_regions.each do |region|
+            menu.choice(region) { @aws_region = region; @region_code = region }
+          end
+        end
+      end
+
+      # supported by fog
+      # FIXME weird that fog has no method to return this list
+      def aws_regions
+        ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'us-east-1', 'us-west-1', 'us-west-2', 'sa-east-1']
       end
 
       def fog_config
@@ -139,7 +168,7 @@ module Bosh::Bootstrap
         File.expand_path(@fog_config_path || "~/.fog")
       end
 
-      def iaas_name
+      def provider_name
         raise "run choose_fog_provider first" unless @iaas_credentials
         @iaas_credentials[:provider]
       end
