@@ -6,6 +6,7 @@ module Bosh::Bootstrap::Stages
         server.create "vcap user", script("create_vcap_user")
         server.install "base packages", script("install_base_packages")
         server.install "ruby 1.9.3", script("install_ruby")
+        server.install "useful ruby gems", script("install_useful_gems")
         server.install "bosh", script("install_bosh")
         server.validate "bosh deployer", script("validate_bosh_deployer")
       end
