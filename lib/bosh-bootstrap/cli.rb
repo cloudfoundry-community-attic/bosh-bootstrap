@@ -14,18 +14,31 @@ module Bosh::Bootstrap
     def local
       load_options # from method_options above
 
-      header "Stage 1: Choose infrastructure"
-      choose_fog_provider
-      confirm "Using #{provider_name} infrastructure provider."
-
-      if choose_provider_region
-        confirm "Using #{provider_name} #{settings.region_code} region."
+      if settings[:provider]
+        header "Stage 1: Choose infrastructure",
+          :skipping => "Already selected infrastructure provider"
       else
-        confirm "No specific region/data center for #{provider_name}"
+        header "Stage 1: Choose infrastructure"
+        choose_fog_provider
+      end
+      confirm "Using #{settings.provider} infrastructure provider."
+
+      unless settings[:region_code]
+        choose_provider_region
+      end
+      if settings[:region_code]
+        confirm "Using #{settings.provider} #{settings.region_code} region."
+      else
+        confirm "No specific region/data center for #{settings.provider}"
       end
 
-      header "Stage 2: Configuration"
-      prompt_for_bosh_credentials
+      if settings[:bosh_username]
+        header "Stage 2: Configuration",
+          :skipping => "Already provided BOSH credentials"
+      else
+        header "Stage 2: Configuration"
+        prompt_for_bosh_credentials
+      end
       confirm "After BOSH is created, your username will be #{settings.bosh_username}"
 
       header "Skipping Stage 3: Create the Inception VM",
@@ -147,7 +160,7 @@ module Bosh::Bootstrap
           @iaas_credentials = @fog_providers.values.first
         end
         settings[:iaas_credentials] = @iaas_credentials
-        settings[:provider] = provider_name
+        settings[:provider] = @iaas_credentials[:provider]
         save_settings!
       end
 
@@ -156,7 +169,7 @@ module Bosh::Bootstrap
       # Return true if region selected (@region_code is set)
       # Else return false
       def choose_provider_region
-        case provider_name.to_sym
+        case settings[:provider].to_sym
         when :AWS
           choose_aws_region
         else
@@ -196,11 +209,6 @@ module Bosh::Bootstrap
 
       def fog_config_path
         File.expand_path(@fog_config_path || "~/.fog")
-      end
-
-      def provider_name
-        raise "run choose_fog_provider first" unless @iaas_credentials
-        @iaas_credentials[:provider]
       end
 
       def prompt_for_bosh_credentials
