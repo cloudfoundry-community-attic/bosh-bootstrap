@@ -35,13 +35,16 @@ Choose infrastructure:  1
 
 Confirming: using AWS infrastructure.
 
-Choose AWS region for BOSH and all its BOSH deployments:
-1) us-east-1
-2) us-west-2
-...
-> 1
+1. ap-northeast-1
+2. ap-southeast-1
+3. eu-west-1
+4. us-east-1
+5. us-west-1
+6. us-west-2
+7. sa-east-1
+Choose AWS region:  6
+Confirming: Using AWS us-west-2 region.
 
-Confirming: using AWS us-east-1 region.
 
 Stage 2: Configuration
 
