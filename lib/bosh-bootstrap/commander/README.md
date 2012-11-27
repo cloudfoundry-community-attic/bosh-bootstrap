@@ -6,10 +6,6 @@ Remote servers are accessed via SSH commands.
 
 Example commands:
 ``` ruby
-@local_machine.run(commands)
-@server.run(commands)
-
-# where
 commands = Bosh::Bootstrap::Commander::Commands.new do |server|
   server.create "vcap user", <<-BASH
     #!/usr/bin/env bash
@@ -35,9 +31,12 @@ commands = Bosh::Bootstrap::Commander::Commands.new do |server|
     rvm alias create default 1.9.3
   BASH
 end
+
+@local_machine.run(commands)
+@server.run(commands)
 ```
 
-You can invoke any method upon `server` and it will be supported as the command name. The name of the method invoked is semantically meaningless; it is a convenience. There is a set of predefined command methods which give nicer text output:
+There is a set of predefined command methods which give nicer text output. You can also invoke any method upon `server` and it will be supported as the command name. The name of the method invoked is semantically meaningless; it is a convenience. 
 
 * `assign`
 * `create`

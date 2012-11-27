@@ -6,13 +6,13 @@ class Bosh::Bootstrap::Commander::Command
   attr_reader :description   # noun phrase, e.g. "packages"
   attr_reader :script
 
-  attr_reader :full_active_tense  # e.g. "installing packages"
+  attr_reader :full_present_tense  # e.g. "installing packages"
   attr_reader :full_past_tense    # e.g. "installed packages"
   
-  def initialize(command, description, script, full_active_tense=nil, full_past_tense=nil)
+  def initialize(command, description, script, full_present_tense=nil, full_past_tense=nil)
     @command           = command
     @description       = description
-    @full_active_tense = full_active_tense || "#{command} #{description}"
+    @full_present_tense = full_present_tense || "#{command} #{description}"
     @full_past_tense   = full_past_tense || "#{command} #{description}"
   end
 end

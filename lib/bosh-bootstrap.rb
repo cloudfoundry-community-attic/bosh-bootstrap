@@ -1,7 +1,7 @@
-require "bosh-bootstrap/version"
-
 module Bosh
   module Bootstrap
-    # Your code goes here...
   end
 end
+
+require "bosh-bootstrap/version"
+require "bosh-bootstrap/commander"
