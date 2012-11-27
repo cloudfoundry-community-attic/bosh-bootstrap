@@ -10,7 +10,10 @@ module Bosh::Bootstrap
     attr_reader :iaas_credentials
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
+    method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
     def local
+      @fog_config_path = options[:fog] if options[:fog]
+
       header "Stage 1: Choose infrastructure"
       choose_fog_provider
       confirm "Using #{iaas_name} infrastructure provider."
@@ -124,15 +127,16 @@ module Bosh::Bootstrap
 
       def fog_config
         @fog_config ||= begin
-          unless File.exists?(fog_config_file)
-            error "Please create a #{fog_config_file} fog configuration file"
+          unless File.exists?(fog_config_path)
+            error "Please create a #{fog_config_path} fog configuration file"
           end
-          YAML.load_file(fog_config_file)
+          say "Found infrastructure API credentials at #{fog_config_path} (override with --fog)"
+          YAML.load_file(fog_config_path)
         end
       end
 
-      def fog_config_file
-        File.expand_path("~/.fog")
+      def fog_config_path
+        File.expand_path(@fog_config_path || "~/.fog")
       end
 
       def iaas_name
