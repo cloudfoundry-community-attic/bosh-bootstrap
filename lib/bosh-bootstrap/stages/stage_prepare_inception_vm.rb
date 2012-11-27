@@ -3,6 +3,7 @@ module Bosh::Bootstrap::Stages
     def commands
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
         server.validate "ubuntu", script("validate_ubuntu")
+        server.create "vcap user", script("create_vcap_user")
         server.install "base packages", script("install_base_packages")
       end
     end
