@@ -14,32 +14,7 @@ module Bosh::Bootstrap
     def local
       load_options # from method_options above
 
-      if settings[:provider]
-        header "Stage 1: Choose infrastructure",
-          :skipping => "Already selected infrastructure provider"
-      else
-        header "Stage 1: Choose infrastructure"
-        choose_fog_provider
-      end
-      confirm "Using #{settings.provider} infrastructure provider."
-
-      unless settings[:region_code]
-        choose_provider_region
-      end
-      if settings[:region_code]
-        confirm "Using #{settings.provider} #{settings.region_code} region."
-      else
-        confirm "No specific region/data center for #{settings.provider}"
-      end
-
-      if settings[:bosh_username]
-        header "Stage 2: Configuration",
-          :skipping => "Already provided BOSH credentials"
-      else
-        header "Stage 2: Configuration"
-        prompt_for_bosh_credentials
-      end
-      confirm "After BOSH is created, your username will be #{settings.bosh_username}"
+      stage_1_and_stage_2
 
       header "Skipping Stage 3: Create the Inception VM",
         :skipping => "Running in local mode instead. This is the Inception VM. POW!"
@@ -51,6 +26,35 @@ module Bosh::Bootstrap
     end
 
     no_tasks do
+      def stage_1_and_stage_2
+        if settings[:provider]
+          header "Stage 1: Choose infrastructure",
+            :skipping => "Already selected infrastructure provider"
+        else
+          header "Stage 1: Choose infrastructure"
+          choose_fog_provider
+        end
+        confirm "Using #{settings.provider} infrastructure provider."
+
+        unless settings[:region_code]
+          choose_provider_region
+        end
+        if settings[:region_code]
+          confirm "Using #{settings.provider} #{settings.region_code} region."
+        else
+          confirm "No specific region/data center for #{settings.provider}"
+        end
+
+        if settings[:bosh_username]
+          header "Stage 2: Configuration",
+            :skipping => "Already provided BOSH credentials"
+        else
+          header "Stage 2: Configuration"
+          prompt_for_bosh_credentials
+        end
+        confirm "After BOSH is created, your username will be #{settings.bosh_username}"
+      end
+
       # Display header for a new section of the bootstrapper
       def header(title, options={})
         say "" # golden whitespace
