@@ -1,3 +1,5 @@
+require "json" # for inline hashes within YAML
+
 module Bosh::Bootstrap::Stages
   class MicroBoshDeploy
     attr_reader :settings
@@ -73,11 +75,11 @@ module Bosh::Bootstrap::Stages
 
       resources:
         persistent_disk: #{persistent_disk}
-        cloud_properties: #{resources_cloud_properties.inspect}
+        cloud_properties: #{resources_cloud_properties.to_json}
 
       cloud:
         plugin: aws
-        properties: #{cloud_properties.inspect}
+        properties: #{cloud_properties.to_json}
 
       apply_spec:
         agent:
