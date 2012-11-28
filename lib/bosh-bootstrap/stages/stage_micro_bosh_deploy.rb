@@ -59,37 +59,37 @@ module Bosh::Bootstrap::Stages
       #   ec2_private_key: /home/vcap/.ssh/#{key_name}.pem
       cloud_properties = settings.bosh_cloud_properties
         <<-YAML
-      ---
-      name: #{name}
+---
+name: #{name}
 
-      env:
-        bosh:
-          password: #{salted_password}
+env:
+  bosh:
+    password: #{salted_password}
 
-      logging:
-        level: DEBUG
+logging:
+  level: DEBUG
 
-      network:
-        type: dynamic
-        vip: #{ipaddress}
+network:
+  type: dynamic
+  vip: #{ipaddress}
 
-      resources:
-        persistent_disk: #{persistent_disk}
-        cloud_properties: #{resources_cloud_properties.to_json}
+resources:
+  persistent_disk: #{persistent_disk}
+  cloud_properties: #{resources_cloud_properties.to_json}
 
-      cloud:
-        plugin: aws
-        properties: #{cloud_properties.to_json}
+cloud:
+  plugin: aws
+  properties: #{cloud_properties.to_json}
 
-      apply_spec:
-        agent:
-          blobstore:
-            address: #{ipaddress}
-          nats:
-            address: #{ipaddress}
-        properties:
-          aws_registry:
-            address: #{ipaddress}
+apply_spec:
+  agent:
+    blobstore:
+      address: #{ipaddress}
+    nats:
+      address: #{ipaddress}
+  properties:
+    aws_registry:
+      address: #{ipaddress}
       YAML
     end
   end
