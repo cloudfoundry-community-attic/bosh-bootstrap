@@ -15,6 +15,11 @@ module Bosh::Bootstrap::Commander
       @script             = script
     end
 
+    # Invoke this command to call back upon +server.run_script+ 
+    def perform(server)
+      server.run_script(self, script)
+    end
+
     # Provide a filename that represents this Command
     def to_filename
       @to_filename ||= "#{command} #{description}".gsub(/\W+/, '_')

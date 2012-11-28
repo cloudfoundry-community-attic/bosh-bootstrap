@@ -7,8 +7,8 @@ module Bosh::Bootstrap::Commander
       yield self
     end
 
-    def upload_file(file_contents, target_location)
-      @commands << UploadCommand.new(file_contents, target_location)
+    def upload_file(target_path, file_contents)
+      @commands << UploadCommand.new(target_path, file_contents)
     end
 
     #

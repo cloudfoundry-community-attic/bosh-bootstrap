@@ -15,5 +15,11 @@ module Bosh::Bootstrap::Commander
       @full_present_tense = full_present_tense || "#{command} #{description}"
       @full_past_tense    = full_past_tense || "#{command} #{description}"
     end
+
+    # Invoke this command (subclass) to call back upon
+    # +server+ to perform a server helper
+    def perform(server)
+      raise "please implement this method to call back upon `server`"
+    end
   end
 end
