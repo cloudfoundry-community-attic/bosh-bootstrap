@@ -26,7 +26,8 @@ class Bosh::Bootstrap::Commander::LocalServer
 
   #
   # Commands performed on local server
-  # These map to Command subclasses
+  # These map to Command subclasses, which then callback to these
+  # local server specific implementations
   #
 
   # Run a script
@@ -52,6 +53,11 @@ class Bosh::Bootstrap::Commander::LocalServer
 
   # Upload a file (put a file into local filesystem)
   def upload_file(command, path, contents)
+    unless File.directory? path
+      basedir = File.dirname(path)
+      logfile.puts "creating micro-bosh manifest folder: #{basedir}"
+      FileUtils.mkdir_p(basedir)
+    end
     File.open(path, "w") { |file| file << contents }
     true
   rescue StandardError => e
