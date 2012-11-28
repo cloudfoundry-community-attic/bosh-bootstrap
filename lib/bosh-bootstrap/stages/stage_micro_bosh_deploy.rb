@@ -10,6 +10,7 @@ module Bosh::Bootstrap::Stages
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
         server.download "micro-bosh stemcell", script("download_micro_bosh_stemcell",
                       "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name)
+        server.upload_file micro_bosh_manifest
       end
     end
 
@@ -35,6 +36,10 @@ module Bosh::Bootstrap::Stages
         Thor::Base.shell.new.say_status "error", "Missing script lib/bosh-bootstrap/stages/#{stage_name}/#{segment_name}", :red
         exit 1
       end
+    end
+
+    def micro_bosh_manifest
+      {}.to_yaml
     end
   end
 end

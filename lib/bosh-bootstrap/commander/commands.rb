@@ -7,44 +7,52 @@ module Bosh::Bootstrap::Commander
       yield self
     end
 
+    def upload_file(file_contents, target_location)
+      @commands << UploadCommand.new(file_contents, target_location)
+    end
+
+    #
+    # Generic remote script commands with custom phrases
+    #
+
     def assign(description, script)
-      @commands << Command.new(
+      @commands << RemoteScriptCommand.new(
         "assign", description, script,
         "assigning #{description}", "assigned #{description}")
     end
 
     def create(description, script)
-      @commands << Command.new(
+      @commands << RemoteScriptCommand.new(
         "create", description, script,
         "creating #{description}", "created #{description}")
     end
 
     def download(description, script)
-      @commands << Command.new(
+      @commands << RemoteScriptCommand.new(
         "download", description, script,
         "downloading #{description}", "downloaded #{description}")
     end
 
     def install(description, script)
-      @commands << Command.new(
+      @commands << RemoteScriptCommand.new(
         "install", description, script,
         "installing #{description}", "installed #{description}")
     end
 
     def provision(description, script)
-      @commands << Command.new(
+      @commands << RemoteScriptCommand.new(
         "provision", description, script,
         "provisioning #{description}", "provisioned #{description}")
     end
 
     def store(description, script)
-      @commands << Command.new(
+      @commands << RemoteScriptCommand.new(
         "store", description, script,
         "storing #{description}", "stored #{description}")
     end
 
     def validate(description, script)
-      @commands << Command.new(
+      @commands << RemoteScriptCommand.new(
         "validate", description, script,
         "validating #{description}", "validated #{description}")
     end
@@ -52,7 +60,7 @@ module Bosh::Bootstrap::Commander
     # catch-all for commands with generic active/past tense phrases
     def method_missing(command, *args, &blk)
       description, script = args[0..1]
-      @commands << Command.new(command.to_s, description, script)
+      @commands << RemoteScriptCommand.new(command.to_s, description, script)
     end
   end
 end
