@@ -104,15 +104,15 @@ module Bosh::Bootstrap
         save_settings!
 
         if aws?
-          settings[:aws] ||= {}
-          unless settings[:aws][:bosh_security_group_name]
+          unless settings[:bosh_security_group_name]
             # create sec group
             # settings[:aws][:bosh_security_group_name] = secgroup_name
           end
-          unless settings[:aws][:bosh_keypair_name]
-            create_aws_keypair("microbosh_key_#{settings}")
-            # settings[:aws][:bosh_keypair_name] = keypair_name
+          unless settings[:bosh_key_pair]
+            key_pair_name = settings.bosh_name
+            create_aws_key_pair(key_pair_name)
           end
+          confirm "Micro BOSH accessible via key pair named #{settings.bosh_key_pair.name}"
         end
 
         unless settings[:micro_bosh_stemcell_name]
@@ -313,6 +313,21 @@ module Bosh::Bootstrap
       # FIXME weird that fog has no method to return this list
       def aws_regions
         ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'sa-east-1', 'us-east-1', 'us-west-1', 'us-west-2']
+      end
+
+      def create_aws_key_pair(key_pair_name)
+        unless fog_compute.key_pairs.get(key_pair_name)
+          kp = fog_compute.key_pairs.create(:name => key_pair_name)
+          puts kp.private_key
+          p kp.private_key
+          settings[:bosh_key_pair] = {}
+          settings[:bosh_key_pair][:name] = key_pair_name
+          settings[:bosh_key_pair][:private_key] = kp.private_key
+          settings[:bosh_key_pair][:fingerprint] = kp.fingerprint
+          save_settings!
+        else
+          error "AWS key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
+        end
       end
 
       # Provision or provide an IP address to use
