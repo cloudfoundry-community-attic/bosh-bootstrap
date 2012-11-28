@@ -58,6 +58,7 @@ class Bosh::Bootstrap::Commander::LocalServer
       logfile.puts "creating micro-bosh manifest folder: #{basedir}"
       FileUtils.mkdir_p(basedir)
     end
+    logfile.puts "creating micro-bosh manifest: #{path}"
     File.open(path, "w") { |file| file << contents }
     true
   rescue StandardError => e
