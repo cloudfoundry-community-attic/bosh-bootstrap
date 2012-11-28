@@ -45,7 +45,7 @@ module Bosh::Bootstrap::Stages
 
     def micro_bosh_manifest
       name                       = settings.bosh_name
-      password                   = settings.bosh.salted_password
+      salted_password            = settings.bosh.salted_password
       ipaddress                  = settings.bosh.ip_address
       persistent_disk            = settings.bosh.persistent_disk
       resources_cloud_properties = {"instance_type" => "m1.medium"}
