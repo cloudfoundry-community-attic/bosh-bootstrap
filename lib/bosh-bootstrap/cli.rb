@@ -2,12 +2,13 @@ require "thor"
 require "highline"
 require "settingslogic"
 require "fileutils"
+require "fog"
 
 module Bosh::Bootstrap
   class Cli < Thor
     include Thor::Actions
 
-    attr_reader :iaas_credentials
+    attr_reader :fog_credentials
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
@@ -176,14 +177,14 @@ module Bosh::Bootstrap
       # Currently detects following fog providers:
       # * AWS
       #
-      # At the end, settings.iaas_credentials contains the credentials for target IaaS
+      # At the end, settings.fog_credentials contains the credentials for target IaaS
       # and :provider key for the IaaS name.
       #
       #   {:provider=>"AWS",
       #    :aws_access_key_id=>"PERSONAL_ACCESS_KEY",
       #    :aws_secret_access_key=>"PERSONAL_SECRET"}
       #
-      # settings.provider is the provider name
+      # settings.fog_credentials.provider is the provider name
       # settings.bosh_provider is the BOSH name for the provider (aws,vsphere,openstack)
       #   so as to local stemcells (see +micro_bosh_stemcell_name+)
       def choose_fog_provider
@@ -203,49 +204,51 @@ module Bosh::Bootstrap
           HighLine.new.choose do |menu|
             menu.prompt = "Choose infrastructure:  "
             @fog_providers.each do |label, credentials|
-              menu.choice(label) { @iaas_credentials = credentials }
+              menu.choice(label) { @fog_credentials = credentials }
             end
           end
         else
-          @iaas_credentials = @fog_providers.values.first
-          if @iaas_credentials["aws_access_key_id"]
-            @iaas_credentials["provider"] = "aws"
+          @fog_credentials = @fog_providers.values.first
+          if @fog_credentials["aws_access_key_id"]
+            @fog_credentials["provider"] = "AWS"
           else
-            raise "implement #choose_fog_provider for #{@iaas_credentials.inspect}"
+            raise "implement #choose_fog_provider for #{@fog_credentials.inspect}"
           end
         end
-        settings[:iaas_credentials] = @iaas_credentials
+        settings[:fog_credentials] = {}
+        @fog_credentials.each do |key, value|
+          settings[:fog_credentials][key] = value
+        end
         settings[:bosh_cloud_properties] = bosh_cloud_properties
         settings[:bosh_resources_cloud_properties] = bosh_resources_cloud_properties
-        settings[:provider] = settings.iaas_credentials.provider
         settings[:bosh_provider] = settings.bosh_cloud_properties.keys.first # aws, vsphere...
         save_settings!
       end
 
       def bosh_cloud_properties
-        case settings.iaas_credentials.provider.to_sym
-        when :aws
+        case settings.fog_credentials.provider.to_sym
+        when :AWS
           {
             "aws" => {
-              "access_key_id" => settings.iaas_credentials.aws_access_key_id,
-              "secret_access_key" => settings.iaas_credentials.aws_secret_access_key,
-              # "ec2_endpoint" => ec2.REGION.amazonaws.com - see choose_aws_region
+              "access_key_id" => settings.fog_credentials.aws_access_key_id,
+              "secret_access_key" => settings.fog_credentials.aws_secret_access_key,
+              # "ec2_endpoint" => ec2.REGION.amazonaws.com - via +choose_aws_region+
               "default_key_name" => "microbosh",
               "default_security_groups" => ["microbosh"],
               "ec2_private_key" => "/home/vcap/.ssh/microbosh.pem"
             }
           }
         else
-          raise "implement #bosh_cloud_properties for #{settings.iaas_credentials.provider}"
+          raise "implement #bosh_cloud_properties for #{settings.fog_credentials.provider}"
         end
       end
 
       def bosh_resources_cloud_properties
-        case settings.iaas_credentials.provider.to_sym
-        when :aws
+        case settings.fog_credentials.provider.to_sym
+        when :AWS
           {"instance_type" => "m1.medium"}
         else
-          raise "implement #bosh_resources_cloud_properties for #{settings.iaas_credentials.provider}"
+          raise "implement #bosh_resources_cloud_properties for #{settings.fog_credentials.provider}"
         end
       end
 
@@ -254,8 +257,8 @@ module Bosh::Bootstrap
       # Return true if region selected (@region_code is set)
       # Else return false
       def choose_provider_region
-        case settings[:provider].to_sym
-        when :aws
+        case settings.fog_credentials.provider.to_sym
+        when :AWS
           choose_aws_region
         else
           false
@@ -267,8 +270,8 @@ module Bosh::Bootstrap
           menu.prompt = "Choose AWS region:  "
           aws_regions.each do |region|
             menu.choice(region) do
-              settings[:aws_region] = region
               settings[:region_code] = region
+              settings.fog_credentials[:region] = region
               settings.bosh_cloud_properties.aws[:ec2_endpoint] = "ec2.#{region}.amazonaws.com"
               save_settings!
             end
