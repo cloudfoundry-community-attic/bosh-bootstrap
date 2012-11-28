@@ -54,7 +54,7 @@ class Bosh::Bootstrap::Commander::LocalServer
   # Upload a file (put a file into local filesystem)
   def upload_file(command, path, contents)
     basedir = File.dirname(path)
-    unless basedir
+    unless File.directory?(basedir)
       logfile.puts "creating micro-bosh manifest folder: #{basedir}"
       FileUtils.mkdir_p(basedir)
     end
