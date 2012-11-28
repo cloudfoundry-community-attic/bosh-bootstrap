@@ -42,7 +42,53 @@ module Bosh::Bootstrap::Stages
     end
 
     def micro_bosh_manifest
-      {}.to_yaml
+      name = settings.bosh_name
+      salted_password = "salted_password"
+      ipaddress = "ipaddress"
+      persistent_disk = "persistent_disk"
+      resources_cloud_properties = {"instance_type" => "m1.medium"}
+
+      # aws:
+      #   access_key_id:     #{access_key}
+      #   secret_access_key: #{secret_key}
+      #   ec2_endpoint: ec2.#{region}.amazonaws.com
+      #   default_key_name: #{key_name}
+      #   default_security_groups: ["#{security_group}"]
+      #   ec2_private_key: /home/vcap/.ssh/#{key_name}.pem
+      cloud_properties = settings.bosh_cloud_properties
+        <<-YAML
+      ---
+      name: #{name}
+
+      env:
+        bosh:
+          password: #{salted_password}
+
+      logging:
+        level: DEBUG
+
+      network:
+        type: dynamic
+        vip: #{ipaddress}
+
+      resources:
+        persistent_disk: #{persistent_disk}
+        cloud_properties: #{resources_cloud_properties.inspect}
+
+      cloud:
+        plugin: aws
+        properties: #{cloud_properties.inspect}
+
+      apply_spec:
+        agent:
+          blobstore:
+            address: #{ipaddress}
+          nats:
+            address: #{ipaddress}
+        properties:
+          aws_registry:
+            address: #{ipaddress}
+      YAML
     end
   end
 end

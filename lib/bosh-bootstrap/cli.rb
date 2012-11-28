@@ -174,13 +174,13 @@ module Bosh::Bootstrap
       def choose_fog_provider
         @fog_providers = {}
         fog_config.inject({}) do |iaas_options, fog_profile|
-          profile_name, keys = fog_profile
-          if keys[:aws_access_key_id]
+          profile_name, profile = fog_profile
+          if profile[:aws_access_key_id]
             # TODO does fog have inbuilt detection algorithm?
             @fog_providers["AWS (#{profile_name})"] = {
-              :provider => "AWS",
-              :aws_access_key_id => keys[:aws_access_key_id],
-              :aws_secret_access_key => keys[:aws_secret_access_key]
+              "provider" => "aws",
+              "aws_access_key_id" => profile[:aws_access_key_id],
+              "aws_secret_access_key" => profile[:aws_secret_access_key]
             }
           end
         end
@@ -193,14 +193,35 @@ module Bosh::Bootstrap
           end
         else
           @iaas_credentials = @fog_providers.values.first
+          if @iaas_credentials[:aws_access_key_id]
+            @iaas_credentials[:provider] = "aws"
+          else
+            raise "implement #choose_fog_provider for #{@iaas_credentials.inspect}"
+          end
         end
         settings[:iaas_credentials] = @iaas_credentials
-        settings[:provider] = @iaas_credentials[:provider]
-        settings[:bosh_provider] = case @iaas_credentials[:provider].to_sym
-        when :AWS
-          "aws"
-        end
+        settings[:bosh_cloud_properties] = bosh_cloud_properties
+        settings[:provider] = settings.iaas_credentials.provider
+        settings[:bosh_provider] = settings.bosh_cloud_properties.keys.first # aws, vsphere...
         save_settings!
+      end
+
+      def bosh_cloud_properties
+        case settings.iaas_credentials.provider.to_sym
+        when :aws
+          {
+            "aws" => {
+              "access_key_id" => settings.iaas_credentials.aws_access_key_id,
+              "secret_access_key" => settings.iaas_credentials.aws_secret_access_key,
+              # "ec2_endpoint" => ec2.REGION.amazonaws.com - see choose_aws_region
+              "default_key_name" => "microbosh",
+              "default_security_groups" => ["microbosh"],
+              "ec2_private_key" => "/home/vcap/.ssh/microbosh.pem"
+            }
+          }
+        else
+          raise "implement #bosh_cloud_properties for #{iaas_credentials[:provider]}"
+        end
       end
 
       # Ask user to provide region information (URI)
@@ -209,7 +230,7 @@ module Bosh::Bootstrap
       # Else return false
       def choose_provider_region
         case settings[:provider].to_sym
-        when :AWS
+        when :aws
           choose_aws_region
         else
           false
@@ -223,6 +244,7 @@ module Bosh::Bootstrap
             menu.choice(region) do
               settings[:aws_region] = region
               settings[:region_code] = region
+              settings.bosh_cloud_properties.aws[:ec2_endpoint] = "ec2.#{region}.amazonaws.com"
               save_settings!
             end
           end
