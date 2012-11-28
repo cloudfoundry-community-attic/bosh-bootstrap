@@ -397,7 +397,7 @@ module Bosh::Bootstrap
           scope = ",stable" # latest stable micro-bosh stemcell by default
           bosh_stemcells_cmd = "bosh public stemcells --tags micro,#{provider}#{scope}"
           say "Locating micro-bosh stemcell, running '#{bosh_stemcells_cmd}'..."
-          `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | head -n 1`
+          `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | head -n 1`.strip
         end
       end
 
