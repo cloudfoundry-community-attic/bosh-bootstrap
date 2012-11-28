@@ -53,13 +53,13 @@ module Bosh::Bootstrap
           header "Stage 1: Choose infrastructure"
           choose_fog_provider
         end
-        confirm "Using #{settings.fog_credentials.provider} infrastructure provider."
+        confirm "Using infrastructure provider #{settings.fog_credentials.provider}"
 
         unless settings[:region_code]
           choose_provider_region
         end
         if settings[:region_code]
-          confirm "Using #{settings.fog_credentials.provider} #{settings.region_code} region."
+          confirm "Using #{settings.fog_credentials.provider} region #{settings.region_code}"
         else
           confirm "No specific region/data center for #{settings.fog_credentials.provider}"
         end
