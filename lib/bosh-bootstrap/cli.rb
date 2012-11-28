@@ -15,7 +15,8 @@ module Bosh::Bootstrap
     def local
       load_options # from method_options above
 
-      stage_1_and_stage_2
+      stage_1
+      stage_2
 
       header "Skipping Stage 3: Create the Inception VM",
         :skipping => "Running in local mode instead. This is the Inception VM. POW!"
@@ -38,12 +39,12 @@ module Bosh::Bootstrap
     def remote
       load_options # from method_options above
 
-      stage_1_and_stage_2
-      
+      stage_1
+      stage_2
     end
 
     no_tasks do
-      def stage_1_and_stage_2
+      def stage_1
         if settings[:provider]
           header "Stage 1: Choose infrastructure",
             :skipping => "Already selected infrastructure provider"
@@ -61,17 +62,31 @@ module Bosh::Bootstrap
         else
           confirm "No specific region/data center for #{settings.provider}"
         end
-
+      end
+      
+      def stage_2
         header "Stage 2: Configuration"
         unless settings[:bosh_username]
           prompt_for_bosh_credentials
         end
         confirm "After BOSH is created, your username will be #{settings.bosh_username}"
 
+        # TODO provision IP address for BOSH
+        ip_address      = "2.3.4.5"
+        password        = settings.bosh_password # FIXME dual use of password?
+        salted_password = `mkpasswd -m sha-512 '#{password}'`.strip
+        settings[:bosh] = {
+          "ip_address" => ip_address,
+          "password" => password,
+          "salted_password" => salted_password,
+          "persistent_disk" => 16384
+        }
+
         unless settings[:micro_bosh_stemcell_name]
           settings[:micro_bosh_stemcell_name] = micro_bosh_stemcell_name
           save_settings!
         end
+
         confirm "Micro BOSH will be created with stemcell #{settings.micro_bosh_stemcell_name}"
       end
 
