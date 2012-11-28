@@ -93,8 +93,18 @@ module Bosh::Bootstrap
           confirm "Micro BOSH will be assigned IP address #{settings.bosh.ip_address}"
         end
         save_settings!
-        
-        
+
+        if aws?
+          settings[:aws] ||= {}
+          unless settings[:aws][:bosh_security_group_name]
+            # create sec group
+            # settings[:aws][:bosh_security_group_name] = secgroup_name
+          end
+          unless settings[:aws][:bosh_keypair_name]
+            # create keypair & .pem
+            # settings[:aws][:bosh_keypair_name] = keypair_name
+          end
+        end
 
         unless settings[:micro_bosh_stemcell_name]
           settings[:micro_bosh_stemcell_name] = micro_bosh_stemcell_name
@@ -239,8 +249,7 @@ module Bosh::Bootstrap
       end
 
       def bosh_cloud_properties
-        case settings.fog_credentials.provider.to_sym
-        when :AWS
+        if aws?
           {
             "aws" => {
               "access_key_id" => settings.fog_credentials.aws_access_key_id,
@@ -257,8 +266,7 @@ module Bosh::Bootstrap
       end
 
       def bosh_resources_cloud_properties
-        case settings.fog_credentials.provider.to_sym
-        when :AWS
+        if aws?
           {"instance_type" => "m1.medium"}
         else
           raise "implement #bosh_resources_cloud_properties for #{settings.fog_credentials.provider}"
@@ -270,8 +278,7 @@ module Bosh::Bootstrap
       # Return true if region selected (@region_code is set)
       # Else return false
       def choose_provider_region
-        case settings.fog_credentials.provider.to_sym
-        when :AWS
+        if aws?
           choose_aws_region
         else
           false
@@ -304,8 +311,7 @@ module Bosh::Bootstrap
       # For other providers, it may opt to prompt for a static IP
       # to use.
       def acquire_ip_address
-        case settings.fog_credentials.provider.to_sym
-        when :AWS
+        if aws?
           provision_elastic_ip_address
         else
           HighLine.new.ask("What static IP to use for micro BOSH?  ")
@@ -345,6 +351,10 @@ module Bosh::Bootstrap
 
       def fog_config_path
         settings.fog_path
+      end
+
+      def aws?
+        settings.fog_credentials.provider == "AWS"
       end
 
       def prompt_for_bosh_credentials
