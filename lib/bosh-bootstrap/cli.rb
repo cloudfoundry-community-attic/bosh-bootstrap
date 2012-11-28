@@ -16,8 +16,8 @@ module Bosh::Bootstrap
     def local
       load_options # from method_options above
 
-      stage_1
-      stage_2
+      stage_1_choose_infrastructure_provider
+      stage_2_bosh_configuration
 
       header "Skipping Stage 3: Create the Inception VM",
         :skipping => "Running in local mode instead. This is the Inception VM. POW!"
@@ -40,33 +40,33 @@ module Bosh::Bootstrap
     def remote
       load_options # from method_options above
 
-      stage_1
-      stage_2
+      stage_1_choose_infrastructure_provider
+      stage_2_bosh_configuration
     end
 
     no_tasks do
-      def stage_1
-        if settings[:provider]
+      def stage_1_choose_infrastructure_provider
+        if settings[:fog_credentials]
           header "Stage 1: Choose infrastructure",
             :skipping => "Already selected infrastructure provider"
         else
           header "Stage 1: Choose infrastructure"
           choose_fog_provider
         end
-        confirm "Using #{settings.provider} infrastructure provider."
+        confirm "Using #{settings.fog_credentials.provider} infrastructure provider."
 
         unless settings[:region_code]
           choose_provider_region
         end
         if settings[:region_code]
-          confirm "Using #{settings.provider} #{settings.region_code} region."
+          confirm "Using #{settings.fog_credentials.provider} #{settings.region_code} region."
         else
-          confirm "No specific region/data center for #{settings.provider}"
+          confirm "No specific region/data center for #{settings.fog_credentials.provider}"
         end
       end
       
-      def stage_2
-        header "Stage 2: Configuration"
+      def stage_2_bosh_configuration
+        header "Stage 2: BOSH configuration"
         unless settings[:bosh_username]
           prompt_for_bosh_credentials
         end
