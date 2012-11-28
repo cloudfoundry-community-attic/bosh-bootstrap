@@ -292,10 +292,10 @@ module Bosh::Bootstrap
         true
       end
 
-      # supported by fog
+      # supported by fog 1.6.0
       # FIXME weird that fog has no method to return this list
       def aws_regions
-        ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'us-east-1', 'us-west-1', 'us-west-2', 'sa-east-1']
+        ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'sa-east-1', 'us-east-1', 'us-west-1', 'us-west-2']
       end
 
       # Provision or provide an IP address to use
