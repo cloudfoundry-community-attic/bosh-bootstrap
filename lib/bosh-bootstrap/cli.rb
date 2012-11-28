@@ -73,15 +73,27 @@ module Bosh::Bootstrap
         confirm "After BOSH is created, your username will be #{settings.bosh_username}"
 
         # TODO provision IP address for BOSH
-        ip_address      = "2.3.4.5"
-        password        = settings.bosh_password # FIXME dual use of password?
-        salted_password = `mkpasswd -m sha-512 '#{password}'`.strip
-        settings[:bosh] = {
-          "ip_address" => ip_address,
-          "password" => password,
-          "salted_password" => salted_password,
-          "persistent_disk" => 16384
-        }
+        unless settings[:bosh]
+          say "Defaulting to 16Gb persistent disk for BOSH"
+          password        = settings.bosh_password # FIXME dual use of password?
+          salted_password = `mkpasswd -m sha-512 '#{password}'`.strip
+          settings[:bosh] = {}
+          settings[:bosh][:password] = password
+          settings[:bosh][:salted_password] = salted_password
+          settings[:bosh][:persistent_disk] = 16384
+          save_settings!
+        end
+        unless settings.bosh["ip_address"]
+          say "Acquiring IP address for micro BOSH..."
+          ip_address = acquire_ip_address
+          settings.bosh["ip_address"] = ip_address
+        end
+        unless settings.bosh["ip_address"]
+          error "IP address not available/provided currently"
+        else
+          confirm "Micro BOSH will be assigned IP address #{settings.bosh.ip_address}"
+        end
+        save_settings!
 
         unless settings[:micro_bosh_stemcell_name]
           settings[:micro_bosh_stemcell_name] = micro_bosh_stemcell_name
@@ -194,7 +206,7 @@ module Bosh::Bootstrap
           if profile[:aws_access_key_id]
             # TODO does fog have inbuilt detection algorithm?
             @fog_providers["AWS (#{profile_name})"] = {
-              "provider" => "aws",
+              "provider" => "AWS",
               "aws_access_key_id" => profile[:aws_access_key_id],
               "aws_secret_access_key" => profile[:aws_secret_access_key]
             }
@@ -284,6 +296,40 @@ module Bosh::Bootstrap
       # FIXME weird that fog has no method to return this list
       def aws_regions
         ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'us-east-1', 'us-west-1', 'us-west-2', 'sa-east-1']
+      end
+
+      # Provision or provide an IP address to use
+      # For AWS, it will dynamically provision an elastic IP
+      # For other providers, it may opt to prompt for a static IP
+      # to use.
+      def acquire_ip_address
+        case settings.fog_credentials.provider.to_sym
+        when :AWS
+          provision_elastic_ip_address
+        else
+          HighLine.new.ask("What static IP to use for micro BOSH?  ")
+        end
+      end
+
+      # using fog, provision an elastic IP address
+      # TODO what is the error raised if no IPs available?
+      # returns an IP address as a string, e.g. "1.2.3.4"
+      def provision_elastic_ip_address
+        address = fog_compute.addresses.create
+        address.public_ip
+      end
+
+      # fog connection object to Compute tasks (VMs, IP addresses)
+      def fog_compute
+        # Fog::Compute.new requires Hash with keys that are symbols
+        # but Settings converts all keys to strings
+        # So create a version of settings.fog_credentials with symbol keys
+        credentials_with_symbols = settings.fog_credentials.inject({}) do |creds, key_pair|
+          key, value = key_pair
+          creds[key.to_sym] = value
+          creds
+        end
+        @fog_compute ||= Fog::Compute.new(credentials_with_symbols)
       end
 
       def fog_config
