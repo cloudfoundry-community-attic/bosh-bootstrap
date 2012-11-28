@@ -216,6 +216,7 @@ module Bosh::Bootstrap
         end
         settings[:iaas_credentials] = @iaas_credentials
         settings[:bosh_cloud_properties] = bosh_cloud_properties
+        settings[:bosh_resources_cloud_properties] = bosh_resources_cloud_properties
         settings[:provider] = settings.iaas_credentials.provider
         settings[:bosh_provider] = settings.bosh_cloud_properties.keys.first # aws, vsphere...
         save_settings!
@@ -235,7 +236,16 @@ module Bosh::Bootstrap
             }
           }
         else
-          raise "implement #bosh_cloud_properties for #{iaas_credentials[:provider]}"
+          raise "implement #bosh_cloud_properties for #{settings.iaas_credentials.provider}"
+        end
+      end
+
+      def bosh_resources_cloud_properties
+        case settings.iaas_credentials.provider.to_sym
+        when :aws
+          {"instance_type" => "m1.medium"}
+        else
+          raise "implement #bosh_resources_cloud_properties for #{settings.iaas_credentials.provider}"
         end
       end
 

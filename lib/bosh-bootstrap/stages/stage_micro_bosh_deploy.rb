@@ -48,7 +48,7 @@ module Bosh::Bootstrap::Stages
       salted_password            = settings.bosh.salted_password
       ipaddress                  = settings.bosh.ip_address
       persistent_disk            = settings.bosh.persistent_disk
-      resources_cloud_properties = {"instance_type" => "m1.medium"}
+      resources_cloud_properties = settings.bosh.resources_cloud_properties
 
       # aws:
       #   access_key_id:     #{access_key}
