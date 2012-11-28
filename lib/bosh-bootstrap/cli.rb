@@ -193,8 +193,8 @@ module Bosh::Bootstrap
           end
         else
           @iaas_credentials = @fog_providers.values.first
-          if @iaas_credentials[:aws_access_key_id]
-            @iaas_credentials[:provider] = "aws"
+          if @iaas_credentials["aws_access_key_id"]
+            @iaas_credentials["provider"] = "aws"
           else
             raise "implement #choose_fog_provider for #{@iaas_credentials.inspect}"
           end
