@@ -318,8 +318,6 @@ module Bosh::Bootstrap
       def create_aws_key_pair(key_pair_name)
         unless fog_compute.key_pairs.get(key_pair_name)
           kp = fog_compute.key_pairs.create(:name => key_pair_name)
-          puts kp.private_key
-          p kp.private_key
           settings[:bosh_key_pair] = {}
           settings[:bosh_key_pair][:name] = key_pair_name
           settings[:bosh_key_pair][:private_key] = kp.private_key
