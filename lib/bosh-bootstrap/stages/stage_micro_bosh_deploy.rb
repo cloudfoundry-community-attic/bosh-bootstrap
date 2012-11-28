@@ -6,11 +6,14 @@ module Bosh::Bootstrap::Stages
       @settings = settings
     end
 
+    # TODO "aws_us_east_1" should come from settings.bosh_name
     def commands
+      settings[:bosh_name] ||= "unnamed_bosh"
+
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
         server.download "micro-bosh stemcell", script("download_micro_bosh_stemcell",
                       "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name)
-        server.upload_file micro_bosh_manifest
+        server.upload_file micro_bosh_manifest, "/var/vcap/store/microboshes/#{settings.bosh_name}/micro_bosh.yml"
       end
     end
 
