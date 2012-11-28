@@ -67,6 +67,15 @@ module Bosh::Bootstrap
       
       def stage_2_bosh_configuration
         header "Stage 2: BOSH configuration"
+        unless settings[:bosh_name]
+          provider, region = settings.bosh_provider, settings.region_code
+          default_name = "microbosh_#{provider}_#{region}".gsub(/\W+/, '_')
+          bosh_name = HighLine.new.ask("Useful name for Micro BOSH?  ") { |q| q.default = default_name }
+          settings[:bosh_name] = bosh_name
+          save_settings!
+        end
+        confirm "Micro BOSH will be named #{settings.bosh_name}"
+
         unless settings[:bosh_username]
           prompt_for_bosh_credentials
         end
@@ -101,7 +110,7 @@ module Bosh::Bootstrap
             # settings[:aws][:bosh_security_group_name] = secgroup_name
           end
           unless settings[:aws][:bosh_keypair_name]
-            # create keypair & .pem
+            create_aws_keypair("microbosh_key_#{settings}")
             # settings[:aws][:bosh_keypair_name] = keypair_name
           end
         end
