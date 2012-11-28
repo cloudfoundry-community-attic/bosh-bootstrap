@@ -137,6 +137,37 @@ Running this command will install packages, an Ruby via RVM, and the BOSH rubyge
 
 
 
+## Internal configuration/settings
+
+Once you've used the CLI it stores your settings for your BOSH, so that you can re-run the tool for upgrades or other future functionality.
+
+By default, the settings file is stored at `~/.bosh_bootstrap/manifest.yml`.
+
+For an AWS BOSH it looks like:
+
+``` yaml
+---
+fog_path: /Users/drnic/.fog
+iaas_credentials:
+  provider: aws
+  aws_access_key_id: ACCESS_KEY
+  aws_secret_access_key: SECRET_KEY
+bosh_cloud_properties:
+  aws:
+    access_key_id: ACCESS_KEY
+    secret_access_key: SECRET_KEY
+    default_key_name: microbosh
+    default_security_groups: [microbosh]
+    ec2_private_key: /home/vcap/.ssh/microbosh.pem
+provider: aws
+bosh_provider: aws
+aws_region: us-east-1
+region_code: us-east-1
+bosh_username: drnic
+bosh_password: PASSWORD
+micro_bosh_stemcell_name: micro-bosh-stemcell-aws-0.6.4.tgz
+```
+
 ## Contributing
 
 1. Fork it
