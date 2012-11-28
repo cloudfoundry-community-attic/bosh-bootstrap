@@ -72,7 +72,6 @@ module Bosh::Bootstrap
         end
         confirm "After BOSH is created, your username will be #{settings.bosh_username}"
 
-        # TODO provision IP address for BOSH
         unless settings[:bosh]
           say "Defaulting to 16Gb persistent disk for BOSH"
           password        = settings.bosh_password # FIXME dual use of password?
@@ -94,6 +93,8 @@ module Bosh::Bootstrap
           confirm "Micro BOSH will be assigned IP address #{settings.bosh.ip_address}"
         end
         save_settings!
+        
+        
 
         unless settings[:micro_bosh_stemcell_name]
           settings[:micro_bosh_stemcell_name] = micro_bosh_stemcell_name
@@ -107,10 +108,10 @@ module Bosh::Bootstrap
       def header(title, options={})
         say "" # golden whitespace
         if skipping = options[:skipping]
-          say "Skipping #{title}", :yellow
+          say "Skipping #{title}", [:yellow, :bold]
           say skipping
         else
-          say title, :green
+          say title, [:green, :bold]
         end
         say "" # more golden whitespace
       end
