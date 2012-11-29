@@ -35,8 +35,9 @@ module Bosh::Bootstrap
       end
     end
 
-    desc "local", "Bootstrap bosh, using local server as inception VM"
+    desc "remote", "Bootstrap bosh, using a remote server as inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
+    method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
     def remote
       load_options # from method_options above
 
