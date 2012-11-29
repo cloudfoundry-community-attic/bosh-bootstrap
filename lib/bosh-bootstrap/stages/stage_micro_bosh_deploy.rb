@@ -94,7 +94,7 @@ module Bosh::Bootstrap::Stages
             "aws_registry" => { "address" => ipaddress }
           }
         }
-      }.to_yaml
+      }.to_yaml.gsub(" !ruby/hash:Settingslogic", "")
     end
   end
 end
