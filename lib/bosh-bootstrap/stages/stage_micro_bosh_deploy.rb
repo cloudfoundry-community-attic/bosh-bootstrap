@@ -35,9 +35,15 @@ module Bosh::Bootstrap::Stages
       if File.exist?(path)
         script = File.read(path)
         if variables.keys.size > 0
+          # inject variables into script if its bash script
           inline_variables = "#!/usr/bin/env bash\n\n"
-          variables.each { |name, value| inline_variables << "#{name}=#{value}\n" }
+          variables.each { |name, value| inline_variables << "#{name}='#{value}'\n" }
           script.gsub!("#!/usr/bin/env bash", inline_variables)
+
+          # inject variables into script if its ruby script
+          inline_variables = "#!/usr/bin/env ruby\n\n"
+          variables.each { |name, value| inline_variables << "ENV['#{name}'] = '#{value}'\n" }
+          script.gsub!("#!/usr/bin/env ruby", inline_variables)
         end
         script
       else

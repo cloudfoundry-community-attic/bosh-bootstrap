@@ -11,7 +11,7 @@
 # * ENV['TARGET_USER'] (default: vcap)
 
 user = ENV['TARGET_USER'] || 'vcap'
-key_pair_name = ENV['key_pair_name']
+key_pair_name = ENV['KEY_PAIR_NAME']
 private_key = ENV['PRIVATE_KEY']
 
 keyfile_path = "/home/#{user}/.ssh/#{key_pair_name}.pem"
