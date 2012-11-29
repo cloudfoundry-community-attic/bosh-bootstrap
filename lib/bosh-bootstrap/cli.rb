@@ -262,8 +262,8 @@ module Bosh::Bootstrap
           settings[:bosh_cloud_properties] = {}
           settings[:bosh_cloud_properties][:aws] = {}
           props = settings[:bosh_cloud_properties][:aws]
-          props[:access_key_id] = settings.fog_credentials.aws_access_key_id,
-          props[:secret_access_key] = settings.fog_credentials.aws_secret_access_key,
+          props[:access_key_id] = settings.fog_credentials.aws_access_key_id
+          props[:secret_access_key] = settings.fog_credentials.aws_secret_access_key
           # props[:ec2_endpoint] = "ec2.REGION.amazonaws.com" - via +choose_aws_region+            
           # props[:default_key_name] = "microbosh"  - via +create_aws_key_pair+
           # props[:ec2_private_key] = "/home/vcap/.ssh/microbosh.pem" - via +create_aws_key_pair+
