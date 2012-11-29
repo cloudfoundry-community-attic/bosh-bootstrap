@@ -328,7 +328,7 @@ module Bosh::Bootstrap
       def create_aws_security_group(security_group_name)
         unless fog_compute.security_groups.get(security_group_name)
           sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
-          settings[:bosh_cloud_properties][:aws][:default_security_groups] = [security_group_name]
+          settings.bosh_cloud_properties.aws[:default_security_groups] = [security_group_name]
           settings[:bosh_security_group] = {}
           settings[:bosh_security_group][:name] = security_group_name
           settings[:bosh_security_group][:ports] = {}
@@ -336,7 +336,7 @@ module Bosh::Bootstrap
           settings[:bosh_security_group][:ports][:message_bus] = 6868
           settings[:bosh_security_group][:ports][:bosh_director] = 25555
           settings[:bosh_security_group][:ports][:aws_registry] = 25888
-          settings.bosh_security_group.ports.values do |port|
+          settings.bosh_security_group.ports.values.each do |port|
             sg.authorize_port_range(port..port)
           end
           save_settings!
