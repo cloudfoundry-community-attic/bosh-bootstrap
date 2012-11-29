@@ -3,12 +3,14 @@
 # Deploys a micro BOSH using "bosh micro deploy"
 #
 # Required:
-# * $BOSH_NAME - name of bosh deployment (thus /var/vcap/store/microboshes/$BOSH_NAME/micro_bosh.yml exists)
-# * $MICRO_BOSH_STEMCELL_NAME - public stemcell name at /var/vcap/store/stemcells/$MICRO_BOSH_STEMCELL_NAME
+# * $BOSH_NAME - name of bosh deployment
+#   (thus /var/vcap/store/microboshes/deployments/$BOSH_NAME/micro_bosh.yml exists)
+# * $MICRO_BOSH_STEMCELL_NAME - public stemcell name at
+#   /var/vcap/store/stemcells/$MICRO_BOSH_STEMCELL_NAME
 
 set -e # exit immediately if a simple command exits with a non-zero status
 set -u # report the usage of uninitialized variables
 
-cd /var/vcap/store/microboshes/
+cd /var/vcap/store/microboshes/deployments/
 bosh micro deployment $BOSH_NAME
 bosh micro deploy $MICRO_BOSH_STEMCELL_PATH

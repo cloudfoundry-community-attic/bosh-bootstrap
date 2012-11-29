@@ -31,7 +31,7 @@ cp ~vcap/.ssh/id_rsa* ~/.ssh/
 
 bosh_app_dir=/var/vcap
 mkdir -p ${bosh_app_dir}
-for path in microboshes deployments releases repos stemcells
+for path in microboshes/deployments deployments releases repos stemcells
 do
   echo "creating ${bosh_app_dir}/store/${path}"
   mkdir -p ${bosh_app_dir}/store/${path}
