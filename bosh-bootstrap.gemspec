@@ -26,6 +26,7 @@ EOS
   gem.add_dependency "highline"
   gem.add_dependency "settingslogic"
   gem.add_dependency "POpen4"
+  gem.add_dependency "net-scp"
   gem.add_dependency "fog"
   gem.add_dependency "bosh_cli"
   gem.add_development_dependency "bosh_deployer"
