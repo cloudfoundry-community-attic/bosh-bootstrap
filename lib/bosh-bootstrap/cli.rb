@@ -19,7 +19,7 @@ module Bosh::Bootstrap
       stage_1_choose_infrastructure_provider
       stage_2_bosh_configuration
 
-      header "Skipping Stage 3: Create the Inception VM",
+      header "Stage 3: Create the Inception VM",
         :skipping => "Running in local mode instead. This is the Inception VM. POW!"
 
       server = Commander::LocalServer.new
