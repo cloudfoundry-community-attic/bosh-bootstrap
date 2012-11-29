@@ -251,24 +251,23 @@ module Bosh::Bootstrap
         @fog_credentials.each do |key, value|
           settings[:fog_credentials][key] = value
         end
-        settings[:bosh_cloud_properties] = bosh_cloud_properties
+        setup_bosh_cloud_properties
         settings[:bosh_resources_cloud_properties] = bosh_resources_cloud_properties
         settings[:bosh_provider] = settings.bosh_cloud_properties.keys.first # aws, vsphere...
         save_settings!
       end
 
-      def bosh_cloud_properties
+      def setup_bosh_cloud_properties
         if aws?
-          {
-            "aws" => {
-              "access_key_id" => settings.fog_credentials.aws_access_key_id,
-              "secret_access_key" => settings.fog_credentials.aws_secret_access_key,
-              # "ec2_endpoint" => ec2.REGION.amazonaws.com - via +choose_aws_region+
-              "default_key_name" => "microbosh",
-              "default_security_groups" => ["microbosh"],
-              "ec2_private_key" => "/home/vcap/.ssh/microbosh.pem"
-            }
-          }
+          settings[:bosh_cloud_properties] = {}
+          settings[:bosh_cloud_properties][:aws] = {}
+          props = settings[:bosh_cloud_properties][:aws]
+          props[:access_key_id] = settings.fog_credentials.aws_access_key_id,
+          props[:secret_access_key] = settings.fog_credentials.aws_secret_access_key,
+          # props[:ec2_endpoint] = "ec2.REGION.amazonaws.com" - via +choose_aws_region+            
+          # props[:default_key_name] = "microbosh"  - via +create_aws_key_pair+
+          # props[:ec2_private_key] = "/home/vcap/.ssh/microbosh.pem" - via +create_aws_key_pair+
+          # props[:default_security_groups] = ["microbosh"], - via +create_aws_security_group+
         else
           raise "implement #bosh_cloud_properties for #{settings.fog_credentials.provider}"
         end
@@ -315,6 +314,17 @@ module Bosh::Bootstrap
         ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'sa-east-1', 'us-east-1', 'us-west-1', 'us-west-2']
       end
 
+      # Creates an AWS key pair, and stores the private key
+      # in settings manifest.
+      # Also sets up the bosh_cloud_properties for the remote server
+      # to have the .pem key installed.
+      #
+      # Adds settings:
+      # * bosh_key_pair.name
+      # * bosh_key_pair.private_key
+      # * bosh_key_pair.fingerprint
+      # * bosh_cloud_properties.aws.default_key_name
+      # * bosh_cloud_properties.aws.ec2_private_key
       def create_aws_key_pair(key_pair_name)
         unless fog_compute.key_pairs.get(key_pair_name)
           kp = fog_compute.key_pairs.create(:name => key_pair_name)
@@ -322,6 +332,8 @@ module Bosh::Bootstrap
           settings[:bosh_key_pair][:name] = key_pair_name
           settings[:bosh_key_pair][:private_key] = kp.private_key
           settings[:bosh_key_pair][:fingerprint] = kp.fingerprint
+          settings[:bosh_cloud_properties][:aws][:default_key_name] = key_pair_name
+          settings[:bosh_cloud_properties][:aws][:ec2_private_key] = "/home/vcap/.ssh/#{key_pair_name}.pem"
           save_settings!
         else
           error "AWS key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
