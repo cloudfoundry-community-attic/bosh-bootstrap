@@ -14,5 +14,5 @@ set -u # report the usage of uninitialized variables
 MICRO_BOSH_STEMCELL_PATH=/var/vcap/store/stemcells/$MICRO_BOSH_STEMCELL_NAME
 
 cd /var/vcap/store/microboshes/deployments/
-bosh micro deployment $BOSH_NAME
-bosh micro deploy $MICRO_BOSH_STEMCELL_PATH
+bosh -n micro deployment $BOSH_NAME
+bosh -n micro deploy $MICRO_BOSH_STEMCELL_PATH
