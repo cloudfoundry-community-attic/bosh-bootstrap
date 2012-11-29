@@ -425,7 +425,7 @@ module Bosh::Bootstrap
       def prompt_for_bosh_credentials
         prompt = HighLine.new
         say "Please enter a user/password for the BOSH that will be created."
-        settings[:bosh_username] = prompt.ask("BOSH username: ") { |q| q.default = `whoami`.strip }
+        settings[:bosh_username] = prompt.ask("BOSH username: ")
         settings[:bosh_password] = prompt.ask("BOSH password: ") { |q| q.echo = "x" }
         save_settings!
       end
