@@ -20,7 +20,7 @@ module Bosh::Bootstrap
       stage_1_choose_infrastructure_provider
       stage_2_bosh_configuration
 
-      header "Stage 3: Create the Inception VM",
+      header "Stage 3: Create/Allocate the Inception VM",
         :skipping => "Running in local mode instead. This is the Inception VM. POW!"
 
       @server = Commander::LocalServer.new
@@ -37,6 +37,28 @@ module Bosh::Bootstrap
 
       stage_1_choose_infrastructure_provider
       stage_2_bosh_configuration
+
+      header "Stage 3: Create/Allocate the Inception VM"
+      unless settings["inception"] && settings["inception"]["host"]
+        HighLine.new.choose do |menu|
+          menu.prompt = "Create or specify an Inception VM:  "
+          # menu.choice("create new inception VM") do
+          #   settings["inception"] = {}
+          # end
+          menu.choice("use an existing Ubuntu VM") do
+            settings["inception"] = {}
+            settings["inception"]["host"] = \
+              HighLine.new.ask("Host address (IP or domain) to inception VM? ")
+            settings["inception"]["username"] = \
+              HighLine.new.ask("Username that you have SSH access to? ") {|q| q.default = "ubuntu"}
+            save_settings!
+          end
+        end
+      end
+      confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
+
+      # stage_4_prepare_inception_vm
+      # stage_5_deploy_micro_bosh
     end
 
     no_tasks do
