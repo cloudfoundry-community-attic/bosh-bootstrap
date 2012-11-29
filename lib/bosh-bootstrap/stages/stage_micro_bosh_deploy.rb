@@ -19,6 +19,9 @@ module Bosh::Bootstrap::Stages
         server.install "key pair for user", script("install_key_pair_for_user",
                       "PRIVATE_KEY" => settings.bosh_key_pair.private_key,
                       "KEY_PAIR_NAME" => settings.bosh_key_pair.name)
+        server.deploy "micro bosh", script("bosh_micro_deploy",
+                      "BOSH_NAME" => settings.bosh_name,
+                      "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name)
       end
     end
 
