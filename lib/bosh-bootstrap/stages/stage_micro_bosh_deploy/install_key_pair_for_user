@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+
+# Creates a local /home/vcap/.ssh/$KEY_PAIR_NAME.pem file
+# from the key pair private key ($PRIVATE_KEY)
+#
+# Requires:
+# * ENV['KEY_PAIR_NAME']
+# * ENV['PRIVATE_KEY']
+#
+# Optional:
+# * ENV['TARGET_USER'] (default: vcap)
+
+user = ENV['TARGET_USER'] || 'vcap'
+key_pair_name = ENV['key_pair_name']
+private_key = ENV['PRIVATE_KEY']
+
+keyfile_path = "/home/#{user}/.ssh/#{key_pair_name}.pem"
+split_private_key = private_key.split(/\n/)
+File.open(keyfile_path, "w") do |f|
+  split_private_key.each {|line| f.puts line}
+  f.chmod 0600
+end
+
