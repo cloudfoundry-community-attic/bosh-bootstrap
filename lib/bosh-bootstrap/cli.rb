@@ -59,7 +59,7 @@ module Bosh::Bootstrap
 
       @server = Commander::RemoteServer.new(settings.inception.host, settings.inception.username)
       stage_4_prepare_inception_vm
-      # stage_5_deploy_micro_bosh
+      stage_5_deploy_micro_bosh
     end
 
     no_tasks do
