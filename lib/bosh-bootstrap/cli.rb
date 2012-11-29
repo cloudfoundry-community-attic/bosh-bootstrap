@@ -104,10 +104,14 @@ module Bosh::Bootstrap
         save_settings!
 
         if aws?
-          unless settings[:bosh_security_group_name]
-            # create sec group
-            # settings[:aws][:bosh_security_group_name] = secgroup_name
+          unless settings[:bosh_security_group]
+            security_group_name = settings.bosh_name
+            create_aws_security_group(security_group_name)
           end
+          ports = settings.bosh_security_group.ports.values
+          confirm "Micro BOSH protected by security group " +
+            "named #{settings.bosh_security_group.name}, with ports #{ports}"
+
           unless settings[:bosh_key_pair]
             key_pair_name = settings.bosh_name
             create_aws_key_pair(key_pair_name)
@@ -312,6 +316,33 @@ module Bosh::Bootstrap
       # FIXME weird that fog has no method to return this list
       def aws_regions
         ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'sa-east-1', 'us-east-1', 'us-west-1', 'us-west-2']
+      end
+
+      # Creates an AWS security group.
+      # Also sets up the bosh_cloud_properties for the remote server
+      #
+      # Adds settings:
+      # * bosh_security_group.name
+      # * bosh_security_group.ports
+      # * bosh_cloud_properties.aws.default_security_groups
+      def create_aws_security_group(security_group_name)
+        unless fog_compute.security_groups.get(security_group_name)
+          sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
+          settings[:bosh_cloud_properties][:aws][:default_security_groups] = security_group_name
+          settings[:bosh_security_group] = {}
+          settings[:bosh_security_group][:name] = security_group_name
+          settings[:bosh_security_group][:ports] = {}
+          settings[:bosh_security_group][:ports][:ssh_access] = 22
+          settings[:bosh_security_group][:ports][:message_bus] = 6868
+          settings[:bosh_security_group][:ports][:bosh_director] = 25555
+          settings[:bosh_security_group][:ports][:aws_registry] = 25888
+          settings.bosh_security_group.ports.values do |port|
+            sg.authorize_port_range(port..port)
+          end
+          save_settings!
+        else
+          error "AWS security group '#{security_group_name}' already exists. Rename BOSH or delete old security group manually and re-run CLI."
+        end
       end
 
       # Creates an AWS key pair, and stores the private key
