@@ -21,7 +21,10 @@ module Bosh::Bootstrap::Stages
                       "KEY_PAIR_NAME" => settings.bosh_key_pair.name)
         server.deploy "micro bosh", script("bosh_micro_deploy",
                       "BOSH_NAME" => settings.bosh_name,
-                      "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name)
+                      "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name,
+                      "BOSH_USERNAME" => settings.bosh_username,
+                      "BOSH_USERNAME" => settings.bosh_password,
+                      "BOSH_UPDATED_DEPLOY" => settings[:bosh_deployed] || "")
       end
     end
 

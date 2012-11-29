@@ -158,6 +158,9 @@ module Bosh::Bootstrap
         unless server.run(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
           error "Failed to complete Stage 5: Deploying micro BOSH"
         end
+        settings[:bosh_deployed] = true
+        settings[:bosh_last_deployment] = DateTime.new
+        save_settings!
       end
 
       # Display header for a new section of the bootstrapper
