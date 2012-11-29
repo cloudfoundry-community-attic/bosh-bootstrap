@@ -9,15 +9,18 @@ module Bosh::Bootstrap::Commander
 
     attr_reader :full_present_tense  # e.g. "installing packages"
     attr_reader :full_past_tense    # e.g. "installed packages"
-  
-    def initialize(command, description, script, full_present_tense=nil, full_past_tense=nil)
+
+    attr_reader :specific_run_as_user # e.g. ubuntu
+
+    def initialize(command, description, script, full_present_tense=nil, full_past_tense=nil, options={})
       super(command, description, full_present_tense, full_past_tense)
-      @script             = script
+      @script = script
+      @specific_run_as_user = options[:user]
     end
 
     # Invoke this command to call back upon +server.run_script+ 
     def perform(server)
-      server.run_script(self, script)
+      server.run_script(self, script, :user => specific_run_as_user)
     end
 
     # Provide a filename that represents this Command

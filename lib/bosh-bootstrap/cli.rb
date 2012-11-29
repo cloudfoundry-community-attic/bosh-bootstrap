@@ -57,7 +57,8 @@ module Bosh::Bootstrap
       end
       confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
 
-      @server = Commander::RemoteServer.new(settings.inception.host, settings.inception.username)
+      @server = Commander::RemoteServer.new(settings.inception.host)
+
       stage_4_prepare_inception_vm
       stage_5_deploy_micro_bosh
     end

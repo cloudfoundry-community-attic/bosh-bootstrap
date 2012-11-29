@@ -15,46 +15,46 @@ module Bosh::Bootstrap::Commander
     # Generic remote script commands with custom phrases
     #
 
-    def assign(description, script)
+    def assign(description, script, options={})
       @commands << RemoteScriptCommand.new(
         "assign", description, script,
-        "assigning #{description}", "assigned #{description}")
+        "assigning #{description}", "assigned #{description}", options)
     end
 
-    def create(description, script)
+    def create(description, script, options={})
       @commands << RemoteScriptCommand.new(
         "create", description, script,
-        "creating #{description}", "created #{description}")
+        "creating #{description}", "created #{description}", options)
     end
 
-    def download(description, script)
+    def download(description, script, options={})
       @commands << RemoteScriptCommand.new(
         "download", description, script,
-        "downloading #{description}", "downloaded #{description}")
+        "downloading #{description}", "downloaded #{description}", options)
     end
 
-    def install(description, script)
+    def install(description, script, options={})
       @commands << RemoteScriptCommand.new(
         "install", description, script,
-        "installing #{description}", "installed #{description}")
+        "installing #{description}", "installed #{description}", options)
     end
 
-    def provision(description, script)
+    def provision(description, script, options={})
       @commands << RemoteScriptCommand.new(
         "provision", description, script,
-        "provisioning #{description}", "provisioned #{description}")
+        "provisioning #{description}", "provisioned #{description}", options)
     end
 
-    def store(description, script)
+    def store(description, script, options={})
       @commands << RemoteScriptCommand.new(
         "store", description, script,
-        "storing #{description}", "stored #{description}")
+        "storing #{description}", "stored #{description}", options)
     end
 
-    def validate(description, script)
+    def validate(description, script, options={})
       @commands << RemoteScriptCommand.new(
         "validate", description, script,
-        "validating #{description}", "validated #{description}")
+        "validating #{description}", "validated #{description}", options)
     end
 
     # catch-all for commands with generic active/past tense phrases
