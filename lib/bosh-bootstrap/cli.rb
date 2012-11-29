@@ -9,6 +9,7 @@ module Bosh::Bootstrap
     include Thor::Actions
 
     attr_reader :fog_credentials
+    attr_reader :server
 
     desc "local", "Bootstrap bosh, using local server as inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
@@ -22,17 +23,10 @@ module Bosh::Bootstrap
       header "Stage 3: Create the Inception VM",
         :skipping => "Running in local mode instead. This is the Inception VM. POW!"
 
-      server = Commander::LocalServer.new
+      @server = Commander::LocalServer.new
 
-      header "Stage 4: Preparing the Inception VM"
-      unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
-        error "Failed to complete Stage 4: Preparing the Inception VM"
-      end
-      
-      header "Stage 5: Deploying micro BOSH"
-      unless server.run(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
-        error "Failed to complete Stage 5: Deploying micro BOSH"
-      end
+      stage_4_prepare_inception_vm
+      stage_5_deploy_micro_bosh
     end
 
     desc "remote", "Bootstrap bosh, using a remote server as inception VM"
@@ -126,6 +120,20 @@ module Bosh::Bootstrap
         end
 
         confirm "Micro BOSH will be created with stemcell #{settings.micro_bosh_stemcell_name}"
+      end
+
+      def stage_4_prepare_inception_vm
+        header "Stage 4: Preparing the Inception VM"
+        unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
+          error "Failed to complete Stage 4: Preparing the Inception VM"
+        end
+      end
+
+      def stage_5_deploy_micro_bosh
+        header "Stage 5: Deploying micro BOSH"
+        unless server.run(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
+          error "Failed to complete Stage 5: Deploying micro BOSH"
+        end
       end
 
       # Display header for a new section of the bootstrapper
