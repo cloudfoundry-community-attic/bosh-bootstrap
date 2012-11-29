@@ -73,7 +73,8 @@ class Bosh::Bootstrap::Commander::RemoteServer
         logfile << data
       end
       # run script
-      ssh.exec!("sudo #{remote_path}") do |channel, stream, data|
+      logfile.puts %Q{running on remote server: "bash -lc 'sudo /usr/bin/env PATH=$PATH GEM_PATH=$GEM_PATH GEM_HOME=$GEM_HOME #{remote_path}'"}
+      ssh.exec!("bash -lc 'sudo /usr/bin/env PATH=$PATH GEM_PATH=$GEM_PATH GEM_HOME=$GEM_HOME #{remote_path}'") do |channel, stream, data|
         logfile << data
       end
     end
