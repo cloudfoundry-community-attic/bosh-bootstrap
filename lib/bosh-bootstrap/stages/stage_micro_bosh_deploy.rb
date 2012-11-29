@@ -61,6 +61,7 @@ module Bosh::Bootstrap::Stages
       ipaddress                  = settings.bosh.ip_address
       persistent_disk            = settings.bosh.persistent_disk
       resources_cloud_properties = settings.bosh_resources_cloud_properties
+      cloud_plugin               = settings.bosh_provider
 
       # aws:
       #   access_key_id:     #{access_key}
@@ -70,39 +71,30 @@ module Bosh::Bootstrap::Stages
       #   default_security_groups: ["#{security_group}"]
       #   ec2_private_key: /home/vcap/.ssh/#{key_name}.pem
       cloud_properties = settings.bosh_cloud_properties
-        <<-YAML
----
-name: #{name}
 
-env:
-  bosh:
-    password: #{salted_password}
-
-logging:
-  level: DEBUG
-
-network:
-  type: dynamic
-  vip: #{ipaddress}
-
-resources:
-  persistent_disk: #{persistent_disk}
-  cloud_properties: #{resources_cloud_properties.to_json}
-
-cloud:
-  plugin: aws
-  properties: #{cloud_properties.to_json}
-
-apply_spec:
-  agent:
-    blobstore:
-      address: #{ipaddress}
-    nats:
-      address: #{ipaddress}
-  properties:
-    aws_registry:
-      address: #{ipaddress}
-      YAML
+      {
+        "name" => name,
+        "env" => { "bosh" => {"password" => salted_password}},
+        "logging" => { "level" => "DEBUG" },
+        "network" => { "type" => "dynamic", "vip" => ipaddress },
+        "resources" => {
+          "persistent_disk" => persistent_disk,
+          "cloud_properties" => resources_cloud_properties
+        },
+        "cloud" => {
+          "plugin" => cloud_plugin,
+          "properties" => cloud_properties
+        },
+        "apply_spec" => {
+          "agent" => {
+            "blobstore" => { "address" => ipaddress },
+            "nats" => { "address" => ipaddress }
+          },
+          "properties" => {
+            "aws_registry" => { "address" => ipaddress }
+          }
+        }
+      }.to_yaml
     end
   end
 end
