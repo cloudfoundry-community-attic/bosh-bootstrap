@@ -11,69 +11,15 @@ module Bosh::Bootstrap
     attr_reader :fog_credentials
     attr_reader :server
 
-    desc "local", "Bootstrap bosh, using local server as inception VM"
+    desc "deploy", "Bootstrap bosh, using a remote server as inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
-    def local
+    def deploy
       load_options # from method_options above
 
       stage_1_choose_infrastructure_provider
       stage_2_bosh_configuration
-
-      header "Stage 3: Create/Allocate the Inception VM",
-        :skipping => "Running in local mode instead. This is the Inception VM. POW!"
-      # dummy data for settings.inception
-      settings[:inception] = {}
-      settings[:inception][:username] = `whoami`.strip
-      
-      @server = Commander::LocalServer.new
-
-      stage_4_prepare_inception_vm
-      stage_5_deploy_micro_bosh
-    end
-
-    desc "remote", "Bootstrap bosh, using a remote server as inception VM"
-    method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
-    method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
-    def remote
-      load_options # from method_options above
-
-      stage_1_choose_infrastructure_provider
-      stage_2_bosh_configuration
-
-      header "Stage 3: Create/Allocate the Inception VM"
-      unless settings["inception"] && settings["inception"]["host"]
-        hl.choose do |menu|
-          menu.prompt = "Create or specify an Inception VM:  "
-          # menu.choice("create new inception VM") do
-          #   settings["inception"] = {}
-          # end
-          menu.choice("use an existing Ubuntu server") do
-            settings["inception"] = {}
-            settings["inception"]["host"] = \
-              hl.ask("Host address (IP or domain) to inception VM? ")
-            settings["inception"]["username"] = \
-              hl.ask("Username that you have SSH access to? ") {|q| q.default = "ubuntu"}
-            save_settings!
-            @server = Commander::RemoteServer.new(settings.inception.host)
-            confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
-          end
-          menu.choice("use this server") do
-            # dummy data for settings.inception
-            settings["inception"] = {}
-            settings["inception"]["username"] = `whoami`.strip
-            @server = Commander::LocalServer.new
-            confirm "Using this server as the inception VM"
-          end
-        end
-      end
-
-      unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
-        error "Failed to complete Stage 3: Create/Allocate the Inception VM"
-      end
-      # If successfully validate inception VM, then save those settings.
-      save_settings!
-
+      stage_3_create_allocate_inception_vm
       stage_4_prepare_inception_vm
       stage_5_deploy_micro_bosh
     end
@@ -154,6 +100,41 @@ module Bosh::Bootstrap
         end
 
         confirm "Micro BOSH will be created with stemcell #{settings.micro_bosh_stemcell_name}"
+      end
+
+      def stage_3_create_allocate_inception_vm
+        header "Stage 3: Create/Allocate the Inception VM"
+        unless settings["inception"] && settings["inception"]["host"]
+          hl.choose do |menu|
+            menu.prompt = "Create or specify an Inception VM:  "
+            # menu.choice("create new inception VM") do
+            #   settings["inception"] = {}
+            # end
+            menu.choice("use an existing Ubuntu server") do
+              settings["inception"] = {}
+              settings["inception"]["host"] = \
+                hl.ask("Host address (IP or domain) to inception VM? ")
+              settings["inception"]["username"] = \
+                hl.ask("Username that you have SSH access to? ") {|q| q.default = "ubuntu"}
+              save_settings!
+              @server = Commander::RemoteServer.new(settings.inception.host)
+              confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
+            end
+            menu.choice("use this server") do
+              # dummy data for settings.inception
+              settings["inception"] = {}
+              settings["inception"]["username"] = `whoami`.strip
+              @server = Commander::LocalServer.new
+              confirm "Using this server as the inception VM"
+            end
+          end
+        end
+
+        unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
+          error "Failed to complete Stage 3: Create/Allocate the Inception VM"
+        end
+        # If successfully validate inception VM, then save those settings.
+        save_settings!
       end
 
       def stage_4_prepare_inception_vm
