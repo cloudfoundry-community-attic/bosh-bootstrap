@@ -16,6 +16,9 @@ set -u # report the usage of uninitialized variables
 
 MICRO_BOSH_STEMCELL_PATH=/var/vcap/store/stemcells/$MICRO_BOSH_STEMCELL_NAME
 
+# TODO in preparation for http://reviews.cloudfoundry.org/#/c/11976/
+export COLUMNS=80 # force a small width for progress bar
+
 cd /var/vcap/store/microboshes/deployments/
 bosh -n micro deployment $BOSH_NAME
 if [[ "${BOSH_UPDATED_DEPLOY}X" == "X" ]]; then
