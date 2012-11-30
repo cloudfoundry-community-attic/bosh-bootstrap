@@ -107,9 +107,11 @@ module Bosh::Bootstrap
         unless settings["inception"] && settings["inception"]["host"]
           hl.choose do |menu|
             menu.prompt = "Create or specify an Inception VM:  "
-            # menu.choice("create new inception VM") do
-            #   settings["inception"] = {}
-            # end
+            if aws?
+              menu.choice("create new inception VM") do
+                boot_aws_inception_vm
+              end
+            end
             menu.choice("use an existing Ubuntu server") do
               settings["inception"] = {}
               settings["inception"]["host"] = \
@@ -212,6 +214,7 @@ module Bosh::Bootstrap
           raw_settings_yaml = settings.to_yaml.gsub(" !ruby/hash:Settingslogic", "")
           file << raw_settings_yaml
         end
+        @settings = nil # force to reload & recreate helper methods
       end
 
       def settings_path
@@ -437,6 +440,88 @@ module Bosh::Bootstrap
         else
           error "AWS key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
         end
+      end
+
+      # Provisions an AWS m1.small VM as the inception VM
+      # Updates settings.inception.host/username
+      #
+      # NOTE: if any stage fails, when the CLI is re-run
+      # and "create new server" is selected again, the process should
+      # complete
+      #
+      # Assumes that local CLI user has public/private keys at ~/.ssh/id_rsa.pub
+      def boot_aws_inception_vm
+        say "" # glowing whitespace
+
+        public_key = File.expand_path("~/.ssh/id_rsa.pub")
+        private_key = File.expand_path("~/.ssh/id_rsa")
+        raise "Please create public keys at ~/.ssh/id_rsa.pub" unless File.exists?(public_key)
+        unless settings["inception"] && settings["inception"]["server_id"]
+          username = "ubuntu"
+          size = "m1.small"
+          say "Provisioning #{size} for inception VM..."
+          server = fog_compute.servers.bootstrap({
+            :public_key_path => public_key,
+            :private_key_path => private_key,
+            :flavor_id => size,
+            :bits => 64,
+            :username => "ubuntu"
+          })
+          unless server
+            error "Something mysteriously cloudy happened and fog could not provision a VM. Please check your limits."
+          end
+
+          settings["inception"] = {}
+          settings["inception"]["server_id"] = server.id
+          settings["inception"]["username"] = username
+          save_settings!
+        end
+
+        unless settings["inception"]["ip_address"]
+          server ||= fog_compute.servers.get(settings.inception.server_id)
+
+          say "Provisioning IP address for inception VM..."
+          ip_address = provision_elastic_ip_address # returns IP as a String
+          address = fog_compute.addresses.get(ip_address)
+          address.server = server
+          server.reload
+          host = server.dns_name
+
+          settings["inception"]["ip_address"] = ip_address
+          save_settings!
+        end
+
+        unless settings["inception"]["disk_size"]
+          server ||= fog_compute.servers.get(settings.inception.server_id)
+
+          disk_size = 16 # Gb
+          say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
+          volume = fog_compute.volumes.create(:size => disk_size, :device => "/dev/sdi", :availability_zone => server.availability_zone)
+          volume.server = server
+
+          # Format and mount the volume
+          say "Mounting persistent disk as volume on inception VM..."
+          server.ssh(['sudo mkfs.ext4 /dev/sdi -F']) 
+          server.ssh(['sudo mkdir -p /var/vcap/store'])
+          server.ssh(['sudo mount /dev/sdi /var/vcap/store'])
+
+          settings["inception"]["disk_size"] = disk_size
+          save_settings!
+        end
+
+        # settings["inception"]["host"] is used externally to determine
+        # if an inception VM has been assigned already; so we leave it
+        # until last in this method to set this setting.
+        # This way we can always rerun the CLI and rerun this method
+        # and idempotently get an inception VM
+        unless settings["inception"]["host"]
+          server ||= fog_compute.servers.get(settings.inception.server_id)
+          settings["inception"]["host"] = server.dns_name
+          save_settings!
+        end
+
+        confirm "Inception VM has been created"
+        say "SSH access: ssh #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
       end
 
       # Provision or provide an IP address to use
