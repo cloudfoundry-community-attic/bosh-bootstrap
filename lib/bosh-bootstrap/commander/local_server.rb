@@ -31,7 +31,7 @@ class Bosh::Bootstrap::Commander::LocalServer
   #
 
   # Run a script
-  def run_script(command, script)
+  def run_script(command, script, options={})
     command.as_file do |execution_command|
       `chmod +x #{execution_command}`
       status = POpen4::popen4(execution_command) do |stdout, stderr, stdin, pid|
@@ -52,7 +52,7 @@ class Bosh::Bootstrap::Commander::LocalServer
   end
 
   # Upload a file (put a file into local filesystem)
-  def upload_file(command, path, contents)
+  def upload_file(command, path, contents, upload_as_user=nil)
     basedir = File.dirname(path)
     unless File.directory?(basedir)
       logfile.puts "creating micro-bosh manifest folder: #{basedir}"

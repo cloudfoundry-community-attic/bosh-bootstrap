@@ -50,8 +50,8 @@ class Bosh::Bootstrap::Commander::RemoteServer
   end
 
   # Upload a file (put a file into the remote server's filesystem)
-  def upload_file(command, remote_path, contents, run_as_user=nil)
-    upload_as_user = run_as_user || default_username
+  def upload_file(command, remote_path, contents, upload_as_user=nil)
+    upload_as_user ||= default_username
     run_remote_command("mkdir -p #{File.dirname(remote_path)}", upload_as_user)
     Tempfile.open("remote_script") do |file|
       file << contents
