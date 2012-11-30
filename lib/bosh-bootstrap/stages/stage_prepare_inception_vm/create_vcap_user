@@ -12,7 +12,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 groupadd vcap
-useradd vcap -m -g vcap
+useradd vcap -m --shell /bin/bash -g vcap
 mkdir -p /home/vcap/.ssh
 chown -R vcap:vcap /home/vcap/.ssh
 
