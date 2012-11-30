@@ -40,7 +40,7 @@ module Bosh::Bootstrap
 
       header "Stage 3: Create/Allocate the Inception VM"
       unless settings["inception"] && settings["inception"]["host"]
-        HighLine.new.choose do |menu|
+        hl.choose do |menu|
           menu.prompt = "Create or specify an Inception VM:  "
           # menu.choice("create new inception VM") do
           #   settings["inception"] = {}
@@ -48,9 +48,9 @@ module Bosh::Bootstrap
           menu.choice("use an existing Ubuntu VM") do
             settings["inception"] = {}
             settings["inception"]["host"] = \
-              HighLine.new.ask("Host address (IP or domain) to inception VM? ")
+              hl.ask("Host address (IP or domain) to inception VM? ")
             settings["inception"]["username"] = \
-              HighLine.new.ask("Username that you have SSH access to? ") {|q| q.default = "ubuntu"}
+              hl.ask("Username that you have SSH access to? ") {|q| q.default = "ubuntu"}
             save_settings!
           end
         end
@@ -86,7 +86,7 @@ module Bosh::Bootstrap
         unless settings[:bosh_name]
           provider, region = settings.bosh_provider, settings.region_code
           default_name = "microbosh_#{provider}_#{region}".gsub(/\W+/, '_')
-          bosh_name = HighLine.new.ask("Useful name for Micro BOSH?  ") { |q| q.default = default_name }
+          bosh_name = hl.ask("Useful name for Micro BOSH?  ") { |q| q.default = default_name }
           settings[:bosh_name] = bosh_name
           save_settings!
         end
@@ -275,7 +275,7 @@ module Bosh::Bootstrap
             }
           end
         end
-        HighLine.new.choose do |menu|
+        hl.choose do |menu|
           menu.prompt = "Choose infrastructure:  "
           @fog_providers.each do |label, credentials|
             menu.choice(label) { @fog_credentials = credentials }
@@ -356,7 +356,7 @@ module Bosh::Bootstrap
       end
 
       def choose_aws_region
-        HighLine.new.choose do |menu|
+        hl.choose do |menu|
           menu.prompt = "Choose AWS region:  "
           aws_regions.each do |region|
             menu.choice(region) do
@@ -438,7 +438,7 @@ module Bosh::Bootstrap
         if aws?
           provision_elastic_ip_address
         else
-          HighLine.new.ask("What static IP to use for micro BOSH?  ")
+          hl.ask("What static IP to use for micro BOSH?  ")
         end
       end
 
@@ -482,7 +482,7 @@ module Bosh::Bootstrap
       end
 
       def prompt_for_bosh_credentials
-        prompt = HighLine.new
+        prompt = hl
         say "Please enter a user/password for the BOSH that will be created."
         settings[:bosh_username] = prompt.ask("BOSH username: ")
         settings[:bosh_password] = prompt.ask("BOSH password: ") { |q| q.echo = "x" }
