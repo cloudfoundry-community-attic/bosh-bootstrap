@@ -15,6 +15,7 @@ groupadd vcap
 useradd vcap -m --shell /bin/bash -g vcap
 mkdir -p /home/vcap/.ssh
 chown -R vcap:vcap /home/vcap/.ssh
+chmod 700 /home/vcap/.ssh
 
 if [[ -f /home/vcap/.ssh/id_rsa ]]
 then
