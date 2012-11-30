@@ -3,7 +3,7 @@
 # Create vcap user & public keys
 # Re-use new public keys for root user
 #
-# Options:
+# Requires:
 # * $ORIGUSER - another local user with authorized_keys for SSH access; will be copied to vcap user
 
 if [[ $EUID -ne 0 ]]; then
@@ -43,15 +43,8 @@ if [[ $(grep "vcap  ALL=(ALL) NOPASSWD:ALL" /etc/sudoers) == "" ]]; then
   echo "vcap  ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 fi
 
-if [[ -n $ORIGUSER ]]
-then
-  echo "copying user '$ORIGUSER' authorized_keys to vcap user"
-  cp /home/${ORIGUSER}/.ssh/authorized_keys ${bosh_app_dir}/
-  cp /home/${ORIGUSER}/.ssh/authorized_keys /home/vcap/.ssh/authorized_keys
-  echo "copying user '$ORIGUSER' .bashrc to vcap user"
-  cp /home/${ORIGUSER}/.bashrc /home/vcap/
-else
-  echo "skipping copying authorized_keys to vcap user"
-  echo "skipping copying .bashrc to vcap user"
-fi
-
+echo "copying user '$ORIGUSER' authorized_keys to vcap user"
+cp /home/${ORIGUSER}/.ssh/authorized_keys ${bosh_app_dir}/
+cp /home/${ORIGUSER}/.ssh/authorized_keys /home/vcap/.ssh/authorized_keys
+echo "copying user '$ORIGUSER' .bashrc to vcap user"
+cp /home/${ORIGUSER}/.bashrc /home/vcap/
