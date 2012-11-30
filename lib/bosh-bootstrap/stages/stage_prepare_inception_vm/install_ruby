@@ -10,7 +10,7 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-if [[ "${UPGRADE}X" != "X" || ("$(ruby -v)" == "ruby 1.9.3*") ]]; then
+if [[ "$(which ruby)" == "" || "${UPGRADE}X" != "X" || ! ("$(ruby -v)" == "ruby 1.9.3*") ]]; then
   echo "install: --no-ri --no-rdoc" > /etc/gemrc
   echo "update: --no-ri --no-rdoc" >> /etc/gemrc
   if [[ -x rvm ]]
