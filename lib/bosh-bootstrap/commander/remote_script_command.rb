@@ -10,17 +10,23 @@ module Bosh::Bootstrap::Commander
     attr_reader :full_present_tense  # e.g. "installing packages"
     attr_reader :full_past_tense    # e.g. "installed packages"
 
+    # Optional:
     attr_reader :specific_run_as_user # e.g. ubuntu
+    attr_reader :settings             # settings manifest (result of script might get stored back)
+    attr_reader :save_output_to_settings_key # e.g. bosh.salted_password
 
     def initialize(command, description, script, full_present_tense=nil, full_past_tense=nil, options={})
       super(command, description, full_present_tense, full_past_tense)
       @script = script
       @specific_run_as_user = options[:user]
+      @settings = options[:settings]
+      @save_output_to_settings_key = options[:save_output_to_settings_key]
     end
 
     # Invoke this command to call back upon +server.run_script+ 
     def perform(server)
-      server.run_script(self, script, :user => specific_run_as_user)
+      server.run_script(self, script, :user => specific_run_as_user,
+        :settings => settings, :save_output_to_settings_key => save_output_to_settings_key)
     end
 
     # Provide a filename that represents this Command

@@ -9,6 +9,9 @@ module Bosh::Bootstrap::Stages
     def commands
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
         server.create "vcap user", script("create_vcap_user"), :user => settings.inception.username
+        # use inception VM to generate a salted password (local machine may not have mkpasswd)
+        server.capture_value "salted password", script("convert_salted_password", "PASSWORD" => settings.bosh.password),
+          :settings => settings, :save_output_to_settings_key => "bosh.salted_password"
         server.install "base packages", script("install_base_packages")
         server.install "ruby 1.9.3", script("install_ruby", "UPGRADE" => settings[:upgrade_deps])
         server.install "useful ruby gems", script("install_useful_gems", "UPGRADE" => settings[:upgrade_deps])

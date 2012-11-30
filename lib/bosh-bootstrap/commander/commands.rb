@@ -21,6 +21,20 @@ module Bosh::Bootstrap::Commander
         "assigning #{description}", "assigned #{description}", options)
     end
 
+    # Runs a script on target server, and stores the (stripped) STDOUT into
+    # settings.
+    # 
+    # Usage:
+    # server.capture_value "salted password", script("convert_salted_password", "PASSWORD" => settings.bosh.password),
+    #   :settings => "bosh.salted_password"
+    #
+    # Would store the returned STDOUT into settings[:bosh][:salted_password]
+    def capture_value(description, script, options)
+      @commands << RemoteScriptCommand.new(
+        "capture value", description, script,
+        "captures value of #{description}", "captured value of #{description}", options)
+    end
+
     def create(description, script, options={})
       @commands << RemoteScriptCommand.new(
         "create", description, script,

@@ -14,7 +14,7 @@ module Bosh::Bootstrap::Stages
 
     private
     def stage_name
-      "stage_prepare_inception_vm"
+      "stage_validate_inception_vm"
     end
 
     # Loads local script

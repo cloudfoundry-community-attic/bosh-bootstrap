@@ -116,18 +116,20 @@ module Bosh::Bootstrap
                 hl.ask("Host address (IP or domain) to inception VM? ")
               settings["inception"]["username"] = \
                 hl.ask("Username that you have SSH access to? ") {|q| q.default = "ubuntu"}
-              save_settings!
-              @server = Commander::RemoteServer.new(settings.inception.host)
-              confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
             end
             menu.choice("use this server") do
               # dummy data for settings.inception
               settings["inception"] = {}
               settings["inception"]["username"] = `whoami`.strip
-              @server = Commander::LocalServer.new
-              confirm "Using this server as the inception VM"
             end
           end
+        end
+        if settings["inception"]["host"]
+          @server = Commander::RemoteServer.new(settings.inception.host)
+          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
+        else
+          @server = Commander::LocalServer.new
+          confirm "Using this server as the inception VM"
         end
 
         unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
@@ -142,14 +144,10 @@ module Bosh::Bootstrap
         unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
           error "Failed to complete Stage 4: Preparing the Inception VM"
         end
-
-        # allow bosh.salted_password to be regenerated
-        # TODO - this must be run on the inception VM, where mkpasswd exists
-        raise "TODO - generate salted_password on inception VM and store in settings"
-        # unless settings[:bosh][:salted_password]
-        #   salted_password = `mkpasswd -m sha-512 '#{password}'`.strip
-        #   settings[:bosh][:salted_password] = salted_password
-        # end
+        # Settings are updated by this stage
+        # it generates a salted password from settings.bosh.password
+        # and stores it in settings.bosh.salted_password
+        save_settings!
       end
 
       def stage_5_deploy_micro_bosh

@@ -38,11 +38,26 @@ class Bosh::Bootstrap::Commander::RemoteServer
   # Run a script
   #
   # Uploads it to the remote server, makes it executable, then executes
+  # Stores the stripped STDOUT/STDERR into a settings field, if :settings & :save_output_to_settings_key => "x.y.z" provided
   def run_script(command, script, options={})
-    run_as_user = options[:user] || default_username
+    run_as_user  = options[:user] || default_username
+    settings     = options[:settings]
+    settings_key = options[:save_output_to_settings_key]
+
     remote_path = remote_tmp_script_path(command)
     upload_file(command, remote_path, script, run_as_user)
-    run_remote_script(remote_path, run_as_user)
+    output = run_remote_script(remote_path, run_as_user)
+    # store output into a settings field, if requested
+    if settings_key
+      settings_key_portions = settings_key.split(".")
+      parent_key_portions, final_key = settings_key_portions[0..-2], settings_key_portions[-1]
+      target_settings_field = settings
+      parent_key_portions.each do |key_portion|
+        target_settings_field[key_portion] ||= {}
+        target_settings_field = target_settings_field[key_portion]
+      end
+      target_settings_field[final_key] = output.strip
+    end
     true
   rescue StandardError => e
     logfile.puts e.message
@@ -71,7 +86,9 @@ class Bosh::Bootstrap::Commander::RemoteServer
   end
 
   # Makes +remote_path+ executable, then runs it
+  # Returns a String of all STDOUT/STDERR; which is also appended to +logfile+.
   def run_remote_script(remote_path, username)
+    script_output = ""
     Net::SSH.start(host, username) do |ssh|
       # make executable
       ssh.exec!("chmod +x #{remote_path}") do |channel, stream, data|
@@ -81,8 +98,10 @@ class Bosh::Bootstrap::Commander::RemoteServer
       logfile.puts %Q{running on remote server: "bash -lc 'sudo /usr/bin/env PATH=$PATH GEM_PATH=$GEM_PATH GEM_HOME=$GEM_HOME #{remote_path}'"}
       ssh.exec!("bash -lc 'sudo /usr/bin/env PATH=$PATH GEM_PATH=$GEM_PATH GEM_HOME=$GEM_HOME #{remote_path}'") do |channel, stream, data|
         logfile << data
+        script_output << data
       end
     end
+    script_output
   end
 
   def run_remote_command(command, username)

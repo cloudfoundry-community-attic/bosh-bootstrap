@@ -25,7 +25,7 @@ module Bosh::Bootstrap::Stages
                       "BOSH_NAME" => settings.bosh_name,
                       "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name,
                       "BOSH_USERNAME" => settings.bosh_username,
-                      "BOSH_USERNAME" => settings.bosh_password,
+                      "BOSH_PASSWORD" => settings.bosh_password,
                       "BOSH_UPDATED_DEPLOY" => settings[:bosh_deployed] || "")
       end
     end
