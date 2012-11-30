@@ -65,11 +65,8 @@ module Bosh::Bootstrap
 
     no_tasks do
       def stage_1_choose_infrastructure_provider
-        if settings[:fog_credentials]
-          header "Stage 1: Choose infrastructure",
-            :skipping => "Already selected infrastructure provider"
-        else
-          header "Stage 1: Choose infrastructure"
+        header "Stage 1: Choose infrastructure"
+        unless settings[:fog_credentials]
           choose_fog_provider
         end
         confirm "Using infrastructure provider #{settings.fog_credentials.provider}"
@@ -159,7 +156,6 @@ module Bosh::Bootstrap
           error "Failed to complete Stage 5: Deploying micro BOSH"
         end
         settings[:bosh_deployed] = true
-        settings[:bosh_last_deployment] = DateTime.new
         save_settings!
       end
 
