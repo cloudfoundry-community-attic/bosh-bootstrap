@@ -264,6 +264,8 @@ module Bosh::Bootstrap
       #   so as to local stemcells (see +micro_bosh_stemcell_name+)
       def choose_fog_provider
         @fog_providers = {}
+        # Prepare menu options:
+        # each provider/profile name gets a menu choice option
         fog_config.inject({}) do |iaas_options, fog_profile|
           profile_name, profile = fog_profile
           if profile[:aws_access_key_id]
@@ -275,12 +277,18 @@ module Bosh::Bootstrap
             }
           end
         end
-        hl.choose do |menu|
-          menu.prompt = "Choose infrastructure:  "
-          @fog_providers.each do |label, credentials|
-            menu.choice(label) { @fog_credentials = credentials }
+        # Display menu
+        # Include "Alternate credentials" as the last option
+        if @fog_providers.keys.size > 0
+          hl.choose do |menu|
+            menu.prompt = "Choose infrastructure:  "
+            @fog_providers.each do |label, credentials|
+              menu.choice(label) { @fog_credentials = credentials }
+            end
+            menu.choice("Alternate credentials") { prompt_for_alternate_fog_credentials }
           end
-          menu.choice("Alternate credentials") { prompt_for_alternate_fog_credentials }
+        else
+          prompt_for_alternate_fog_credentials
         end
         settings[:fog_credentials] = {}
         @fog_credentials.each do |key, value|
@@ -465,11 +473,13 @@ module Bosh::Bootstrap
 
       def fog_config
         @fog_config ||= begin
-          unless File.exists?(fog_config_path)
-            error "Please create a #{fog_config_path} fog configuration file"
+          if File.exists?(fog_config_path)
+            say "Found infrastructure API credentials at #{fog_config_path} (override with --fog)"
+            YAML.load_file(fog_config_path)
+          else
+            say "No existing #{fog_config_path} fog configuration file", :yellow
+            {}
           end
-          say "Found infrastructure API credentials at #{fog_config_path} (override with --fog)"
-          YAML.load_file(fog_config_path)
         end
       end
 
