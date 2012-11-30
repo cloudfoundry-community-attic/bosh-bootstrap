@@ -22,7 +22,10 @@ module Bosh::Bootstrap
 
       header "Stage 3: Create/Allocate the Inception VM",
         :skipping => "Running in local mode instead. This is the Inception VM. POW!"
-
+      # dummy data for settings.inception
+      settings[:inception] = {}
+      settings[:inception][:username] = `whoami`.strip
+      
       @server = Commander::LocalServer.new
 
       stage_4_prepare_inception_vm
