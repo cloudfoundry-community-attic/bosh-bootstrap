@@ -19,7 +19,9 @@ MICRO_BOSH_STEMCELL_PATH=/var/vcap/store/stemcells/$MICRO_BOSH_STEMCELL_NAME
 cd /var/vcap/store/microboshes/deployments/
 bosh -n micro deployment $BOSH_NAME
 if [[ "${BOSH_UPDATED_DEPLOY}X" == "X" ]]; then
+  echo "Performing initial deploy of micro BOSH $BOSH_NAME"
   bosh -n micro deploy $MICRO_BOSH_STEMCELL_PATH
 else
+  echo "Performing update deploy to micro BOSH $BOSH_NAME"
   bosh -n micro deploy $MICRO_BOSH_STEMCELL_PATH --update
 fi
