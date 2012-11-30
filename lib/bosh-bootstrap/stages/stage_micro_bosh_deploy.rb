@@ -81,7 +81,7 @@ module Bosh::Bootstrap::Stages
         "name" => name,
         "env" => { "bosh" => {"password" => salted_password}},
         "logging" => { "level" => "DEBUG" },
-        "network" => { "type" => "dynamic", "ip" => ipaddress },
+        "network" => { "type" => "dynamic", "vip" => ipaddress },
         "resources" => {
           "persistent_disk" => persistent_disk,
           "cloud_properties" => resources_cloud_properties
