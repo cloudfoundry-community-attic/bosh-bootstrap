@@ -117,7 +117,7 @@ module Bosh::Bootstrap
               settings["inception"]["username"] = \
                 hl.ask("Username that you have SSH access to? ") {|q| q.default = "ubuntu"}
             end
-            menu.choice("use this server") do
+            menu.choice("use this server (must be ubuntu & on same network as bosh)") do
               # dummy data for settings.inception
               settings["inception"] = {}
               settings["inception"]["username"] = `whoami`.strip
