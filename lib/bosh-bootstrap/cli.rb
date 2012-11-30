@@ -68,6 +68,11 @@ module Bosh::Bootstrap
         end
       end
 
+      unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
+        error "Failed to complete Stage 3: Create/Allocate the Inception VM"
+      end
+      # If successfully validate inception VM, then save those settings.
+      save_settings!
 
       stage_4_prepare_inception_vm
       stage_5_deploy_micro_bosh
