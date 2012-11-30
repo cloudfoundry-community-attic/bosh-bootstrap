@@ -431,13 +431,14 @@ module Bosh::Bootstrap
       # * bosh_cloud_properties.aws.ec2_private_key
       def create_aws_key_pair(key_pair_name)
         unless fog_compute.key_pairs.get(key_pair_name)
+          say "creating key pair #{key_pair_name}..."
           kp = fog_compute.key_pairs.create(:name => key_pair_name)
           settings[:bosh_key_pair] = {}
           settings[:bosh_key_pair][:name] = key_pair_name
           settings[:bosh_key_pair][:private_key] = kp.private_key
           settings[:bosh_key_pair][:fingerprint] = kp.fingerprint
-          settings[:bosh_cloud_properties][:aws][:default_key_name] = key_pair_name
-          settings[:bosh_cloud_properties][:aws][:ec2_private_key] = "/home/vcap/.ssh/#{key_pair_name}.pem"
+          settings.bosh_cloud_properties.aws[:default_key_name] = key_pair_name
+          settings.bosh_cloud_properties.aws[:ec2_private_key] = "/home/vcap/.ssh/#{key_pair_name}.pem"
           save_settings!
         else
           error "AWS key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
