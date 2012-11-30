@@ -43,5 +43,10 @@ if [[ $INSTALL_BOSH_FROM_SOURCE ]]; then
   bundle exec rake install
 else
   install_gem bosh_cli
+  
+  # Remove when https://cloudfoundry.atlassian.net/browse/CF-200 is fixed
+  gem install bosh_cpi -v "~> 0.4.4"
+  gem install bosh_vsphere_cpi -v 0.5.0
+
   install_gem bosh_deployer
 fi

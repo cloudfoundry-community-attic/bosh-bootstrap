@@ -66,15 +66,15 @@ module Bosh::Bootstrap
           settings[:bosh][:persistent_disk] = 16384
           save_settings!
         end
-        unless settings.bosh["ip_address"]
+        unless settings[:bosh]["ip_address"]
           say "Acquiring IP address for micro BOSH..."
           ip_address = acquire_ip_address
-          settings.bosh["ip_address"] = ip_address
+          settings[:bosh]["ip_address"] = ip_address
         end
-        unless settings.bosh["ip_address"]
+        unless settings[:bosh]["ip_address"]
           error "IP address not available/provided currently"
         else
-          confirm "Micro BOSH will be assigned IP address #{settings.bosh.ip_address}"
+          confirm "Micro BOSH will be assigned IP address #{settings[:bosh]['ip_address']}"
         end
         save_settings!
 
@@ -434,8 +434,8 @@ module Bosh::Bootstrap
           settings[:bosh_key_pair][:name] = key_pair_name
           settings[:bosh_key_pair][:private_key] = kp.private_key
           settings[:bosh_key_pair][:fingerprint] = kp.fingerprint
-          settings.bosh_cloud_properties.aws[:default_key_name] = key_pair_name
-          settings.bosh_cloud_properties.aws[:ec2_private_key] = "/home/vcap/.ssh/#{key_pair_name}.pem"
+          settings["bosh_cloud_properties"]["aws"]["default_key_name"] = key_pair_name
+          settings["bosh_cloud_properties"]["aws"]["ec2_private_key"] = "/home/vcap/.ssh/#{key_pair_name}.pem"
           save_settings!
         else
           error "AWS key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
