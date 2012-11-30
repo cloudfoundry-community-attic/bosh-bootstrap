@@ -225,6 +225,7 @@ module Bosh::Bootstrap
       #
       # 1. AWS (default)
       # 2. AWS (bosh)
+      # 3. Alternate credentials
       # Choose infrastructure:  1
       #
       # If .fog config only contains one provider, do not prompt.
@@ -244,6 +245,12 @@ module Bosh::Bootstrap
       #
       # Currently detects following fog providers:
       # * AWS
+      #
+      # If "Alternate credentials" is selected, then user is prompted for fog
+      # credentials:
+      # * provider?
+      # * access keys?
+      # * API URI or region?
       #
       # At the end, settings.fog_credentials contains the credentials for target IaaS
       # and :provider key for the IaaS name.
@@ -268,20 +275,12 @@ module Bosh::Bootstrap
             }
           end
         end
-        if @fog_providers.keys.size > 1
-          HighLine.new.choose do |menu|
-            menu.prompt = "Choose infrastructure:  "
-            @fog_providers.each do |label, credentials|
-              menu.choice(label) { @fog_credentials = credentials }
-            end
+        HighLine.new.choose do |menu|
+          menu.prompt = "Choose infrastructure:  "
+          @fog_providers.each do |label, credentials|
+            menu.choice(label) { @fog_credentials = credentials }
           end
-        else
-          @fog_credentials = @fog_providers.values.first
-          if @fog_credentials["aws_access_key_id"]
-            @fog_credentials["provider"] = "AWS"
-          else
-            raise "implement #choose_fog_provider for #{@fog_credentials.inspect}"
-          end
+          menu.choice("Alternate credentials") { prompt_for_alternate_fog_credentials }
         end
         settings[:fog_credentials] = {}
         @fog_credentials.each do |key, value|
@@ -291,6 +290,33 @@ module Bosh::Bootstrap
         settings[:bosh_resources_cloud_properties] = bosh_resources_cloud_properties
         settings[:bosh_provider] = settings.bosh_cloud_properties.keys.first # aws, vsphere...
         save_settings!
+      end
+
+      # If no .fog file is found, or if user chooses "Alternate credentials",
+      # then this method prompts the user:
+      # * provider?
+      # * access keys?
+      # * API URI or region?
+      #
+      # Populates +@fog_credentials+ with a Hash that includes :provider key
+      # For example:
+      # {
+      #   :provider => "AWS",
+      #   :aws_access_key_id => ACCESS_KEY,
+      #   :aws_secret_access_key => SECRET_KEY
+      # }
+      def prompt_for_alternate_fog_credentials
+        say ""  # glorious whitespace
+        creds = {}
+        hl.choose do |menu|
+          menu.prompt = "Choose infrastructure:  "
+          menu.choice("AWS") do
+            creds[:provider] = "AWS"
+            creds[:aws_access_key_id] = hl.ask("Access key: ")
+            creds[:aws_secret_access_key] = hl.ask("Secret key: ")
+          end
+        end
+        @fog_credentials = creds
       end
 
       def setup_bosh_cloud_properties
@@ -481,6 +507,11 @@ module Bosh::Bootstrap
       def red; "\033[31m" end
       def green; "\033[32m" end
       def yellow; "\033[33m" end
+
+      # Helper to access HighLine for ask & menu prompts
+      def hl
+        @hl ||= HighLine.new
+      end
     end
   end
 end
