@@ -100,10 +100,8 @@ module Bosh::Bootstrap
         unless settings[:bosh]
           say "Defaulting to 16Gb persistent disk for BOSH"
           password        = settings.bosh_password # FIXME dual use of password?
-          salted_password = `mkpasswd -m sha-512 '#{password}'`.strip
           settings[:bosh] = {}
           settings[:bosh][:password] = password
-          settings[:bosh][:salted_password] = salted_password
           settings[:bosh][:persistent_disk] = 16384
           save_settings!
         end
@@ -148,6 +146,14 @@ module Bosh::Bootstrap
         unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
           error "Failed to complete Stage 4: Preparing the Inception VM"
         end
+
+        # allow bosh.salted_password to be regenerated
+        # TODO - this must be run on the inception VM, where mkpasswd exists
+        raise "TODO - generate salted_password on inception VM and store in settings"
+        # unless settings[:bosh][:salted_password]
+        #   salted_password = `mkpasswd -m sha-512 '#{password}'`.strip
+        #   settings[:bosh][:salted_password] = salted_password
+        # end
       end
 
       def stage_5_deploy_micro_bosh
