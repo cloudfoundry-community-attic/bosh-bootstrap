@@ -48,19 +48,26 @@ module Bosh::Bootstrap
           # menu.choice("create new inception VM") do
           #   settings["inception"] = {}
           # end
-          menu.choice("use an existing Ubuntu VM") do
+          menu.choice("use an existing Ubuntu server") do
             settings["inception"] = {}
             settings["inception"]["host"] = \
               hl.ask("Host address (IP or domain) to inception VM? ")
             settings["inception"]["username"] = \
               hl.ask("Username that you have SSH access to? ") {|q| q.default = "ubuntu"}
             save_settings!
+            @server = Commander::RemoteServer.new(settings.inception.host)
+            confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
+          end
+          menu.choice("use this server") do
+            # dummy data for settings.inception
+            settings["inception"] = {}
+            settings["inception"]["username"] = `whoami`.strip
+            @server = Commander::LocalServer.new
+            confirm "Using this server as the inception VM"
           end
         end
       end
-      confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
 
-      @server = Commander::RemoteServer.new(settings.inception.host)
 
       stage_4_prepare_inception_vm
       stage_5_deploy_micro_bosh
