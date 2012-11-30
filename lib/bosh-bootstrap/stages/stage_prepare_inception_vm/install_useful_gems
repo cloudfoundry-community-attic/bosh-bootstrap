@@ -21,5 +21,4 @@ function install_gem() {
 }
 
 install_gem bundler
-install_gem fog
 install_gem rake
