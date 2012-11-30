@@ -38,6 +38,11 @@ do
   chown vcap:vcap ${bosh_app_dir}/store/${path}
 done
 
+if [[ $(grep "vcap  ALL=(ALL) NOPASSWD:ALL" /etc/sudoers) == "" ]]; then
+  echo "adding vcap to sudoers"
+  echo "vcap  ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+fi
+
 if [[ -n $ORIGUSER ]]
 then
   echo "copying user '$ORIGUSER' authorized_keys to vcap user"
