@@ -8,7 +8,6 @@ module Bosh::Bootstrap::Stages
 
     def commands
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
-        server.validate "ubuntu", script("validate_ubuntu"), :user => settings.inception.username
         server.create "vcap user", script("create_vcap_user"), :user => settings.inception.username
         server.install "base packages", script("install_base_packages")
         server.install "ruby 1.9.3", script("install_ruby", "UPGRADE" => settings[:upgrade_deps])
