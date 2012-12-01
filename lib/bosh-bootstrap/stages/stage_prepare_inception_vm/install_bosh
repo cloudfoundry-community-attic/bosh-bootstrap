@@ -48,5 +48,5 @@ else
   gem install bosh_cpi -v "~> 0.4.4"
   gem install bosh_vsphere_cpi -v 0.5.0
 
-  install_gem bosh_deployer
+  gem install bosh_deployer -v "1.1.0"
 fi
