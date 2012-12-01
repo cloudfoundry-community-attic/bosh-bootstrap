@@ -46,7 +46,7 @@ class Bosh::Bootstrap::Commander::RemoteServer
 
     remote_path = remote_tmp_script_path(command)
     upload_file(command, remote_path, script, run_as_user)
-    output = run_remote_script(remote_path, run_as_user)
+    output, status = run_remote_script(remote_path, run_as_user)
     # store output into a settings field, if requested
     if settings_key
       settings_key_portions = settings_key.split(".")
@@ -58,7 +58,7 @@ class Bosh::Bootstrap::Commander::RemoteServer
       end
       target_settings_field[final_key] = output.strip
     end
-    true
+    status
   rescue StandardError => e
     logfile.puts e.message
     false
@@ -86,7 +86,9 @@ class Bosh::Bootstrap::Commander::RemoteServer
   end
 
   # Makes +remote_path+ executable, then runs it
-  # Returns a String of all STDOUT/STDERR; which is also appended to +logfile+.
+  # Returns:
+  # * a String of all STDOUT/STDERR; which is also appended to +logfile+
+  # * status (true = success) [currently always true; no failure detection yet]
   def run_remote_script(remote_path, username)
     script_output = ""
     Net::SSH.start(host, username) do |ssh|
@@ -101,7 +103,7 @@ class Bosh::Bootstrap::Commander::RemoteServer
         script_output << data
       end
     end
-    script_output
+    [script_output, true]
   end
 
   def run_remote_command(command, username)
