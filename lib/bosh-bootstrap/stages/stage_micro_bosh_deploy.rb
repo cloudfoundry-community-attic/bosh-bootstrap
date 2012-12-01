@@ -24,6 +24,7 @@ module Bosh::Bootstrap::Stages
         server.deploy "micro bosh", script("bosh_micro_deploy",
                       "BOSH_NAME" => settings.bosh_name,
                       "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name,
+                      "BOSH_HOST" => settings.bosh.ip_address,
                       "BOSH_USERNAME" => settings.bosh_username,
                       "BOSH_PASSWORD" => settings.bosh_password,
                       "BOSH_UPDATED_DEPLOY" => settings[:bosh_deployed] || "")
