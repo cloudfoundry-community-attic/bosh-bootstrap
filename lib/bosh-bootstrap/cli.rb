@@ -408,6 +408,7 @@ module Bosh::Bootstrap
         if aws?
           choose_aws_region
         else
+          settings[:region_code] = nil
           false
         end
       end
