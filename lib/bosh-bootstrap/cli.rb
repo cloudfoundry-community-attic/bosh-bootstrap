@@ -507,9 +507,11 @@ module Bosh::Bootstrap
           server ||= fog_compute.servers.get(settings.inception.server_id)
 
           disk_size = 16 # Gb
-          say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
-          volume = fog_compute.volumes.create(:size => disk_size, :device => "/dev/sdi", :availability_zone => server.availability_zone)
-          volume.server = server
+          unless volume = server.volumes.all.find {|v| v.device == "/dev/sdi"}
+            say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
+            volume = fog_compute.volumes.create(:size => disk_size, :device => "/dev/sdi", :availability_zone => server.availability_zone)
+            volume.server = server
+          end
 
           # Format and mount the volume
           say "Mounting persistent disk as volume on inception VM..."
