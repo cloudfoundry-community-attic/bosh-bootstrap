@@ -47,5 +47,7 @@ fi
 echo "copying user '$ORIGUSER' authorized_keys to vcap user"
 cp /home/${ORIGUSER}/.ssh/authorized_keys ${bosh_app_dir}/
 cp /home/${ORIGUSER}/.ssh/authorized_keys /home/vcap/.ssh/authorized_keys
+chown vcap:vcap /home/vcap/.ssh/authorized_keys
 echo "copying user '$ORIGUSER' .bashrc to vcap user"
 cp /home/${ORIGUSER}/.bashrc /home/vcap/
+chown vcap:vcap /home/vcap/.bashrc
