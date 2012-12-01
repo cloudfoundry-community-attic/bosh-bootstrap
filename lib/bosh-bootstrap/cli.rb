@@ -157,8 +157,20 @@ module Bosh::Bootstrap
         unless server.run(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
           error "Failed to complete Stage 5: Deploying micro BOSH"
         end
+
+        if settings[:bosh_deployed]
+          confirm "Successfully updated micro BOSH"
+        else
+          confirm "Successfully created micro BOSH"
+        end
+        say "Locally targeting and login to new BOSH..."
+        puts `bosh target #{settings.bosh.ip_address}`
+        puts `bosh login #{settings.bosh_username} #{settings.bosh_password}`
+
         settings[:bosh_deployed] = true
         save_settings!
+
+        confirm "You are now targeting and logged in to your BOSH"
       end
 
       # Display header for a new section of the bootstrapper
