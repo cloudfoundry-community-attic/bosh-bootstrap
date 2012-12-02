@@ -493,7 +493,7 @@ module Bosh::Bootstrap
           settings[:bosh_security_group][:ports][:ssh_access] = 22
           settings[:bosh_security_group][:ports][:message_bus] = 6868
           settings[:bosh_security_group][:ports][:bosh_director] = 25555
-          settings[:bosh_security_group][:ports][:openstack_registry] = 25888
+          settings[:bosh_security_group][:ports][:openstack_registry] = 25889
           settings.bosh_security_group.ports.values.each do |port|
             sg.create_security_group_rule(port, port)
             say "opened port #{port} in security group #{security_group_name}"
