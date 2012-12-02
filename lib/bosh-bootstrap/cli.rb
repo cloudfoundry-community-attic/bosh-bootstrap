@@ -804,7 +804,12 @@ module Bosh::Bootstrap
         # and idempotently get an inception VM
         unless settings["inception"]["host"]
           server ||= fog_compute.servers.get(settings.inception.server_id)
-          settings["inception"]["host"] = server.dns_name
+          if server.public_ip_address
+            host = server.public_ip_address["addr"]
+          else
+            host = settings["inception"]["ip_address"]
+          end
+          settings["inception"]["host"] = host
           save_settings!
         end
 
