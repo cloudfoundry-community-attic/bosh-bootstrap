@@ -377,10 +377,10 @@ module Bosh::Bootstrap
           settings[:bosh_cloud_properties] = {}
           settings[:bosh_cloud_properties][:openstack] = {}
           props = settings[:bosh_cloud_properties][:openstack]
-          props[:openstack_username] = settings.fog_credentials.openstack_username
-          props[:openstack_api_key] = settings.fog_credentials.openstack_api_key
-          props[:openstack_tenant] = settings.fog_credentials.openstack_tenant
-          props[:openstack_auth_url] = settings.fog_credentials.openstack_auth_url
+          props[:username] = settings.fog_credentials.openstack_username
+          props[:api_key] = settings.fog_credentials.openstack_api_key
+          props[:tenant] = settings.fog_credentials.openstack_tenant
+          props[:auth_url] = settings.fog_credentials.openstack_auth_url
           # props[:default_key_name] = "microbosh"  - via +create_openstack_key_pair+
           # props[:private_key] = "/home/vcap/.ssh/microbosh.pem" - via +create_openstack_key_pair+
           # props[:default_security_groups] = ["microbosh"], - via +create_openstack_security_group+
