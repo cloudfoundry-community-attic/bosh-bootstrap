@@ -785,7 +785,7 @@ module Bosh::Bootstrap
           unless server.private_key_path
             server.private_key_path = private_key_path
           end
-          server.username = "ubuntu"
+          server.username = settings["inception"]["username"]
           server.sshable?
 
           say "Mounting persistent disk as volume on inception VM..."
