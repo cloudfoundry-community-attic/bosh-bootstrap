@@ -677,6 +677,7 @@ module Bosh::Bootstrap
             :public_key => public_key
           )
         end
+        confirm "Using key pair #{key_pair.name} for Inception VM"
 
         # make sure port 22 is open in the default security group
         security_group = fog_compute.security_groups.find { |sg| sg.name == 'default' }
@@ -689,20 +690,45 @@ module Bosh::Bootstrap
         unless authorized
           security_group.create_security_group_rule(22, 22)
         end
+        confirm "Inception VM port 22 open"
 
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
-          size = "m1.small"
-          say "Provisioning #{size} for inception VM..."
-          flavor = fog_compute.flavors.find { |f| f.name == size }
-          image = fog_compute.images.find { |i| i.name == 'lucid-server-cloudimg-amd64' }
+          say "Provisioning for inception VM..."
+          settings["inception"] = {}
+
+          # Select OpenStack flavor
+          say ""
+          hl.choose do |menu|
+            menu.prompt = "Choose OpenStack flavor:  "
+            fog_compute.flavors.each do |flavor|
+              menu.choice(flavor.name) do
+                settings["inception"]["flavor_id"] = flavor.id
+                save_settings!
+              end
+            end
+          end
+
+          # Select OpenStack image
+          say ""
+          hl.choose do |menu|
+            menu.prompt = "Choose OpenStack image (Ubuntu):  "
+            fog_compute.images.each do |image|
+              menu.choice(image.name) do
+                settings["inception"]["image_id"] = image.id
+                save_settings!
+              end
+            end
+          end
+
+          # Boot OpenStack server
           server = fog_compute.servers.create(
             :name => "Inception VM",
             :key_name => key_pair.name,
             :public_key_path => public_key_file,
             :private_key_path => private_key_file,
-            :flavor_ref => flavor.id,
-            :image_ref => image.id,
+            :flavor_ref => settings["inception"]["flavor_id"],
+            :image_ref => settings["inception"]["image_id"],
             :username => username
           )
           unless server
@@ -710,7 +736,6 @@ module Bosh::Bootstrap
           end
           server.wait_for { ready? }
 
-          settings["inception"] = {}
           settings["inception"]["server_id"] = server.id
           settings["inception"]["username"] = username
           save_settings!
