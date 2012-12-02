@@ -694,29 +694,33 @@ module Bosh::Bootstrap
 
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
-          say "Provisioning for inception VM..."
+          say "Provisioning server for inception VM..."
           settings["inception"] = {}
 
           # Select OpenStack flavor
-          say ""
-          hl.choose do |menu|
-            menu.prompt = "Choose OpenStack flavor:  "
-            fog_compute.flavors.each do |flavor|
-              menu.choice(flavor.name) do
-                settings["inception"]["flavor_id"] = flavor.id
-                save_settings!
+          unless settings["inception"]["flavor_id"]
+            say ""
+            hl.choose do |menu|
+              menu.prompt = "Choose OpenStack flavor:  "
+              fog_compute.flavors.each do |flavor|
+                menu.choice(flavor.name) do
+                  settings["inception"]["flavor_id"] = flavor.id
+                  save_settings!
+                end
               end
             end
           end
 
           # Select OpenStack image
-          say ""
-          hl.choose do |menu|
-            menu.prompt = "Choose OpenStack image (Ubuntu):  "
-            fog_compute.images.each do |image|
-              menu.choice(image.name) do
-                settings["inception"]["image_id"] = image.id
-                save_settings!
+          unless settings["inception"]["image_id"]
+            say ""
+            hl.choose do |menu|
+              menu.prompt = "Choose OpenStack image (Ubuntu):  "
+              fog_compute.images.each do |image|
+                menu.choice(image.name) do
+                  settings["inception"]["image_id"] = image.id
+                  save_settings!
+                end
               end
             end
           end
