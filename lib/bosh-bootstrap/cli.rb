@@ -665,13 +665,13 @@ module Bosh::Bootstrap
         say "" # glowing whitespace
 
         # make sure we've a fog key pair
-        public_key_file = File.expand_path("~/.ssh/id_rsa.pub")
-        private_key_file = File.expand_path("~/.ssh/id_rsa")
-        raise "Please create public keys at ~/.ssh/id_rsa.pub" unless File.exists?(public_key_file)
+        public_key_path = File.expand_path("~/.ssh/id_rsa.pub")
+        private_key_path = File.expand_path("~/.ssh/id_rsa")
+        raise "Please create public keys at ~/.ssh/id_rsa.pub" unless File.exists?(public_key_path)
         key_pair_name = Fog.respond_to?(:credential) && Fog.credential || :default
         unless key_pair = fog_compute.key_pairs.get("fog_#{key_pair_name}")
-          #say "creating key pair fog_#{key_pair_name}..."
-          public_key = File.open(public_key_file, 'rb') { |f| f.read }
+          say "creating key pair fog_#{key_pair_name}..."
+          public_key = File.open(public_key_path, 'rb') { |f| f.read }
           key_pair = fog_compute.key_pairs.create(
             :name => "fog_#{key_pair_name}",
             :public_key => public_key
@@ -729,8 +729,8 @@ module Bosh::Bootstrap
           server = fog_compute.servers.create(
             :name => "Inception VM",
             :key_name => key_pair.name,
-            :public_key_path => public_key_file,
-            :private_key_path => private_key_file,
+            :public_key_path => public_key_path,
+            :private_key_path => private_key_path,
             :flavor_ref => settings["inception"]["flavor_id"],
             :image_ref => settings["inception"]["image_id"],
             :username => username
@@ -753,9 +753,6 @@ module Bosh::Bootstrap
           address = fog_compute.addresses.find { |a| a.ip == ip_address }
           address.server = server
           server.reload
-          host = ip_address
-          # TODO: Hack
-          server.addresses["public"] = [{"version" => 4, "addr" => ip_address}]
 
           settings["inception"]["ip_address"] = ip_address
           save_settings!
@@ -765,21 +762,36 @@ module Bosh::Bootstrap
           server ||= fog_compute.servers.get(settings.inception.server_id)
 
           disk_size = 16 # Gb
-          unless volume = server.volumes.all.find {|v| v.device == "/dev/sdi"}
+          va = fog_compute.get_server_volumes(server.id).body['volumeAttachments']
+          unless vol = va.find { |v| v["device"] == "/dev/vdc" }
             say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
             volume = fog_compute.volumes.create(:name => "Inception Disk",
                                                 :description => "",
                                                 :size => disk_size,
-                                                :device => "/dev/sdi",
                                                 :availability_zone => server.availability_zone)
-            volume.server = server
+            volume.wait_for { volume.status == 'available' }
+            volume.attach(server.id, "/dev/vdc")
+            volume.wait_for { volume.status == 'in-use' }
           end
 
           # Format and mount the volume
+          # TODO: Hack
+          unless server.public_ip_address
+            server.addresses["public"] = [settings["inception"]["ip_address"]]
+          end
+          unless server.public_key_path
+            server.public_key_path = public_key_path
+          end
+          unless server.private_key_path
+            server.private_key_path = private_key_path
+          end
+          server.username = "ubuntu"
+          server.sshable?
+
           say "Mounting persistent disk as volume on inception VM..."
-          server.ssh(['sudo mkfs.ext4 /dev/sdi -F'])
+          server.ssh(['sudo mkfs.ext4 /dev/vdc -F'])
           server.ssh(['sudo mkdir -p /var/vcap/store'])
-          server.ssh(['sudo mount /dev/sdi /var/vcap/store'])
+          server.ssh(['sudo mount /dev/vdc /var/vcap/store'])
 
           settings["inception"]["disk_size"] = disk_size
           save_settings!
