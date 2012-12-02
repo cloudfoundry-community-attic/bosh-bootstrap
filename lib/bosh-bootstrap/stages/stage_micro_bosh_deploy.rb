@@ -97,7 +97,7 @@ module Bosh::Bootstrap::Stages
             "nats" => { "address" => ipaddress }
           },
           "properties" => {
-            "aws_registry" => { "address" => ipaddress }
+            "#{cloud_plugin.downcase}_registry" => { "address" => ipaddress }
           }
         }
       }.to_yaml.gsub(" !ruby/hash:Settingslogic", "")
