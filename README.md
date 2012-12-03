@@ -3,16 +3,19 @@
 Bootstrap a micro BOSH universe from one CLI command.
 
 ```
-$ bosh-bootstrap
+$ bosh-bootstrap deploy
 Creating inception VM...
 Creating micro BOSH VM...
+
+$ bosh-bootstrap delete
+Deleting micro BOSH VM...
 ```
 
-It is now very simple to bootstrap a micro BOSH from a single, local CLI. The bootstrapper first creates an inception VM and then uses `bosh_deployer` (`bosh micro deploy`) to deploy micro BOSH.
+It is now very simple to bootstrap a micro BOSH from a single, local CLI. The bootstrapper first creates an inception VM and then uses the `bosh_deployer` (`bosh micro deploy`) to deploy micro BOSH.
 
 ## Installation
 
-The bootstrapper is distributed as a RubyGem for Ruby 1.8+.
+This bootstrapper for BOSH is distributed as a RubyGem for Ruby 1.8+.
 
 ```
 $ gem install bosh-bootstrap
@@ -23,7 +26,7 @@ $ gem install bosh-bootstrap
 The first time you use `bosh-bootstrap` it will create everything necessary. The example output below includes user prompts.
 
 ```
-$ bosh-bootstrap
+$ bosh-bootstrap deploy
 
 Stage 1: Choose infrastructure
 
@@ -48,77 +51,46 @@ Confirming: Using AWS us-west-2 region.
 
 Stage 2: Configuration
 
+Confirming: Micro BOSH will be named microbosh_aws_us_east_1
+
 BOSH username: drnic
 BOSH password: ********
 Confirming: After BOSH is created, your username will be drnic
 
-Determining latest stable microbosh stemcell... (override: --microbosh-stemcell NAME)
-Confirming: micro BOSH stemcell being used is 
+Confirming: Micro BOSH will be assigned IP address 174.129.227.124
 
-Stage 3: Create the Inception VM
-This bootstrapper uses a VM within the same target region
-to manage the micro BOSH VM.
+Confirming: Micro BOSH protected by security group named microbosh_aws_us_east_1, with ports [22, 6868, 25555, 25888]
 
-Provisioning m1.small in us-east-1...
-Provisioned: i-123456 (m1.small, us-east-1c)
+Confirming: Micro BOSH accessible via key pair named microbosh_aws_us_east_1
 
-Provisioning static IP for Inception VM in us-east-1...
-Provisioned: 1.2.3.4 (us-east-1)
-Provisioning static IP for micro BOSH VM in us-east-1...
-Provisioned: 2.3.4.5 (us-east-1)
+Confirming: Micro BOSH will be created with stemcell micro-bosh-stemcell-aws-0.6.4.tgz
 
-Assigning 1.2.3.4 to i-123456...
-Assigned: 1.2.3.4 to i-123456
 
-Provisioning 16G disk in us-east-1...
-Provisioned: v-987654
+Stage 3: Create/Allocate the Inception VM
 
-Assigning v-987654 to i-123456 at /var/vcap/store...
-Assigned: v-987654 to i-123456 at /var/vcap/store
+1. create new inception VM
+2. use an existing Ubuntu server
+3. use this server (must be ubuntu & on same network as bosh)
+Create or specify an Inception VM:  1
+
+Confirming: Inception VM has been created
 
 Stage 4: Preparing the Inception VM
 
-Installing dependent packages...
-Creating folders...
-Creating SSH keys for root user...
-Storing SSH keys into local manifest...
-Installing ruby...
-Installing BOSH from rubygems... (override: --source to use bosh from git source)
-
-Confirming: BOSH deployer is installed...
-$ bosh help micro
-[commands displayed]
+Successfully created vcap user
+Successfully installed base packages
+Successfully installed ruby 1.9.3
+Successfully installed useful ruby gems
+Successfully installed bosh
+Successfully captured value of salted password
+Successfully validated bosh deployer
 
 Stage 5: Deploying micro BOSH
 
-Downloading stemcell microbosh-aws-0.6.7 into /var/vcap/store/stemcells....
-
-Preparing micro BOSH:
-* Static IP: 2.3.4.5     (provisioned above)
-* Properties: {'instance_type': 'm1.large'}        
-                         (override: --bosh-cloud-properties)
-* Attached disk: 16 Gb   (override: --bosh-persistent-disk)
-
-Uploading micro_bosh.yml manifest to /var/vcap/store/deployments/microbosh/aws-us-east-1/micro_bosh.yml...
-
-Deploying micro BOSH...
-
-Setting local BOSH CLI to http://2.3.4.5:25555...
-Setting inception VM BOSH CLI to http://2.3.4.5:25555...
-Creating BOSH user 'drnic'...
-Logging in local BOSH CLI...
-Logging in inception VM BOSH CLI...
-
-Status of BOSH:
-Updating director data... done
-
-Director
-  Name      microbosh-aws-us-east-1
-  URL       http://2.3.4.5:25555
-  Version   0.5.2 (release:ffed4d4a bosh:21e0b0bc)
-  User      drnic
-  UUID      bbcc7942-0ddf-4d1a-ab54-XXXXXXXXXX
-  CPI       aws
+Successfully downloaded micro-bosh stemcell
+Successfully uploaded micro-bosh deployment manifest file
+Successfully installed key pair for user
+Successfully deploy micro bosh
 ```
 
 ## Local usage
