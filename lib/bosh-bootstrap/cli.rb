@@ -24,6 +24,11 @@ module Bosh::Bootstrap
       stage_5_deploy_micro_bosh
     end
 
+    desc "delete", "Delete micro-bosh, and optionally the inception VM"
+    def delete
+      error "Not implemented yet. Stay tuned!"
+    end
+
     no_tasks do
       def stage_1_choose_infrastructure_provider
         header "Stage 1: Choose infrastructure"
