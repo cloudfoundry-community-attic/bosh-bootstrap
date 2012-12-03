@@ -47,9 +47,9 @@ module Bosh::Bootstrap
         unless settings[:bosh_name]
           provider, region = settings.bosh_provider, settings.region_code
           if region
-            default_name = "microbosh_#{provider}_#{region}".gsub(/\W+/, '_')
+            default_name = "microbosh-#{provider}-#{region}".gsub(/\W+/, '-')
           else
-            default_name = "microbosh_#{provider}".gsub(/\W+/, '_')
+            default_name = "microbosh-#{provider}".gsub(/\W+/, '-')
           end
           bosh_name = hl.ask("Useful name for Micro BOSH?  ") { |q| q.default = default_name }
           settings[:bosh_name] = bosh_name
