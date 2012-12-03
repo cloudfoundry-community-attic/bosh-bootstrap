@@ -41,6 +41,10 @@ if [[ $INSTALL_BOSH_FROM_SOURCE ]]; then
   cd /var/vcap/bootstrap/bosh/aws_registry/
   bundle install --without=development test
   bundle exec rake install
+
+  cd /var/vcap/bootstrap/bosh/openstack_registry/
+  bundle install --without=development test
+  bundle exec rake install
 else
   install_gem bosh_cli
   install_gem bosh_deployer
