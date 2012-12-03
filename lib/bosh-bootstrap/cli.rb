@@ -455,7 +455,7 @@ module Bosh::Bootstrap
       def create_aws_security_group(security_group_name)
         unless fog_compute.security_groups.get(security_group_name)
           sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
-          settings.bosh_cloud_properties.aws[:default_security_groups] = [security_group_name]
+          settings.bosh_cloud_properties["aws"]["default_security_groups"] = [security_group_name]
           settings[:bosh_security_group] = {}
           settings[:bosh_security_group][:name] = security_group_name
           settings[:bosh_security_group][:ports] = {}
@@ -486,7 +486,7 @@ module Bosh::Bootstrap
           # sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
           data = fog_compute.create_security_group(security_group_name, "microbosh")
           sg = fog_compute.security_groups.get(data.body['security_group']['id'])
-          settings.bosh_cloud_properties.openstack[:default_security_groups] = [security_group_name]
+          settings.bosh_cloud_properties["openstack"]["default_security_groups"] = [security_group_name]
           settings[:bosh_security_group] = {}
           settings[:bosh_security_group][:name] = security_group_name
           settings[:bosh_security_group][:ports] = {}
