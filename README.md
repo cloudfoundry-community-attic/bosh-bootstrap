@@ -93,21 +93,22 @@ Successfully installed key pair for user
 Successfully deploy micro bosh
 ```
 
-## Local usage
+### Local usage
 
-Instead of creating a new Inception VM, if you already have an Ubuntu VM on the target infrastructure region network then you can use it with the `--local` flag.
+During the `bosh-bootstrap deploy` sequence above, you could choose to use the local VM as the Inception VM. 
 
-```
-$ bosh-bootstrap --local
-```
+For AWS, it is important that you only use a VM that is on the same infrastructure region. The process of creating a micro-bosh VM is to use a local
+EBS volume to create an AMI. The target region for the micro-bosh VM must therefore be in the same region.
 
-You will still be prompted for infrastructure details (a VM does not necessarily know how to talk to its own infrastructure).
+### Repeat usage
 
-Running this command will install packages, an Ruby via RVM, and the BOSH rubygems on your local VM. It will then use the local VM to create the micro BOSH via BOSH deployer (`bosh micro deploy`).
+The `deploy` command can be re-run and it will not prompt again for inputs. It aims to be idempotent. This means that if you see any errors when running `deploy`, such as unavailability of VMs or IP addresses, then when you resolve those issues you can re-run the `deploy` command and it will resume the bootstrap of micro-bosh (and the optional inception VM).
 
-## Advanced usage
+## Deleting micro BOSH
 
+The `bosh-bootstrap delete`  command will delete the micro-bosh, and optionally delete the inception VM, its attached disk and release any IP addresses back to the infrastructure provider (for providers that have elastic IP provisioning, such as AWS).
 
+[note implemented yet]
 
 ## Internal configuration/settings
 
