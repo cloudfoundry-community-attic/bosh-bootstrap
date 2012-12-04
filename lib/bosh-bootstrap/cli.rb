@@ -18,16 +18,17 @@ module Bosh::Bootstrap
     def deploy
       load_options # from method_options above
 
-      stage_1_choose_infrastructure_provider
-      stage_2_bosh_configuration
-      stage_3_create_allocate_inception_vm
-      stage_4_prepare_inception_vm
-      stage_5_deploy_micro_bosh
+      deploy_stage_1_choose_infrastructure_provider
+      deploy_stage_2_bosh_configuration
+      deploy_stage_3_create_allocate_inception_vm
+      deploy_stage_4_prepare_inception_vm
+      deploy_stage_5_deploy_micro_bosh
     end
 
     desc "delete", "Delete micro-bosh, and optionally the inception VM"
     def delete
-      error "Not implemented yet. Stay tuned!"
+      delete_stage_1_target_inception_vm
+      delete_stage_2_delete_micro_bosh
     end
 
     desc "ssh [COMMAND]", "Open an ssh session to the inception VM [do nothing if local machine is inception VM]"
@@ -50,7 +51,7 @@ module Bosh::Bootstrap
     end
 
     no_tasks do
-      def stage_1_choose_infrastructure_provider
+      def deploy_stage_1_choose_infrastructure_provider
         header "Stage 1: Choose infrastructure"
         unless settings[:fog_credentials]
           choose_fog_provider
@@ -67,7 +68,7 @@ module Bosh::Bootstrap
         end
       end
       
-      def stage_2_bosh_configuration
+      def deploy_stage_2_bosh_configuration
         header "Stage 2: BOSH configuration"
         unless settings[:bosh_name]
           provider, region = settings.bosh_provider, settings.region_code
@@ -129,7 +130,7 @@ module Bosh::Bootstrap
         confirm "Micro BOSH will be created with stemcell #{settings.micro_bosh_stemcell_name}"
       end
 
-      def stage_3_create_allocate_inception_vm
+      def deploy_stage_3_create_allocate_inception_vm
         header "Stage 3: Create/Allocate the Inception VM"
         unless settings["inception"] && settings["inception"]["host"]
           hl.choose do |menu|
@@ -168,7 +169,7 @@ module Bosh::Bootstrap
         save_settings!
       end
 
-      def stage_4_prepare_inception_vm
+      def deploy_stage_4_prepare_inception_vm
         header "Stage 4: Preparing the Inception VM"
         unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
           error "Failed to complete Stage 4: Preparing the Inception VM"
@@ -179,7 +180,7 @@ module Bosh::Bootstrap
         save_settings!
       end
 
-      def stage_5_deploy_micro_bosh
+      def deploy_stage_5_deploy_micro_bosh
         header "Stage 5: Deploying micro BOSH"
         unless server.run(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
           error "Failed to complete Stage 5: Deploying micro BOSH"
@@ -198,6 +199,26 @@ module Bosh::Bootstrap
         save_settings!
 
         confirm "You are now targeting and logged in to your BOSH"
+      end
+
+      def delete_stage_1_target_inception_vm
+        header "Stage 1: Target inception VM to use to delete micro-bosh"
+        if settings["inception"]["host"]
+          @server = Commander::RemoteServer.new(settings.inception.host)
+          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
+        else
+          @server = Commander::LocalServer.new
+          confirm "Using this server as the inception VM"
+        end
+      end
+
+      def delete_stage_2_delete_micro_bosh
+        header "Stage 2: Deleting micro BOSH"
+        unless server.run(Bosh::Bootstrap::Stages::MicroBoshDelete.new(settings).commands)
+          error "Failed to complete Stage 1: Delete micro BOSH"
+        end
+        settings[:bosh_deployed] = false
+        save_settings!
       end
 
       # Display header for a new section of the bootstrapper

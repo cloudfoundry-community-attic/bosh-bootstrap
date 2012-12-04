@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Deletes a micro BOSH using "bosh micro delete"
+#
+# Required:
+# * $BOSH_NAME - name of bosh deployment
+#   (thus /var/vcap/store/microboshes/deployments/$BOSH_NAME/micro_bosh.yml exists)
+
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+
+# TODO in preparation for http://reviews.cloudfoundry.org/#/c/11976/
+export COLUMNS=80 # force a small width for progress bar
+
+cd /var/vcap/store/microboshes/deployments/
+bosh -n micro deployment $BOSH_NAME
+
+echo "Deleting deployment of micro BOSH $BOSH_NAME"
+bosh -n micro delete
