@@ -21,7 +21,9 @@ This bootstrapper for BOSH is distributed as a RubyGem for Ruby 1.8+.
 $ gem install bosh-bootstrap
 ```
 
-## First time usage
+## Usage
+
+### First time usage
 
 The first time you use `bosh-bootstrap` it will create everything necessary. The example output below includes user prompts.
 
@@ -109,6 +111,21 @@ The `deploy` command can be re-run and it will not prompt again for inputs. It a
 The `bosh-bootstrap delete`  command will delete the micro-bosh, and optionally delete the inception VM, its attached disk and release any IP addresses back to the infrastructure provider (for providers that have elastic IP provisioning, such as AWS).
 
 [note implemented yet]
+
+## SSH access
+
+You can open an SSH shell with the Inception VM:
+
+```
+$ bosh-bootstrap ssh
+```
+
+You can also pass a COMMAND argument and that command will be run instead of the shell being opened.
+
+```
+$ bosh-bootstrap ssh 'whoami'
+ubuntu
+```
 
 ## Internal configuration/settings
 

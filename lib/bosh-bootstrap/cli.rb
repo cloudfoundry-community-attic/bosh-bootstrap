@@ -3,6 +3,7 @@ require "highline"
 require "settingslogic"
 require "fileutils"
 require "fog"
+require "escape"
 
 module Bosh::Bootstrap
   class Cli < Thor
@@ -27,6 +28,25 @@ module Bosh::Bootstrap
     desc "delete", "Delete micro-bosh, and optionally the inception VM"
     def delete
       error "Not implemented yet. Stay tuned!"
+    end
+
+    desc "ssh [COMMAND]", "Open an ssh session to the inception VM [do nothing if local machine is inception VM]"
+    long_desc <<-DESC
+      If a command is supplied, it will be run, otherwise a session will be
+      opened.
+    DESC
+    def ssh(cmd=nil)
+      unless settings[:inception]
+        say "No inception VM being used", :yellow
+        exit 0
+      end
+      unless host = settings.inception[:host]
+        exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
+      end
+      unless username = settings.inception[:username]
+        exit "settings inception.username is missing"
+      end
+      system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].compact)
     end
 
     no_tasks do
