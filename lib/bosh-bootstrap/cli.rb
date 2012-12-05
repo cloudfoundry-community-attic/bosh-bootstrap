@@ -626,16 +626,14 @@ module Bosh::Bootstrap
       def boot_aws_inception_vm
         say "" # glowing whitespace
 
-        public_key = File.expand_path("~/.ssh/id_rsa.pub")
-        private_key = File.expand_path("~/.ssh/id_rsa")
-        raise "Please create public keys at ~/.ssh/id_rsa.pub" unless File.exists?(public_key)
+        public_key_path, private_key_path = local_ssh_key_paths
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
           size = "m1.small"
           say "Provisioning #{size} for inception VM..."
           server = fog_compute.servers.bootstrap({
-            :public_key_path => public_key,
-            :private_key_path => private_key,
+            :public_key_path => public_key_path,
+            :private_key_path => private_key_path,
             :flavor_id => size,
             :bits => 64,
             :username => "ubuntu"
@@ -710,10 +708,9 @@ module Bosh::Bootstrap
       def boot_openstack_inception_vm
         say "" # glowing whitespace
 
+        public_key_path, private_key_path = local_ssh_key_paths
+
         # make sure we've a fog key pair
-        public_key_path = File.expand_path("~/.ssh/id_rsa.pub")
-        private_key_path = File.expand_path("~/.ssh/id_rsa")
-        raise "Please create public keys at ~/.ssh/id_rsa.pub" unless File.exists?(public_key_path)
         key_pair_name = Fog.respond_to?(:credential) && Fog.credential || :default
         unless key_pair = fog_compute.key_pairs.get("fog_#{key_pair_name}")
           say "creating key pair fog_#{key_pair_name}..."
@@ -912,6 +909,24 @@ module Bosh::Bootstrap
             {}
           end
         end
+      end
+
+      # Discover/create local passphrase-less SSH keys to allow
+      # communication with Inception VM
+      #
+      # Returns [public_key_path, private_key_path]
+      def local_ssh_key_paths
+        unless settings[:local] && settings[:local][:private_key_path]
+          settings[:local] = {}
+          public_key_path = File.expand_path("~/.ssh/id_rsa.pub")
+          private_key_path = File.expand_path("~/.ssh/id_rsa")
+          raise "Please create public keys at ~/.ssh/id_rsa.pub" unless File.exists?(public_key_path)
+
+          settings[:local][:public_key_path] = public_key_path
+          settings[:local][:private_key_path] = private_key_path
+          save_settings!
+        end
+        [settings.local.public_key_path, settings.local.private_key_path]
       end
 
       def fog_config_path
