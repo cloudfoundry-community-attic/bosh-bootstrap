@@ -108,9 +108,25 @@ The `deploy` command can be re-run and it will not prompt again for inputs. It a
 
 ## Deleting micro BOSH
 
-The `bosh-bootstrap delete`  command will delete the micro-bosh, and optionally delete the inception VM, its attached disk and release any IP addresses back to the infrastructure provider (for providers that have elastic IP provisioning, such as AWS).
+The `bosh-bootstrap delete`  command will delete the target micro-bosh.
 
-[note implemented yet]
+```
+$ bosh-bootstrap delete
+Stage 1: Target inception VM to use to delete micro-bosh
+
+Confirming: Using inception VM ubuntu@ec2-184-73-231-239.compute-1.amazonaws.com
+
+Stage 2: Deleting micro BOSH
+Delete micro BOSH
+  stopping agent services (00:00:01)                                            
+  unmount disk (00:00:10)                                                       
+  detach disk (00:00:13)                                                        
+  delete disk (00:02:35)                                                        
+  delete VM (00:00:37)                                                          
+  delete stemcell (00:00:00)                                                    
+Done                          6/6 00:03:37                                      
+Deleted deployment 'microbosh-aws-us-east-1', took 00:03:37 to complete
+```
 
 ## SSH access
 
