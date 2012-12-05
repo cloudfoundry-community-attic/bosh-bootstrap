@@ -47,7 +47,14 @@ module Bosh::Bootstrap
       unless username = settings.inception[:username]
         exit "settings inception.username is missing"
       end
-      system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].compact)
+      exit system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].compact)
+
+      # TODO how to use the specific private_key_path as configured in settings
+      # _, private_key_path = local_ssh_key_paths
+      # exit system Escape.shell_command(['ssh', "-i #{private_key_path}", "#{username}@#{host}", cmd].compact)
+      #
+      # Currently this shows:
+      # Warning: Identity file  /Users/drnic/.ssh/id_rsa not accessible: No such file or directory.
     end
 
     no_tasks do
