@@ -170,14 +170,19 @@ module Bosh::Bootstrap
       end
 
       def deploy_stage_4_prepare_inception_vm
-        header "Stage 4: Preparing the Inception VM"
-        unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
-          error "Failed to complete Stage 4: Preparing the Inception VM"
+        unless settings["inception"]["prepared"]
+          header "Stage 4: Preparing the Inception VM"
+          unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
+            error "Failed to complete Stage 4: Preparing the Inception VM"
+          end
+          # Settings are updated by this stage
+          # it generates a salted password from settings.bosh.password
+          # and stores it in settings.bosh.salted_password
+          settings["inception"]["prepared"] = true
+          save_settings!
+        else
+          header "Stage 4: Preparing the Inception VM", :skipping => "Already prepared inception VM."
         end
-        # Settings are updated by this stage
-        # it generates a salted password from settings.bosh.password
-        # and stores it in settings.bosh.salted_password
-        save_settings!
       end
 
       def deploy_stage_5_deploy_micro_bosh
