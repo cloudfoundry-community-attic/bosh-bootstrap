@@ -26,9 +26,17 @@ module Bosh::Bootstrap
     end
 
     desc "delete", "Delete micro-bosh, and optionally the inception VM"
+    method_option :all, :type => :boolean, :desc => "Delete all micro-boshes and inception VM [coming soon]"
     def delete
       delete_stage_1_target_inception_vm
-      delete_stage_2_delete_micro_bosh
+
+      if options[:all]
+        error "I'm sorry; the awesome --all flag is not yet implemented"
+        delete_all_stage_2_delete_micro_boshes
+        delete_all_stage_3_delete_inception_vm
+      else
+        delete_one_stage_2_delete_micro_bosh
+      end
     end
 
     desc "ssh [COMMAND]", "Open an ssh session to the inception VM [do nothing if local machine is inception VM]"
@@ -202,13 +210,21 @@ module Bosh::Bootstrap
         end
       end
 
-      def delete_stage_2_delete_micro_bosh
+      def delete_one_stage_2_delete_micro_bosh
         header "Stage 2: Deleting micro BOSH"
         unless server.run(Bosh::Bootstrap::Stages::MicroBoshDelete.new(settings).commands)
           error "Failed to complete Stage 1: Delete micro BOSH"
         end
         settings[:bosh_deployed] = false
         save_settings!
+      end
+
+      def delete_all_stage_2_delete_micro_boshes
+        
+      end
+
+      def delete_all_stage_3_delete_inception_vm
+        
       end
 
       def run_ssh_command_or_open_tunnel(cmd)
