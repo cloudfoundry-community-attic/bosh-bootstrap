@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Deploys a micro BOSH using "bosh micro deploy"
+#
+# Required:
+# * $BOSH_NAME - name of bosh deployment
+#   (thus /var/vcap/store/microboshes/deployments/$BOSH_NAME/micro_bosh.yml exists)
+# * $BOSH_HOST - public IP of the deployed BOSH
+# * $BOSH_USERNAME - user login to be created
+# * $BOSH_PASSWORD - password for user login
+
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+
+echo "Initially targeting micro-bosh..."
+bosh -u admin -p admin target $BOSH_HOST
+
+echo "Creating initial user $BOSH_USERNAME..."
+bosh login admin admin
+bosh create user $BOSH_USERNAME $BOSH_PASSWORD
+
+echo "Login as $BOSH_USERNAME..."
+bosh login $BOSH_USERNAME $BOSH_PASSWORD

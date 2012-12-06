@@ -24,6 +24,7 @@ module Bosh::Bootstrap
       deploy_stage_3_create_allocate_inception_vm
       deploy_stage_4_prepare_inception_vm
       deploy_stage_5_deploy_micro_bosh
+      deploy_stage_6_setup_new_bosh
     end
 
     desc "delete", "Delete micro-bosh, and optionally the inception VM"
@@ -190,6 +191,18 @@ module Bosh::Bootstrap
         else
           confirm "Successfully created micro BOSH"
         end
+      end
+
+      def deploy_stage_6_setup_new_bosh
+        # TODO change to a polling test of director being available
+        say "Pausing to wait for BOSH Director..."
+        sleep 5
+
+        header "Stage 6: Setup bosh"
+        unless server.run(Bosh::Bootstrap::Stages::SetupNewBosh.new(settings).commands)
+          error "Failed to complete Stage 6: Setup bosh"
+        end
+
         say "Locally targeting and login to new BOSH..."
         puts `bosh target #{settings.bosh.ip_address}`
         puts `bosh login #{settings.bosh_username} #{settings.bosh_password}`
