@@ -209,7 +209,7 @@ module Bosh::Bootstrap
         end
 
         say "Locally targeting and login to new BOSH..."
-        puts `bosh target #{settings.bosh.ip_address}`
+        puts `bosh -u #{settings.bosh_username} -p #{settings.bosh_password} target #{settings.bosh.ip_address}`
         puts `bosh login #{settings.bosh_username} #{settings.bosh_password}`
 
         settings[:bosh_deployed] = true
