@@ -16,8 +16,9 @@ module Bosh::Bootstrap
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
     method_option :"private-key", :type => :string, :desc => "Local passphrase-less private key path"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
+    method_option :git, :type => :boolean, :desc => "Install bosh from git instead of rubygems"
     def deploy
-      load_options # from method_options above
+      load_deploy_options # from method_options above
 
       deploy_stage_1_choose_infrastructure_provider
       deploy_stage_2_bosh_configuration
@@ -289,8 +290,9 @@ module Bosh::Bootstrap
         say "" # bonus golden whitespace
       end
 
-      def load_options
+      def load_deploy_options
         settings["fog_path"] = File.expand_path(options[:fog] || "~/.fog")
+        settings["bosh_git_source"] = options[:git] # use bosh git repo instead of rubygems
 
         if options["private-key"]
           private_key_path = File.expand_path(options["private-key"])
