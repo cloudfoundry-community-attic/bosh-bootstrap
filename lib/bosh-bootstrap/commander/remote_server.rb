@@ -88,22 +88,24 @@ class Bosh::Bootstrap::Commander::RemoteServer
   # Makes +remote_path+ executable, then runs it
   # Returns:
   # * a String of all STDOUT/STDERR; which is also appended to +logfile+
-  # * status (true = success) [currently always true; no failure detection yet]
+  # * status (true = success)
+  #
+  # TODO catch exceptions http://learnonthejob.blogspot.com/2010/08/exception-handling-for-netssh.html
   def run_remote_script(remote_path, username)
+    commands = [
+      "chmod +x #{remote_path}",
+      "bash -lc 'sudo /usr/bin/env PATH=$PATH GEM_PATH=$GEM_PATH GEM_HOME=$GEM_HOME #{remote_path}'"
+    ]
     script_output = ""
-    Net::SSH.start(host, username) do |ssh|
-      # make executable
-      ssh.exec!("chmod +x #{remote_path}") do |channel, stream, data|
-        logfile << data
-      end
-      # run script
-      logfile.puts %Q{running on remote server: "bash -lc 'sudo /usr/bin/env PATH=$PATH GEM_PATH=$GEM_PATH GEM_HOME=$GEM_HOME #{remote_path}'"}
-      ssh.exec!("bash -lc 'sudo /usr/bin/env PATH=$PATH GEM_PATH=$GEM_PATH GEM_HOME=$GEM_HOME #{remote_path}'") do |channel, stream, data|
+    results = Fog::SSH.new(host, username).run(commands) do |stdout, stderr|
+      [stdout, stderr].flatten.each do |data|
         logfile << data
         script_output << data
       end
     end
-    [script_output, true]
+    result = results.last
+    result_success = result.status == 0
+    [script_output, result_success]
   end
 
   def run_remote_command(command, username)
