@@ -14,6 +14,7 @@ module Bosh::Bootstrap
 
     desc "deploy", "Bootstrap bosh, using a remote server as inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
+    method_option :"private-key", :type => :string, :desc => "Local passphrase-less private key path"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
     def deploy
       load_options # from method_options above
@@ -272,6 +273,21 @@ module Bosh::Bootstrap
 
       def load_options
         settings["fog_path"] = File.expand_path(options[:fog] || "~/.fog")
+
+        if options["private-key"]
+          private_key_path = File.expand_path(options["private-key"])
+          unless File.exists?(private_key_path)
+            error "Cannot find a file at #{private_key_path}"
+          end
+          public_key_path = "#{private_key_path}.pub"
+          unless File.exists?(public_key_path)
+            error "Cannot find a file at #{public_key_path}"
+          end
+
+          settings["local"] ||= {}
+          settings["local"]["private_key_path"] = private_key_path
+          settings["local"]["public_key_path"] = public_key_path
+        end
 
         if options["upgrade-deps"]
           settings["upgrade_deps"] = options["upgrade-deps"]
@@ -721,7 +737,7 @@ module Bosh::Bootstrap
         end
 
         confirm "Inception VM has been created"
-        say "SSH access: ssh #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
+        display_inception_ssh_access
       end
 
       # Provisions an OpenStack m1.small VM as the inception VM
@@ -879,7 +895,7 @@ module Bosh::Bootstrap
         end
 
         confirm "Inception VM has been created"
-        say "SSH access: ssh #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
+        display_inception_ssh_access
       end
 
       # Provision or provide an IP address to use
@@ -938,19 +954,24 @@ module Bosh::Bootstrap
         end
       end
 
+      def display_inception_ssh_access
+        _, private_key_path = local_ssh_key_paths
+        say "SSH access: ssh -i #{private_key_path} #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
+      end
+
       # Discover/create local passphrase-less SSH keys to allow
       # communication with Inception VM
       #
       # Returns [public_key_path, private_key_path]
       def local_ssh_key_paths
-        unless settings[:local] && settings[:local][:private_key_path]
-          settings[:local] = {}
+        unless settings["local"] && settings["local"]["private_key_path"]
+          settings["local"] = {}
           public_key_path = File.expand_path("~/.ssh/id_rsa.pub")
           private_key_path = File.expand_path("~/.ssh/id_rsa")
-          raise "Please create public keys at ~/.ssh/id_rsa.pub" unless File.exists?(public_key_path)
+          raise "Please create public keys at ~/.ssh/id_rsa.pub or use --private-key flag" unless File.exists?(public_key_path)
 
-          settings[:local][:public_key_path] = public_key_path
-          settings[:local][:private_key_path] = private_key_path
+          settings["local"]["public_key_path"] = public_key_path
+          settings["local"]["private_key_path"] = private_key_path
           save_settings!
         end
         [settings.local.public_key_path, settings.local.private_key_path]
