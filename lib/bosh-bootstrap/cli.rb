@@ -37,24 +37,7 @@ module Bosh::Bootstrap
       opened.
     DESC
     def ssh(cmd=nil)
-      unless settings[:inception]
-        say "No inception VM being used", :yellow
-        exit 0
-      end
-      unless host = settings.inception[:host]
-        exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
-      end
-      unless username = settings.inception[:username]
-        exit "settings inception.username is missing"
-      end
-      exit system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].compact)
-
-      # TODO how to use the specific private_key_path as configured in settings
-      # _, private_key_path = local_ssh_key_paths
-      # exit system Escape.shell_command(['ssh', "-i #{private_key_path}", "#{username}@#{host}", cmd].compact)
-      #
-      # Currently this shows:
-      # Warning: Identity file  /Users/drnic/.ssh/id_rsa not accessible: No such file or directory.
+      run_ssh_command_or_open_tunnel(cmd)
     end
 
     no_tasks do
@@ -226,6 +209,27 @@ module Bosh::Bootstrap
         end
         settings[:bosh_deployed] = false
         save_settings!
+      end
+
+      def run_ssh_command_or_open_tunnel(cmd)
+        unless settings[:inception]
+          say "No inception VM being used", :yellow
+          exit 0
+        end
+        unless host = settings.inception[:host]
+          exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
+        end
+        unless username = settings.inception[:username]
+          exit "settings inception.username is missing"
+        end
+        exit system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].compact)
+
+        # TODO how to use the specific private_key_path as configured in settings
+        # _, private_key_path = local_ssh_key_paths
+        # exit system Escape.shell_command(['ssh', "-i #{private_key_path}", "#{username}@#{host}", cmd].compact)
+        #
+        # Currently this shows:
+        # Warning: Identity file  /Users/drnic/.ssh/id_rsa not accessible: No such file or directory.
       end
 
       # Display header for a new section of the bootstrapper
