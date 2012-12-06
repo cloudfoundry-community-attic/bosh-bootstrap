@@ -21,7 +21,7 @@ function install_gem() {
   fi
 }
 
-if [[ $INSTALL_BOSH_FROM_SOURCE ]]; then
+if [[ "${INSTALL_BOSH_FROM_SOURCE}X" != "X" ]]; then
   mkdir -p /var/vcap/bootstrap
   cd /var/vcap/bootstrap
   git clone https://github.com/cloudfoundry/bosh.git
