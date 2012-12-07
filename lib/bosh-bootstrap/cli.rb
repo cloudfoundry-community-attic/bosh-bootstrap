@@ -18,6 +18,7 @@ module Bosh::Bootstrap
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
     method_option :git, :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
     method_option :latest, :type => :boolean, :desc => "Use latest micro-bosh stemcell; possibly not tagged stable"
+    method_option :custom, :type => :boolean, :desc => "Create custom stemcell from BOSH git source"
     def deploy
       load_deploy_options # from method_options above
 
@@ -300,9 +301,9 @@ module Bosh::Bootstrap
         if options[:latest]
           settings["micro_bosh_stemcell_type"] = "latest"
           settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
-        elsif options[:source]
-          settings["micro_bosh_stemcell_type"] = "source"
-          settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
+        elsif options[:custom]
+          settings["micro_bosh_stemcell_type"] = "custom"
+          settings["micro_bosh_stemcell_name"] = "custom"
         else
           # may have already been set from previous deploy run
           settings["micro_bosh_stemcell_type"] ||= "stable"
@@ -1060,6 +1061,10 @@ module Bosh::Bootstrap
           # get the Name field, reverse sort, and return the first item
           `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
         end
+
+        # * cd .../bosh/agent
+        # * rake stemcell2[aws,~/cf/bosh-release/micro/aws.yml,~/cf/bosh/release/dev_release/<latest>.tgz]
+        # * bosh micro deploy <new micro bosh stemcell>
       end
 
       def cyan; "\033[36m" end
