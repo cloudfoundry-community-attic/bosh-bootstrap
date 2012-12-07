@@ -16,7 +16,8 @@ module Bosh::Bootstrap
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
     method_option :"private-key", :type => :string, :desc => "Local passphrase-less private key path"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
-    method_option :git, :type => :boolean, :desc => "Install bosh from git instead of rubygems"
+    method_option :git, :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
+    method_option :latest, :type => :boolean, :desc => "Use latest micro-bosh stemcell; possibly not tagged stable"
     def deploy
       load_deploy_options # from method_options above
 
@@ -292,7 +293,19 @@ module Bosh::Bootstrap
 
       def load_deploy_options
         settings["fog_path"] = File.expand_path(options[:fog] || "~/.fog")
+
         settings["bosh_git_source"] = options[:git] # use bosh git repo instead of rubygems
+
+        # determine which micro-bosh stemcell to download/create
+        if options[:latest]
+          settings["micro_bosh_stemcell_type"] = "latest"
+          settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
+        elsif options[:source]
+          settings["micro_bosh_stemcell_type"] = "source"
+          settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
+        else
+          settings["micro_bosh_stemcell_type"] = "stable"
+        end
 
         if options["private-key"]
           private_key_path = File.expand_path(options["private-key"])
@@ -1022,14 +1035,29 @@ module Bosh::Bootstrap
       def micro_bosh_stemcell_name
         @micro_bosh_stemcell_name ||= begin
           provider = settings.bosh_provider.downcase # aws, vsphere, openstack
+          stemcell_filter_tags = ['micro', provider]
           if openstack?
-            scope = ",test" # TODO: OpenStack stemcell
+            # FIXME remove this if when openstack has its first stable
           else
-            scope = ",stable" # latest stable micro-bosh stemcell by default
+            if settings["micro_bosh_stemcell_type"] == "stable"
+              stemcell_filter_tags << "stable" # latest stable micro-bosh stemcell by default
+            end
           end
-          bosh_stemcells_cmd = "bosh public stemcells --tags micro,#{provider}#{scope}"
+          tags = stemcell_filter_tags.join(",")
+          bosh_stemcells_cmd = "bosh public stemcells --tags #{tags}"
           say "Locating micro-bosh stemcell, running '#{bosh_stemcells_cmd}'..."
-          `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | head -n 1`.strip
+          #
+          # The +bosh_stemcells_cmd+ has an output that looks like:
+          # +-----------------------------------+--------------------+
+          # | Name                              | Tags               |
+          # +-----------------------------------+--------------------+
+          # | micro-bosh-stemcell-aws-0.6.4.tgz | aws, micro, stable |
+          # | micro-bosh-stemcell-aws-0.7.0.tgz | aws, micro, test   |
+          # +-----------------------------------+--------------------+
+          #
+          # So to get the latest version for the filter tags,
+          # get the Name field, reverse sort, and return the first item
+          `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
         end
       end
 
