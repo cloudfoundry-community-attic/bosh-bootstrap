@@ -24,6 +24,7 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}X" == "X" ]]; then
 fi
 
 if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
+
   BOSH_RELEASE_REPO=${BOSH_RELEASE_REPO:-'https://github.com/cloudfoundry/bosh-release.git'}
   BOSH_RELEASE_DIRNAME=${BOSH_RELEASE_DIRNAME:-'bosh-release'}
   BOSH_RELEASE_DIR=/var/vcap/store/releases/$BOSH_RELEASE_DIRNAME
@@ -102,6 +103,9 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
   echo "Creating custom stemcell..."
   bundle install --without test development
   bundle exec rake stemcell2:micro[$PROVIDER,$MICRO_BOSH_MANIFEST_PATH,$LATEST_BOSH_RELEASE_PATH]
+
+  echo "Cleaning up..."
+  rm $(dirname $LATEST_BOSH_RELEASE_PATH)/*.tgz
 
 elif [[ -f /var/vcap/store/stemcells/$MICRO_BOSH_STEMCELL_NAME ]]; then
   echo "Stemcell $(pwd)/$MICRO_BOSH_STEMCELL_NAME already exists."

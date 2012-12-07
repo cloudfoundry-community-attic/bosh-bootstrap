@@ -19,6 +19,14 @@ export COLUMNS=80 # force a small width for progress bar
 
 cd /var/vcap/store/microboshes/deployments/
 bosh -n micro deployment $BOSH_NAME
+
+if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
+  MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/agent-*/work/work/*.tgz | sort | tail -n 1)
+  echo "Custom stemcell path $MICRO_BOSH_STEMCELL_PATH"
+else
+  echo "Downloaded stemcell path $MICRO_BOSH_STEMCELL_PATH"
+fi
+
 if [[ "${BOSH_UPDATED_DEPLOY}X" == "X" ]]; then
   echo "Performing initial deploy of micro BOSH $BOSH_NAME"
   bosh -n micro deploy $MICRO_BOSH_STEMCELL_PATH
