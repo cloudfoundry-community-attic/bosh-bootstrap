@@ -12,7 +12,7 @@ module Bosh::Bootstrap
     attr_reader :fog_credentials
     attr_reader :server
 
-    desc "deploy", "Bootstrap bosh, using a remote server as inception VM"
+    desc "deploy", "Bootstrap Micro BOSH, and optionally an Inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
     method_option :"private-key", :type => :string, :desc => "Local passphrase-less private key path"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
@@ -29,7 +29,7 @@ module Bosh::Bootstrap
       deploy_stage_6_setup_new_bosh
     end
 
-    desc "delete", "Delete micro-bosh, and optionally the inception VM"
+    desc "delete", "Delete Micro BOSH"
     method_option :all, :type => :boolean, :desc => "Delete all micro-boshes and inception VM [coming soon]"
     def delete
       delete_stage_1_target_inception_vm
