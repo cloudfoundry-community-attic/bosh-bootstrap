@@ -157,6 +157,8 @@ module Bosh::Bootstrap
             end
           end
         end
+        save_settings!
+
         if settings["inception"]["host"]
           @server = Commander::RemoteServer.new(settings.inception.host)
           confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
@@ -164,9 +166,11 @@ module Bosh::Bootstrap
           @server = Commander::LocalServer.new
           confirm "Using this server as the inception VM"
         end
-
-        unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
-          error "Failed to complete Stage 3: Create/Allocate the Inception VM"
+        unless settings["inception"]["validated"]
+          unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
+            error "Failed to complete Stage 3: Create/Allocate the Inception VM"
+          end
+          settings["inception"]["validated"] = true
         end
         # If successfully validate inception VM, then save those settings.
         save_settings!
