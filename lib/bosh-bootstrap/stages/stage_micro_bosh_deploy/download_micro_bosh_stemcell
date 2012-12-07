@@ -10,6 +10,9 @@
 # * $PROVIDER - required for 'custom' $MICRO_BOSH_STEMCELL_NAME; e.g. aws, openstack
 # * $BOSH_RELEASE_REPO - defaults to https://github.com/cloudfoundry/bosh-release.git
 
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+
 if [[ $EUID -ne 0 ]]; then
   echo "ERROR: This script must be run as root" 1>&2
   exit 1
@@ -37,6 +40,8 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
     git clone $BOSH_RELEASE_REPO
     cd $BOSH_RELEASE_DIRNAME
   fi
+
+  echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 
   echo "Updating source submodules..."
   git submodule update --init
