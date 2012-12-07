@@ -304,7 +304,8 @@ module Bosh::Bootstrap
           settings["micro_bosh_stemcell_type"] = "source"
           settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
         else
-          settings["micro_bosh_stemcell_type"] = "stable"
+          # may have already been set from previous deploy run
+          settings["micro_bosh_stemcell_type"] ||= "stable"
         end
 
         if options["private-key"]
