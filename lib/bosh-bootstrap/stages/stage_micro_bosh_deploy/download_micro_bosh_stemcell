@@ -43,11 +43,31 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
   echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
 
+  echo "Rewriting all git:// & git@ to https:// to allow access if port 22 is blocked..."
+  # Snippet written by Mike Reeves <swampfoxmr@gmail.com> on bosh-users mailing list
+  # Date 2012-12-06
+  grep -rI "git[@:/]\{0,3\}github.com" * .gitmodules | awk 'BEGIN {FS=":"} { print($1) }' | while read file
+  do
+    echo "changing - $file"
+    sed -i 's/git\:\/\/github.com/https:\/\/github.com/g' $file
+    sed -i 's/git@github.com:/https:\/\/github.com\//g' $file
+  done
+
   echo "Updating source submodules..."
   git submodule update --init
 
+  echo "Within submodules, rewriting all git:// & git@ to https:// to allow access if port 22 is blocked..."
+  # Snippet written by Mike Reeves <swampfoxmr@gmail.com> on bosh-users mailing list
+  # Date 2012-12-06
+  grep -rI "git[@:/]\{0,3\}github.com" * .gitmodules | awk 'BEGIN {FS=":"} { print($1) }' | while read file
+  do
+    echo "changing - $file"
+    sed -i 's/git\:\/\/github.com/https:\/\/github.com/g' $file
+    sed -i 's/git@github.com:/https:\/\/github.com\//g' $file
+  done
+
   echo "Creating bosh release (fetching any new blobs)..."
-  bosh -n create release --force
+  bosh -n create release --force --with-tarball
 
   # dev_releases/index.yml contains the dev_releases
   # and its last line contains the latest dev_release name
@@ -61,14 +81,27 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
   #
   # So to get the latest dev_release name, grab the last line's 2nd token
   # For example, above this would be "119.2-dev"
+  RELEASE_NAME="bosh-release"
   LATEST_DEV_RELEASE_NAME=$(tail -n 1 dev_releases/index.yml | awk '{print $2}')
-  LATEST_BOSH_RELEASE_PATH=~$BOSH_RELEASE_DIR/dev_release/$LATEST_DEV_RELEASE_NAME.tgz
+  LATEST_BOSH_RELEASE_PATH=$BOSH_RELEASE_DIR/dev_releases/$RELEASE_NAME-$LATEST_DEV_RELEASE_NAME.tgz
   MICRO_BOSH_MANIFEST_PATH=$BOSH_RELEASE_DIR/micro/$PROVIDER.yml
 
-  bosh_dir=/var/vcap/store/repos/bosh
-  cd $bosh_dir/agent
+  BOSH_DIR=/var/vcap/store/repos/bosh
+  cd $(dirname $BOSH_DIR)
+  if [[ -d bosh ]]; then
+    echo "Updating bosh source for agent/stemcell scripts"
+    cd bosh
+    git pull origin master
+  else
+    echo "Cloning bosh source for agent/stemcell scripts"
+    git clone https://github.com/cloudfoundry/bosh.git
+    cd bosh
+  fi
+
+  cd $BOSH_DIR/agent
   echo "Creating custom stemcell..."
-  rake stemcell2[$PROVIDER,$MICRO_BOSH_MANIFEST_PATH,$LATEST_BOSH_RELEASE_PATH]
+  bundle install --without test development
+  bundle exec rake stemcell2:micro[$PROVIDER,$MICRO_BOSH_MANIFEST_PATH,$LATEST_BOSH_RELEASE_PATH]
 
 elif [[ -f /var/vcap/store/stemcells/$MICRO_BOSH_STEMCELL_NAME ]]; then
   echo "Stemcell $(pwd)/$MICRO_BOSH_STEMCELL_NAME already exists."

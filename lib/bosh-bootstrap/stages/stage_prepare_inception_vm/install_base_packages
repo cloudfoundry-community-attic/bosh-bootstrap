@@ -8,4 +8,5 @@ fi
 apt-get update
 apt-get install build-essential libsqlite3-dev curl rsync git-core \
   libmysqlclient-dev libxml2-dev libxslt-dev libpq-dev libsqlite3-dev \
-  genisoimage mkpasswd -y
+  genisoimage mkpasswd \
+  debootstrap kpartx -y
