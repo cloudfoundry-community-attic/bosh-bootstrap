@@ -1,4 +1,6 @@
-# Bosh::Bootstrap
+# Stark & Wayne's Bosh Bootstrap
+
+In order to deploy CloudFoundry, and a growing number of other complex systems, you will need a BOSH. This `bosh-bootstrap` command is the simplest way to get a Micro BOSH running, to upgrade an existing Micro BOSH, and to delete it if you change your mind.
 
 Bootstrap a Micro BOSH universe from one CLI command. Also allows SSH access and the ability to delete created Micro BOSHes.
 
