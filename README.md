@@ -1,6 +1,8 @@
-# Stark & Wayne's Bosh Bootstrap
+# Stark & Wayne's Bosh Bootstrapper
 
-In order to deploy CloudFoundry, and a growing number of other complex systems, you will need a BOSH. This `bosh-bootstrap` command is the simplest way to get a Micro BOSH running, to upgrade an existing Micro BOSH, and to delete it if you change your mind.
+In order to deploy CloudFoundry, and a growing number of other complex systems, you will need a BOSH. BOSH provides a complete lifecycle manager/deployer for complex systems. CloudFoundry is a very complex system when it comes to deployment/upgrades.
+
+The Stark & Wayne Bosh Bootstrapper is the simplest way to get a Micro BOSH running, to upgrade an existing Micro BOSH, and to delete it if you change your mind. 
 
 Bootstrap a Micro BOSH universe from one CLI command. Also allows SSH access and the ability to delete created Micro BOSHes.
 
@@ -17,6 +19,8 @@ Deleting micro BOSH VM...
 ```
 
 It is now very simple to bootstrap a micro BOSH from a single, local CLI. The bootstrapper first creates an inception VM and then uses the `bosh_deployer` (`bosh micro deploy`) to deploy micro BOSH.
+
+To be cute about it, the Stark & Wayne Bosh Bootstrapper aims to provide lifecycle management for the BOSH lifecycle manager. Zing! See the "Deep dive into deploy command" section below for greater understanding why the Stark & Wayne Bosh Bootstrapper is very useful.
 
 ## Installation
 
