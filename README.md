@@ -152,7 +152,7 @@ Done                          6/6 00:03:37
 Deleted deployment 'microbosh-aws-us-east-1', took 00:03:37 to complete
 ```
 
-## Deep dive into deploy command
+## Deep dive into the BOSH Bootstrap deploy command
 
 What is actually happening when you run `bosh-bootstrap deploy`?
 
@@ -246,6 +246,19 @@ The summary of the process of creating the Micro BOSH AMI is:
 
 This process takes the majority of the time to deploy a new/replacement Micro BOSH server.
 
+### Why can't I run BOSH Deployer from my laptop?
+
+One of the feature of the BOSH Bootstrapper is that you can run it from your local laptop. BOSH Deployer itself cannot be run from your laptop. The reason is hidden in the step-by-step AMI example above. In AWS, to create an EBS volume, create a snapshot and register it as an AMI, you need to be running the commands on an AWS server in the same target region as your future Micro BOSH server.
+
+The server that runs the BOSH Deployer is commonly called the Inception VM. For AWS you need an Inception VM in the same AWS region that you will provision your Micro BOSH server. Since a BOSH also manages a stemcell process similar to the above, your BOSH must be in the same AWS region that you a deploying BOSH releases.
+
+### How does BOSH Bootstrapper get around this requirement?
+
+The BOSH Bootstrapper can run from your laptop or locally from an Inception VM. 
+
+If you run it from your laptop, then it will prompt you to create a new Inception VM or for the host/username of a pre-existing Ubuntu server. The BOSH Bootstrapper will then use SSH to command the Inception VM to perform all the deployment steps discussed above.
+
+That is the core of the service being provided by the BOSH Bootstrapper - to prepare an Inception VM and to command it to deploy and upgrade Micro BOSHes.
 
 ## Internal configuration/settings
 
