@@ -109,6 +109,21 @@ EBS volume to create an AMI. The target region for the micro-bosh VM must theref
 
 The `deploy` command can be re-run and it will not prompt again for inputs. It aims to be idempotent. This means that if you see any errors when running `deploy`, such as unavailability of VMs or IP addresses, then when you resolve those issues you can re-run the `deploy` command and it will resume the bootstrap of micro-bosh (and the optional inception VM).
 
+## SSH access
+
+You can open an SSH shell with the Inception VM:
+
+```
+$ bosh-bootstrap ssh
+```
+
+You can also pass a COMMAND argument and that command will be run instead of the shell being opened.
+
+```
+$ bosh-bootstrap ssh 'whoami'
+ubuntu
+```
+
 ## Deleting micro BOSH
 
 The `bosh-bootstrap delete`  command will delete the target micro-bosh.
@@ -129,21 +144,6 @@ Delete micro BOSH
   delete stemcell (00:00:00)                                                    
 Done                          6/6 00:03:37                                      
 Deleted deployment 'microbosh-aws-us-east-1', took 00:03:37 to complete
-```
-
-## SSH access
-
-You can open an SSH shell with the Inception VM:
-
-```
-$ bosh-bootstrap ssh
-```
-
-You can also pass a COMMAND argument and that command will be run instead of the shell being opened.
-
-```
-$ bosh-bootstrap ssh 'whoami'
-ubuntu
 ```
 
 ## Internal configuration/settings

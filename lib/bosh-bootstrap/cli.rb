@@ -157,6 +157,7 @@ module Bosh::Bootstrap
             end
           end
         end
+        # If successfully validate inception VM, then save those settings.
         save_settings!
 
         if settings["inception"]["host"]
