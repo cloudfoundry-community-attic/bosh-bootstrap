@@ -1,4 +1,4 @@
-Copyright (c) 2012 Dr Nic Williams
+Copyright (c) 2012 Stark & Wayne LLC
 
 MIT License
 

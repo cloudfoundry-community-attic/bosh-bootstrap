@@ -305,3 +305,14 @@ micro_bosh_stemcell_name: "micro-bosh-stemcell-aws-0.6.4.tgz"
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Copyright
+
+All documentation and source code is copyright of Stark & Wayne LLC.
+
+## Subscription and Support
+
+This documentation & tool is freely available to all people and companies coming to CloudFoundry and BOSH.
+
+If you decide to run CloudFoundry and BOSH in production, please purchase a Subscription and Support Agreement with Stark & Wayne so we can continue to create and maintain top quality documentation and tools; and also provide you with bespoke support for your deployments. We want to help you be successfully.
+
