@@ -1,11 +1,14 @@
 # Bosh::Bootstrap
 
-Bootstrap a micro BOSH universe from one CLI command.
+Bootstrap a Micro BOSH universe from one CLI command. Also allows SSH access and the ability to delete created Micro BOSHes.
 
 ```
 $ bosh-bootstrap deploy
 Creating inception VM...
 Creating micro BOSH VM...
+
+$ bosh-bootstrap ssh
+Open SSH tunnel to inception VM...
 
 $ bosh-bootstrap delete
 Deleting micro BOSH VM...
