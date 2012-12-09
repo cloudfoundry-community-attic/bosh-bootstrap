@@ -152,6 +152,101 @@ Done                          6/6 00:03:37
 Deleted deployment 'microbosh-aws-us-east-1', took 00:03:37 to complete
 ```
 
+## Deep dive into deploy command
+
+What is actually happening when you run `bosh-bootstrap deploy`?
+
+At the heart of `bosh-bootstrap deploy` is the execution of the BOSH Deployer, a command provided with BOSH to bootstrap a single VM with all the parts of BOSH running on it. If you ran this command yourself you would run:
+
+```
+$ gem install bosh-deployer
+$ bosh download public stemcell some-stemcell.tgz
+$ bosh micro deploy path/to/some-stemcell.tgz
+```
+
+Unfortunately for this simple scenario, there are many little prerequisite steps before those three commands. The Stark & Wayne Bosh Bootstrapper replaces pages and pages of step-by-step instructions with a single command line that does everything. It even allows you to upgrade your Micro BOSH with newer BOSH releases: both publicly available stemcells and custom stemcells generated from the BOSH source code.
+
+To understand exactly what the `bosh-bootstrap deploy` command is doing, let's start with what the running parts of BOSH are and how `bosh micro deploy` deploys them.
+
+### What is in BOSH?
+
+A running BOSH, whether it is running on a single server or a cluster of servers, is a collection of processes. The core of BOSH is the Director and the Blobstore. The remaining processes provide support, storage or messaging.
+
+* The Director, the public API for the bosh CLI and coordinator of BOSH behavior
+* The Blobstore, to store and retrieve precompiled packages
+* Agents, run on each server within deployments
+* The Health Manager, to track the state of deployed systems (the infrastructure and running jobs)
+* Internal DNS, called PowerDNS, for internal unique naming of servers within BOSH deployments
+* Registry, for example AWS Registry, for tracking the infrastructure that has been provisioned (servers, persistent disks)
+* PostgreSQL
+* Redis
+
+When you deploy a BOSH using the BOSH Deployer (`bosh micro deploy`) or indirectly via the BOSH Bootstrapper, you are actually deploying a BOSH release that describes a BOSH called [bosh-release](https://github.com/cloudfoundry/bosh-release). The processes listed above are called "jobs" and you can see the full list of jobs inside a BOSH within the [jobs/ directory](https://github.com/cloudfoundry/bosh-release/jobs) of `bosh-release`.
+
+But you don't yet have a BOSH to deploy another BOSH.
+
+### How to get your first BOSH?
+
+The BOSH Deployer (`bosh micro deploy`) exists to spin you up a pre-baked server with all the packages and jobs running.
+
+When you run the BOSH Deployer on a server, it does not convert that server into a BOSH. Rather, it provisions a single brand new server, with all the required packages, configuration and startup scripts. We call this pre-baked server a Micro BOSH.
+
+A Micro BOSH server is a normal running server built from a base OS image that already contains all the packages, configuration and startup scripts for the jobs listed above.
+
+In BOSH terminology, call these pre-packaged base OS images "stemcells".
+
+For AWS, vSphere and OpenStack there are publicly available stemcells that can bootstrap a Micro BOSH for that infrastructure. To see the current list of all public Micro BOSH stemcells for all infrastructure providers; and to download one of them:
+
+```
+$ bosh public stemcells --tag micro
+$ bosh download public stemcell micro-bosh-stemcell-aws-0.6.4.tgz
+```
+
+The CloudFoundry BOSH team will release new public stemcells overtime. The BOSH Deployer allows you to upgrade to newer stemcells as easily as it is to deploy a Micro BOSH initially.
+
+```
+$ bosh micro deploy micro-bosh-stemcell-aws-0.6.4.tgz
+$ bosh micro deploy micro-stemcell-aws-0.7.0.tgz --update
+```
+
+### Configuring a Micro BOSH
+
+The command above will not work without first providing BOSH Deployer with configuration details. The stemcell file alone is not sufficient information. When we deploy or update a Micro BOSH we need to provide the following:
+
+* A static IP address - this IP address will be bound to the initial Micro BOSH server, and when the Micro BOSH is updated in future and the server is thrown away and replaced, then it is bound to the replacement servers
+* Server properties - the instance type (such as m1.large on AWS) or RAM/CPU combination (on vSphere)
+* Server persistent disk - a single persistent, attached disk volume will be provisioned and mounted at `/var/vcap/store`; when the Micro BOSH is updated is is unmounted, unattached from the current server and then reattached and remounted to the upgraded server
+* Infrastructure API credentials - the magic permissions for the Micro BOSH to provision servers and persistent disks for its BOSH deployments
+
+This information is to go into a file called `/path/to/deployments/NAME/micro_bosh.yml`. Before `bosh micro deploy` is run, we first need to tell BOSH Deployer which file contains the Micro BOSH deployment manifest.
+
+In the Stark & Wayne Bosh Bootstrapper, the manifests are stored at `/var/vcap/store/microboshes/deployments/NAME/micro_bosh.yml`.
+
+So the BOSH Deployer command that is run to specify the deployment manifest and run the deployment is:
+
+```
+$ bosh micro deployment `/var/vcap/store/microboshes/deployments/NAME/micro_bosh.yml`
+$ bosh micro deploy /var/vcap/store/stemcells/micro-bosh-stemcell-aws-0.6.4.tgz
+```
+
+### Why does it take so long to deploy Micro BOSH on AWS?
+
+On AWS it can take over 20 minutes to deploy or upgrade a Micro BOSH from a public stemcell. The majority of this time is taken with converting the stemcell file (such as `micro-bosh-stemcell-aws-0.6.4.tgz`) into an Amazon AMI.
+
+When you boot a new server on AWS you provide the base machine image for the root filesystem. This is called the Amazon Machine Image (AMI). For our Micro BOSH, we need an AMI that contains all the packages, process configuration and startup scripts. That is, we need to convert our stemcell into an AMI; then use the AMI to boot the Micro BOSH server.
+
+The BOSH Deployer performs all the hard work to create an AMI. Believe me, it is a lot of hard work.
+
+The summary of the process of creating the Micro BOSH AMI is:
+
+1. Create a new EBS volume (an attached disk) on the server running BOSH Deployer
+2. Unpack/upload the stemcell onto the EBS volume
+3. Create a snapshot of the EBS volume
+4. Register the snapshot as an AMI
+
+This process takes the majority of the time to deploy a new/replacement Micro BOSH server.
+
+
 ## Internal configuration/settings
 
 Once you've used the CLI it stores your settings for your BOSH, so that you can re-run the tool for upgrades or other future functionality.
