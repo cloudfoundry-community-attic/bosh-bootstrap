@@ -547,9 +547,9 @@ module Bosh::Bootstrap
           menu.prompt = "Choose AWS region:  "
           aws_regions.each do |region|
             menu.choice(region) do
-              settings[:region_code] = region
-              settings.fog_credentials[:region] = region
-              settings.bosh_cloud_properties.aws[:ec2_endpoint] = "ec2.#{region}.amazonaws.com"
+              settings["region_code"] = region
+              settings["fog_credentials"]["region"] = region
+              settings["bosh_cloud_properties"]["aws"]["ec2_endpoint"] = "ec2.#{region}.amazonaws.com"
               save_settings!
             end
           end
@@ -915,6 +915,7 @@ module Bosh::Bootstrap
           server.sshable?
 
           say "Mounting persistent disk as volume on inception VM..."
+          # TODO if any of these ssh calls fail; retry
           server.ssh(['sudo mkfs.ext4 /dev/vdc -F'])
           server.ssh(['sudo mkdir -p /var/vcap/store'])
           server.ssh(['sudo mount /dev/vdc /var/vcap/store'])
