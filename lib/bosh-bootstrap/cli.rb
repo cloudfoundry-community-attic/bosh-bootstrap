@@ -1061,10 +1061,6 @@ module Bosh::Bootstrap
           # get the Name field, reverse sort, and return the first item
           `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
         end
-
-        # * cd .../bosh/agent
-        # * rake stemcell2[aws,~/cf/bosh-release/micro/aws.yml,~/cf/bosh/release/dev_release/<latest>.tgz]
-        # * bosh micro deploy <new micro bosh stemcell>
       end
 
       def cyan; "\033[36m" end
