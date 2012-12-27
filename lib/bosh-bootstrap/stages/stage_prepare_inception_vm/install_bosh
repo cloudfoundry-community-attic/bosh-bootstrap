@@ -24,28 +24,24 @@ function install_gem() {
 if [[ "${INSTALL_BOSH_FROM_SOURCE}X" != "X" ]]; then
   mkdir -p /var/vcap/store/repos
   cd /var/vcap/store/repos
-  git clone https://github.com/cloudfoundry/bosh.git
+  if [[ -d bosh ]]; then
+    cd bosh
+    git pull origin master
+  else
+    git clone https://github.com/cloudfoundry/bosh.git
+  fi
 
   bosh_dir=/var/vcap/store/repos/bosh
-  cd $bosh_dir/common/
-  bundle install --without=development test
-  bundle exec rake install
+  for project in common cli deployer aws_registry openstack_registry; do
+    cd $bosh_dir/$project/
+    rm -rf pkg
+    bundle install --without=development test
+    gem build *.gemspec
+    mkdir -p pkg
+    mv *.gem pkg/
+    gem install pkg/*.gem --no-ri --no-rdoc
+  done
 
-  cd $bosh_dir/cli/
-  bundle install --without=development test
-  bundle exec rake install
-
-  cd $bosh_dir/deployer/
-  bundle install --without=development test
-  bundle exec rake install
-
-  cd $bosh_dir/aws_registry/
-  bundle install --without=development test
-  bundle exec rake install
-
-  cd $bosh_dir/openstack_registry/
-  bundle install --without=development test
-  bundle exec rake install
 else
   install_gem bosh_cli
   install_gem bosh_deployer
