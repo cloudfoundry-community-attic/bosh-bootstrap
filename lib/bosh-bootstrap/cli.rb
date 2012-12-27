@@ -178,7 +178,7 @@ module Bosh::Bootstrap
       end
 
       def deploy_stage_4_prepare_inception_vm
-        unless settings["inception"]["prepared"]
+        unless settings["inception"]["prepared"] && !settings["upgrade_deps"]
           header "Stage 4: Preparing the Inception VM"
           unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
             error "Failed to complete Stage 4: Preparing the Inception VM"
@@ -199,11 +199,7 @@ module Bosh::Bootstrap
           error "Failed to complete Stage 5: Deploying micro BOSH"
         end
 
-        if settings[:bosh_deployed]
-          confirm "Successfully updated micro BOSH"
-        else
-          confirm "Successfully created micro BOSH"
-        end
+        confirm "Successfully built micro BOSH"
       end
 
       def deploy_stage_6_setup_new_bosh
@@ -220,7 +216,6 @@ module Bosh::Bootstrap
         puts `bosh -u #{settings.bosh_username} -p #{settings.bosh_password} target #{settings.bosh.ip_address}`
         puts `bosh login #{settings.bosh_username} #{settings.bosh_password}`
 
-        settings[:bosh_deployed] = true
         save_settings!
 
         confirm "You are now targeting and logged in to your BOSH"
@@ -242,7 +237,6 @@ module Bosh::Bootstrap
         unless server.run(Bosh::Bootstrap::Stages::MicroBoshDelete.new(settings).commands)
           error "Failed to complete Stage 1: Delete micro BOSH"
         end
-        settings[:bosh_deployed] = false
         save_settings!
       end
 
