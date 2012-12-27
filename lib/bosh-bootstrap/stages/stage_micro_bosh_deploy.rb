@@ -100,7 +100,7 @@ module Bosh::Bootstrap::Stages
             "#{cloud_plugin.downcase}_registry" => { "address" => ipaddress }
           }
         }
-      }.to_yaml.gsub(" !ruby/hash:Settingslogic", "")
+      }.to_yaml.gsub(/![^ ]+\s/, '')
     end
   end
 end
