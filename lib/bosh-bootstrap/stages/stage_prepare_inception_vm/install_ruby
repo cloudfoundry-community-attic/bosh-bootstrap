@@ -3,6 +3,7 @@
 # Install ruby 1.9.3
 #
 # Options:
+# * $RUBY_VERSION - override ruby version to test/install
 # * $UPGRADE - re-install or upgrade ruby if already installed
 
 if [[ $EUID -ne 0 ]]; then
@@ -10,19 +11,26 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+RUBY_VERSION=${RUBY_VERSION:-'1.9.3-p362'}
+
 if [[ "$(which ruby)" == "" || "${UPGRADE}X" != "X" || ! ("$(ruby -v)" == "ruby 1.9.3*") ]]; then
-  echo "install: --no-ri --no-rdoc" > /etc/gemrc
-  echo "update: --no-ri --no-rdoc" >> /etc/gemrc
-  if [[ -x rvm ]]
+  if [[ -d /var/vcap/store/repos/ruby-build ]]
   then
-    rvm get stable
+    cd /var/vcap/store/repos
+    git clone git://github.com/sstephenson/ruby-build.git
+    cd ruby-build
+    ./install.sh
   else
-    curl -L get.rvm.io | bash -s stable
-    source /etc/profile.d/rvm.sh
+    cd /var/vcap/store/repos/ruby-build
+    git pull origin master
+    ./install.sh
   fi
-  command rvm install 1.9.3 # oh god this takes a long time
-  rvm 1.9.3
-  rvm alias create default 1.9.3
+  
+  rbenv-install $RUBY_VERSION
+  
+  rbenv rehash
+  rbenv set-default $RUBY_VERSION
+  ruby --version
 else
   echo Ruby 1.9.3 already installed
 fi

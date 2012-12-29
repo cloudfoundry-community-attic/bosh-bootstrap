@@ -15,6 +15,7 @@ function install_gem() {
   gem_name=$1
   if [[ ("${UPGRADE}X" != "X") || "$(gem list $gem_name | grep $gem_name)X" == "X" ]]; then
     gem install $gem_name --no-ri --no-rdoc
+    rbenv rehash
   else
     echo gem $gem_name already installed
   fi
