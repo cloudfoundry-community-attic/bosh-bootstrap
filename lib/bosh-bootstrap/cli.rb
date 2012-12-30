@@ -256,9 +256,7 @@ module Bosh::Bootstrap
         unless host = settings.inception[:host]
           exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
         end
-        unless username = settings.inception[:username]
-          exit "settings inception.username is missing"
-        end
+        username = 'vcap'
         exit system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].compact)
 
         # TODO how to use the specific private_key_path as configured in settings
