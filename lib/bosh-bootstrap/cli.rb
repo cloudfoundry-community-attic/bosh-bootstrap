@@ -751,6 +751,7 @@ module Bosh::Bootstrap
 
           # Format and mount the volume
           say "Mounting persistent disk as volume on inception VM..."
+          # TODO catch Errno::ETIMEDOUT and re-run ssh commands
           server.ssh(['sudo mkfs.ext4 /dev/sdi -F']) 
           server.ssh(['sudo mkdir -p /var/vcap/store'])
           server.ssh(['sudo mount /dev/sdi /var/vcap/store'])

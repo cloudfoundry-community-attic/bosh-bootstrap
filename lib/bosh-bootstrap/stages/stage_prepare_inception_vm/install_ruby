@@ -11,26 +11,20 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-RUBY_VERSION=${RUBY_VERSION:-'1.9.3-p362'}
+DISTRIB_CODENAME=lucid
 
-if [[ "$(which ruby)" == "" || "${UPGRADE}X" != "X" || ! ("$(ruby -v)" == "ruby 1.9.3*") ]]; then
-  if [[ -d /var/vcap/store/repos/ruby-build ]]
-  then
-    cd /var/vcap/store/repos
-    git clone git://github.com/sstephenson/ruby-build.git
-    cd ruby-build
-    ./install.sh
-  else
-    cd /var/vcap/store/repos/ruby-build
-    git pull origin master
-    ./install.sh
-  fi
+if [[ "$(which ruby)" == "" || "${UPGRADE}X" != "X" || ! ("$(ruby -v)" =~ "ruby 1.9.3") ]]; then
+  echo "Adding the Unboxed APT repository..."
+  echo "deb http://apt.unboxedconsulting.com/ $DISTRIB_CODENAME main" > /etc/apt/sources.list.d/unboxed.list
   
-  rbenv-install $RUBY_VERSION
-  
-  rbenv rehash
-  rbenv set-default $RUBY_VERSION
-  ruby --version
+  echo -e "\n Retrieving the PGP keys for the repository..."
+  wget -O - http://apt.unboxedconsulting.com/release.asc | apt-key add -
+
+  echo "Resynchronizing the package index files from their sources..."
+  apt-get update
+
+  echo -e "*** Installing Ruby 1.9.3...\n"
+  apt-get -y install ubxd-ruby1.9.3
 else
   echo Ruby 1.9.3 already installed
 fi
