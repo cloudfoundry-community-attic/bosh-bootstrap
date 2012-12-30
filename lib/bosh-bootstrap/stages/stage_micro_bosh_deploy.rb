@@ -101,7 +101,35 @@ module Bosh::Bootstrap::Stages
             "#{cloud_plugin.downcase}_registry" => { "address" => ipaddress }
           }
         }
-      }.to_yaml.gsub(" !ruby/hash:Settingslogic", "")
+      }.to_yaml.gsub(/![^ ]+\s/, '')
+      
+      # /![^ ]+\s/ removes object notation from the YAML which appears to cause problems when being interpretted by the 
+      # Ruby running on the inception vm. A before and after example would look like;
+      # 
+      #   properties: !map:Settingslogic
+      #     openstack: !map:Settingslogic
+      #       username: admin
+      #       api_key: xxxxxxxxxxxxxxxxxxx
+      #       tenant: CloudFoundry
+      #       auth_url: http://192.168.1.2:5000/v2.0/tokens
+      #       default_security_groups:
+      #       - !str:HighLine::String microbosh-openstack
+      #       default_key_name: !str:HighLine::String microbosh-openstack
+      #       private_key: /home/vcap/.ssh/microbosh-openstack.pem
+      # 
+      # The regex strips the !Module::ClassName notation out and the result looks as it should
+      # 
+      #   properties:
+      #     openstack:
+      #       username: admin
+      #       api_key: xxxxxxxxxxxxxxxxxxx
+      #       tenant: CloudFoundry
+      #       auth_url: http://192.168.1.2:5000/v2.0/tokens
+      #       default_security_groups:
+      #       - microbosh-openstack
+      #       default_key_name: microbosh-openstack
+      #       private_key: /home/vcap/.ssh/microbosh-openstack.pem
+
     end
   end
 end
