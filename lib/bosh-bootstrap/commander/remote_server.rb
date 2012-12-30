@@ -94,7 +94,7 @@ class Bosh::Bootstrap::Commander::RemoteServer
   def run_remote_script(remote_path, username)
     commands = [
       "chmod +x #{remote_path}",
-      "bash -lc 'sudo /usr/bin/env PATH=$PATH GEM_PATH=$GEM_PATH GEM_HOME=$GEM_HOME #{remote_path}'"
+      "bash -lc 'sudo /usr/bin/env PATH=$PATH #{remote_path}'"
     ]
     script_output = ""
     results = Fog::SSH.new(host, username).run(commands) do |stdout, stderr|

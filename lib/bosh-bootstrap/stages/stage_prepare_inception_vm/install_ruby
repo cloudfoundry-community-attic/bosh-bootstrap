@@ -23,8 +23,11 @@ if [[ "$(which ruby)" == "" || "${UPGRADE}X" != "X" || ! ("$(ruby -v)" =~ "ruby 
   echo "Resynchronizing the package index files from their sources..."
   apt-get update
 
-  echo -e "*** Installing Ruby 1.9.3...\n"
+  echo -e "Installing Ruby 1.9.3...\n"
   apt-get -y install ubxd-ruby1.9.3
+
+  echo -e "Upgrading to latest Rubygems..."
+  gem update --system
 else
   echo Ruby 1.9.3 already installed
 fi
