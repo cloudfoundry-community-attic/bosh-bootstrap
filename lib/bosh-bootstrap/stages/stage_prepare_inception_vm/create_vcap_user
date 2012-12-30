@@ -32,9 +32,9 @@ cp ~vcap/.ssh/id_rsa* ~/.ssh/
 
 bosh_app_dir=/var/vcap
 mkdir -p ${bosh_app_dir}
-for path in microboshes/deployments deployments releases repos stemcells tmp
+for path in microboshes microboshes/deployments deployments releases repos stemcells tmp bosh_cache
 do
-  echo "creating ${bosh_app_dir}/store/${path}"
+  echo "creating /var/vcap/store/${path}"
   mkdir -p ${bosh_app_dir}/store/${path}
   chown vcap:vcap ${bosh_app_dir}/store/${path}
 done
@@ -51,3 +51,13 @@ chown vcap:vcap /home/vcap/.ssh/authorized_keys
 echo "copying user '$ORIGUSER' .bashrc to vcap user"
 cp /home/${ORIGUSER}/.bashrc /home/vcap/
 chown vcap:vcap /home/vcap/.bashrc
+
+if [[ $(grep "export TMPDIR" /home/vcap/.bashrc) == "" ]]; then
+  echo "adding TMPDIR to .bashrc"
+  echo "export TMPDIR=/var/vcap/store/tmp" >> /home/vcap/.bashrc
+fi
+
+if [[ ! -h /home/vcap/.bosh_cache ]]; then
+  rm -rf ~vcap/.bosh_cache/
+  ln -s /var/vcap/store/bosh_cache ~vcap/.bosh_cache
+fi
