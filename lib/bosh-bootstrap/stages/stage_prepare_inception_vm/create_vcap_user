@@ -32,11 +32,22 @@ cp ~vcap/.ssh/id_rsa* ~/.ssh/
 
 bosh_app_dir=/var/vcap
 mkdir -p ${bosh_app_dir}
+
+# setup common folder for all folder/data
+# this is what could/should be mounted as a separate persistent disk
+# which is what is done for you if bosh-bootstrap creates the inception
+# server for you.
+
+store_dir=/var/vcap/store
+mkdir -p ${store_dir}
+chown vcap:vcap ${store_dir}
+
+# setup common folders used by bosh-bootstrap or bosh deployments
 for path in microboshes microboshes/deployments deployments releases repos stemcells tmp bosh_cache
 do
   echo "creating /var/vcap/store/${path}"
-  mkdir -p ${bosh_app_dir}/store/${path}
-  chown vcap:vcap ${bosh_app_dir}/store/${path}
+  mkdir -p ${store_dir}/${path}
+  chown vcap:vcap ${store_dir}/${path}
 done
 
 if [[ $(grep "vcap  ALL=(ALL) NOPASSWD:ALL" /etc/sudoers) == "" ]]; then
