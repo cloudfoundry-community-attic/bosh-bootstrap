@@ -582,8 +582,9 @@ module Bosh::Bootstrap
           settings[:bosh_security_group][:ports] = {}
           settings[:bosh_security_group][:ports][:ssh_access] = 22
           settings[:bosh_security_group][:ports][:message_bus] = 6868
+          settings[:bosh_security_group][:ports][:blobstore] = 25250
           settings[:bosh_security_group][:ports][:bosh_director] = 25555
-          settings[:bosh_security_group][:ports][:aws_registry] = 25888
+          settings[:bosh_security_group][:ports][:aws_registry] = 25777
           settings.bosh_security_group.ports.values.each do |port|
             sg.authorize_port_range(port..port)
             say "opened port #{port} in security group #{security_group_name}"
