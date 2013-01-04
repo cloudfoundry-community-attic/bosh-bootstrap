@@ -16,9 +16,9 @@ module Bosh::Bootstrap
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
     method_option :"private-key", :type => :string, :desc => "Local passphrase-less private key path"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
-    method_option :git, :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
-    method_option :latest, :type => :boolean, :desc => "Use latest micro-bosh stemcell; possibly not tagged stable"
-    method_option :custom, :type => :boolean, :desc => "Create custom stemcell from BOSH git source"
+    method_option :"edge-deployer", :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
+    method_option :"latest-stemcell", :type => :boolean, :desc => "Use latest micro-bosh stemcell; possibly not tagged stable"
+    method_option :"edge-stemcell", :type => :boolean, :desc => "Create custom stemcell from BOSH git source"
     def deploy
       load_deploy_options # from method_options above
 
@@ -292,13 +292,13 @@ module Bosh::Bootstrap
       def load_deploy_options
         settings["fog_path"] = File.expand_path(options[:fog] || "~/.fog")
 
-        settings["bosh_git_source"] = options[:git] # use bosh git repo instead of rubygems
+        settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
 
         # determine which micro-bosh stemcell to download/create
-        if options[:latest]
+        if options[:"latest-stemcell"]
           settings["micro_bosh_stemcell_type"] = "latest"
           settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
-        elsif options[:custom]
+        elsif options[:"edge-stemcell"]
           settings["micro_bosh_stemcell_type"] = "custom"
           settings["micro_bosh_stemcell_name"] = "custom"
         else
