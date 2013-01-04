@@ -581,6 +581,7 @@ module Bosh::Bootstrap
           settings[:bosh_security_group][:name] = security_group_name
           settings[:bosh_security_group][:ports] = {}
           settings[:bosh_security_group][:ports][:ssh_access] = 22
+          settings[:bosh_security_group][:ports][:nats_server] = 4222
           settings[:bosh_security_group][:ports][:message_bus] = 6868
           settings[:bosh_security_group][:ports][:blobstore] = 25250
           settings[:bosh_security_group][:ports][:bosh_director] = 25555
