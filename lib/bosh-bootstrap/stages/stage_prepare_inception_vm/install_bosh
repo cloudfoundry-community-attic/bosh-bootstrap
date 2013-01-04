@@ -46,3 +46,9 @@ else
   install_gem bosh_cli
   install_gem bosh_deployer
 fi
+
+if [[ ! -d /var/tmp/bosh ]]; then
+  echo "Symlinking the expected stemcell creation folder into mounted volume..."
+  mkdir -p /var/vcap/store/tmp/bosh
+  ln -s /var/vcap/store/tmp/bosh /var/tmp/bosh
+fi
