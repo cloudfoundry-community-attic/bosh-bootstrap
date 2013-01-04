@@ -23,6 +23,8 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}X" == "X" ]]; then
   exit 1
 fi
 
+export TMPDIR=/var/vcap/store/tmp
+
 if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
   BOSH_RELEASE_REPO=${BOSH_RELEASE_REPO:-'https://github.com/cloudfoundry/bosh-release.git'}
