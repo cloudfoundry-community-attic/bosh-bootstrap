@@ -23,8 +23,6 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}X" == "X" ]]; then
   exit 1
 fi
 
-export TMPDIR=/var/vcap/store/tmp
-
 if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
   BOSH_RELEASE_REPO=${BOSH_RELEASE_REPO:-'https://github.com/cloudfoundry/bosh-release.git'}
@@ -32,6 +30,12 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
   BOSH_RELEASE_DIR=/var/vcap/store/releases/$BOSH_RELEASE_DIRNAME
 
   echo "Creating custom stemcell..."
+
+  if [[ -d /var/tmp/bosh/ ]]; then
+    echo "But first, cleaning out previous stemcell temporary files..."
+    rm -rf /var/tmp/bosh
+  fi
+
 
   cd $(dirname $BOSH_RELEASE_DIR)
   if [[ -d $BOSH_RELEASE_DIRNAME ]]; then
