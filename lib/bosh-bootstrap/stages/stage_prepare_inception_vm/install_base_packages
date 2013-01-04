@@ -6,7 +6,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 apt-get update
-apt-get install build-essential libsqlite3-dev curl rsync git-core \
+apt-get install build-essential libsqlite3-dev curl rsync git-core tmux \
   libmysqlclient-dev libxml2-dev libxslt-dev libpq-dev libsqlite3-dev \
   genisoimage mkpasswd \
   debootstrap kpartx qemu-kvm -y
