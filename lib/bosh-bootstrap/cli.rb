@@ -54,6 +54,8 @@ module Bosh::Bootstrap
     end
 
     no_tasks do
+      DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
+
       def deploy_stage_1_choose_infrastructure_provider
         header "Stage 1: Choose infrastructure"
         unless settings[:fog_credentials]
@@ -747,7 +749,8 @@ module Bosh::Bootstrap
         unless settings["inception"]["disk_size"]
           server ||= fog_compute.servers.get(settings.inception.server_id)
 
-          disk_size = 16 # Gb
+          disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
+
           unless volume = server.volumes.all.find {|v| v.device == "/dev/sdi"}
             say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
             volume = fog_compute.volumes.create(:size => disk_size, :device => "/dev/sdi", :availability_zone => server.availability_zone)
