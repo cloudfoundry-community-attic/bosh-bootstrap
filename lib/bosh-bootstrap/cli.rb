@@ -536,7 +536,7 @@ module Bosh::Bootstrap
 
       def choose_aws_region
         hl.choose do |menu|
-          menu.prompt = "Choose AWS region:  "
+          menu.prompt = "Choose AWS region (default: #{default_aws_region}): "
           aws_regions.each do |region|
             menu.choice(region) do
               settings["region_code"] = region
@@ -544,6 +544,7 @@ module Bosh::Bootstrap
               settings["bosh_cloud_properties"]["aws"]["ec2_endpoint"] = "ec2.#{region}.amazonaws.com"
               save_settings!
             end
+            menu.default = default_aws_region
           end
         end
         true
@@ -553,6 +554,10 @@ module Bosh::Bootstrap
       # FIXME weird that fog has no method to return this list
       def aws_regions
         ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'sa-east-1', 'us-east-1', 'us-west-1', 'us-west-2']
+      end
+
+      def default_aws_region
+        'us-east-1'
       end
 
       # Creates a security group.
