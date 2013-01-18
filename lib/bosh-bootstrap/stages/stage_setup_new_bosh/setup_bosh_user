@@ -12,12 +12,18 @@
 set -e # exit immediately if a simple command exits with a non-zero status
 set -u # report the usage of uninitialized variables
 
-echo "Initially targeting micro-bosh..."
-bosh -u admin -p admin target $BOSH_HOST
+cd /var/vcap/store/microboshes/deployments/
 
-echo "Creating initial user $BOSH_USERNAME..."
-bosh login admin admin
-bosh create user $BOSH_USERNAME $BOSH_PASSWORD
+if [[ -f $BOSH_NAME/new_bosh_deployed ]]; then
+  echo "Initially targeting micro-bosh..."
+  bosh -u admin -p admin target $BOSH_HOST
+
+  echo "Creating initial user $BOSH_USERNAME..."
+  bosh login admin admin
+  bosh create user $BOSH_USERNAME $BOSH_PASSWORD
+
+  rm -f $BOSH_NAME/new_bosh_deployed
+fi
 
 echo "Login as $BOSH_USERNAME..."
 bosh login $BOSH_USERNAME $BOSH_PASSWORD

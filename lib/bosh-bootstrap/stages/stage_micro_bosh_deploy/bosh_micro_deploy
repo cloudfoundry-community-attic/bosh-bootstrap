@@ -31,4 +31,5 @@ if [[ -f bosh-deployments.yml && "$(grep $BOSH_NAME bosh-deployments.yml)" != ""
 else
   echo "Performing initial deploy of micro BOSH $BOSH_NAME"
   bosh -n micro deploy $MICRO_BOSH_STEMCELL_PATH
+  touch $BOSH_NAME/new_bosh_deployed # to communicate with setup_bosh_user script
 fi
