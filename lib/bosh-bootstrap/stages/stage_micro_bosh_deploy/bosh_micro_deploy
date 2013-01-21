@@ -14,6 +14,7 @@ set -u # report the usage of uninitialized variables
 MICRO_BOSH_STEMCELL_PATH=/var/vcap/store/stemcells/$MICRO_BOSH_STEMCELL_NAME
 
 export COLUMNS=80 # force a small width for progress bar
+export TMPDIR=/var/vcap/store/tmp
 
 cd /var/vcap/store/microboshes/deployments/
 bosh -n micro deployment $BOSH_NAME
