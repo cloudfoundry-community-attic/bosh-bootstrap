@@ -308,6 +308,10 @@ module Bosh::Bootstrap
           settings["micro_bosh_stemcell_type"] ||= "stable"
         end
 
+        # once a stemcell is downloaded or created; these fields above should
+        # be uploaded with values such as:
+        #  -> settings["micro_bosh_stemcell_name"] = "micro-bosh-stemcell-aws-0.8.1.tgz"
+
         if options["private-key"]
           private_key_path = File.expand_path(options["private-key"])
           unless File.exists?(private_key_path)
