@@ -547,7 +547,7 @@ module Bosh::Bootstrap
             menu.choice(region) do
               settings["region_code"] = region
               settings["fog_credentials"]["region"] = region
-              settings["bosh_cloud_properties"]["aws"]["ec2_endpoint"] = "ec2.#{region}.amazonaws.com"
+              settings["bosh_cloud_properties"]["aws"]["region"] = region
               save_settings!
             end
             menu.default = default_aws_region
