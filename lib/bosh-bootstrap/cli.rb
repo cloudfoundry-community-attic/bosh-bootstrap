@@ -570,60 +570,38 @@ module Bosh::Bootstrap
       end
 
       # Creates a security group.
-      def create_security_group(security_group_name)
-        if aws?
-          create_aws_security_group(security_group_name)
-        elsif openstack?
-          create_openstack_security_group(security_group_name)
-        else
-          raise "implement #create_security_group for #{settings.fog_credentials.provider}"
-        end
-      end
-
-      # Creates an AWS security group.
       # Also sets up the bosh_cloud_properties for the remote server
       #
       # Adds settings:
       # * bosh_security_group.name
       # * bosh_security_group.ports
       # * bosh_cloud_properties.aws.default_security_groups
-      def create_aws_security_group(security_group_name)
-        ports {
-          ssh_access: 22,
-          nats_server: 4222,
-          message_bus: 6868,
-          blobstore: 25250,
-          bosh_director: 25555,
-          aws_registry: 25777
-        }
+      def create_security_group(security_group_name)
+        ports = if aws?
+          {
+            ssh_access: 22,
+            nats_server: 4222,
+            message_bus: 6868,
+            blobstore: 25250,
+            bosh_director: 25555,
+            aws_registry: 25777
+          }
+        elsif openstack?
+          {
+            ssh_access: 22,
+            nats_server: 4222,
+            message_bus: 6868,
+            blobstore: 25250,
+            bosh_director: 25555,
+            openstack_registry: 25889
+          }
+        else
+          raise "Please specific required ports for this provider"
+        end
+
         provider.create_security_group(security_group_name, "microbosh", ports)
 
         settings["bosh_cloud_properties"]["aws"]["default_security_groups"] = [security_group_name]
-        settings["bosh_security_group"]["name"] = security_group_name
-        settings["bosh_security_group"]["ports"] = {}
-        ports.each { |name, port| settings["bosh_security_group"]["ports"][name.to_s] = port }
-        save_settings!
-      end
-
-      # Creates a OpenStack security group.
-      # Also sets up the bosh_cloud_properties for the remote server
-      #
-      # Adds settings:
-      # * bosh_security_group.name
-      # * bosh_security_group.ports
-      # * bosh_cloud_properties.openstack.default_security_groups
-      def create_openstack_security_group(security_group_name)
-        ports {
-          ssh_access: 22,
-          nats_server: 4222,
-          message_bus: 6868,
-          blobstore: 25250,
-          bosh_director: 25555,
-          openstack_registry: 25889
-        }
-        provider.create_security_group(security_group_name, "microbosh", ports)
-
-        settings["bosh_cloud_properties"]["openstack"]["default_security_groups"] = [security_group_name]
         settings["bosh_security_group"]["name"] = security_group_name
         settings["bosh_security_group"]["ports"] = {}
         ports.each { |name, port| settings["bosh_security_group"]["ports"][name.to_s] = port }
