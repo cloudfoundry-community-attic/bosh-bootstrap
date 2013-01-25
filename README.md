@@ -7,7 +7,7 @@ The Stark & Wayne Bosh Bootstrapper is the simplest way to get a Micro BOSH runn
 Bootstrap a Micro BOSH universe from one CLI command. Also allows SSH access and the ability to delete created Micro BOSHes.
 
 ```
-$ bosh-bootstrap deploy
+$ bosh-bootstrap deploy --latest-stemcell
 Creating inception VM...
 Creating micro BOSH VM...
 
@@ -37,7 +37,7 @@ $ gem install bosh-bootstrap
 The first time you use `bosh-bootstrap` it will create everything necessary. The example output below includes user prompts.
 
 ```
-$ bosh-bootstrap deploy
+$ bosh-bootstrap deploy --latest-stemcell
 
 Stage 1: Choose infrastructure
 
@@ -160,8 +160,8 @@ At the heart of `bosh-bootstrap deploy` is the execution of the BOSH Deployer, a
 
 ```
 $ gem install bosh-deployer
-$ bosh download public stemcell some-stemcell.tgz
-$ bosh micro deploy path/to/some-stemcell.tgz
+$ bosh download public stemcell some-microbosh-stemcell.tgz
+$ bosh micro deploy some-microbosh-stemcell.tgz
 ```
 
 Unfortunately for this simple scenario, there are many little prerequisite steps before those three commands. The Stark & Wayne Bosh Bootstrapper replaces pages and pages of step-by-step instructions with a single command line that does everything. It even allows you to upgrade your Micro BOSH with newer BOSH releases: both publicly available stemcells and custom stemcells generated from the BOSH source code.
