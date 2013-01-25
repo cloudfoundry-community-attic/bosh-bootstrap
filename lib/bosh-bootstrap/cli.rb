@@ -598,6 +598,7 @@ module Bosh::Bootstrap
         }
         provider.create_security_group(security_group_name, "microbosh", ports)
 
+        settings["bosh_cloud_properties"]["aws"]["default_security_groups"] = [security_group_name]
         settings[:bosh_security_group][:name] = security_group_name
         settings[:bosh_security_group][:ports] = ports
         save_settings!
