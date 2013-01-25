@@ -739,9 +739,9 @@ module Bosh::Bootstrap
           save_settings!
         end
 
-        unless settings["inception"]["ip_address"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
+        server ||= fog_compute.servers.get(settings["inception"]["server_id"])
 
+        unless settings["inception"]["ip_address"]
           say "Provisioning IP address for inception VM..."
           ip_address = acquire_ip_address
           associate_ip_address_with_server(ip_address, server)
@@ -752,8 +752,6 @@ module Bosh::Bootstrap
         end
 
         unless settings["inception"]["disk_size"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
-
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
           device = "/dev/sdi"
           provision_and_mount_volume(server, disk_size, device)
@@ -769,7 +767,6 @@ module Bosh::Bootstrap
         # This way we can always rerun the CLI and rerun this method
         # and idempotently get an inception VM
         unless settings["inception"]["host"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
           settings["inception"]["host"] = server.dns_name
           save_settings!
         end
@@ -869,9 +866,9 @@ module Bosh::Bootstrap
           save_settings!
         end
 
-        unless settings["inception"]["ip_address"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
+        server ||= fog_compute.servers.get(settings["inception"]["server_id"])
 
+        unless settings["inception"]["ip_address"]
           say "Provisioning IP address for inception VM..."
           ip_address = acquire_ip_address
           associate_ip_address_with_server(ip_address, server)
@@ -881,8 +878,6 @@ module Bosh::Bootstrap
         end
 
         unless settings["inception"]["disk_size"]
-          server ||= fog_compute.servers.get(settings["inception"]["server_id"])
-
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
           device = "/dev/vdc"
           provision_and_mount_volume(server, disk_size, device)
@@ -936,7 +931,6 @@ module Bosh::Bootstrap
         # This way we can always rerun the CLI and rerun this method
         # and idempotently get an inception VM
         unless settings["inception"]["host"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
           settings["inception"]["host"] = settings["inception"]["ip_address"]
           save_settings!
         end
