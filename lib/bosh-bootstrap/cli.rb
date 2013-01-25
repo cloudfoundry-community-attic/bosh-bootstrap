@@ -33,20 +33,20 @@ module Bosh::Bootstrap
       deploy_stage_6_setup_new_bosh
     end
 
-    desc "delete", "Delete Micro BOSH"
-    method_option :all, :type => :boolean, :desc => "Delete all micro-boshes and inception VM [coming soon]"
-    def delete
-      delete_stage_1_target_inception_vm
-
-      if options[:all]
-        error "I'm sorry; the awesome --all flag is not yet implemented"
-        delete_all_stage_2_delete_micro_boshes
-        delete_all_stage_3_delete_inception_vm
-      else
-        delete_one_stage_2_delete_micro_bosh
-      end
-    end
-
+    # desc "delete", "Delete Micro BOSH"
+    # method_option :all, :type => :boolean, :desc => "Delete all micro-boshes and inception VM [coming soon]"
+    # def delete
+    #   delete_stage_1_target_inception_vm
+    # 
+    #   if options[:all]
+    #     error "I'm sorry; the awesome --all flag is not yet implemented"
+    #     delete_all_stage_2_delete_micro_boshes
+    #     delete_all_stage_3_delete_inception_vm
+    #   else
+    #     delete_one_stage_2_delete_micro_bosh
+    #   end
+    # end
+    # 
     desc "ssh [COMMAND]", "Open an ssh session to the inception VM [do nothing if local machine is inception VM]"
     long_desc <<-DESC
       If a command is supplied, it will be run, otherwise a session will be
