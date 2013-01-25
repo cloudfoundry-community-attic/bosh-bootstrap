@@ -5,6 +5,16 @@ module Bosh; module Providers; end; end
 require "bosh/providers/base_provider"
 
 class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
+  # supported by fog 1.6.0
+  # FIXME weird that fog has no method to return this list
+  def region_labels
+    ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'sa-east-1', 'us-east-1', 'us-west-1', 'us-west-2']
+  end
+
+  def default_region_label
+    'us-east-1'
+  end
+
   # @return [Integer] megabytes of RAM for requested flavor of server
   def ram_for_server_flavor(server_flavor_id)
     if flavor = fog_compute_flavor(server_flavor_id)
@@ -26,6 +36,10 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
   #   :id => 't1.micro', :name => 'Micro Instance', :ram => 613}
   def aws_compute_flavors
     Fog::Compute::AWS::FLAVORS
+  end
+
+  def aws_compute_flavor_ids
+    aws_compute_flavors.map { |fl| fl[:id] }
   end
 
   # Creates or reuses an AWS security group and opens ports.

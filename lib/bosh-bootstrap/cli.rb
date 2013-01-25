@@ -499,7 +499,7 @@ module Bosh::Bootstrap
           props = settings[:bosh_cloud_properties][:aws]
           props[:access_key_id] = settings.fog_credentials.aws_access_key_id
           props[:secret_access_key] = settings.fog_credentials.aws_secret_access_key
-          # props[:ec2_endpoint] = "ec2.REGION.amazonaws.com" - via +choose_aws_region+            
+          # props[:region] = REGION - via +choose_aws_region+            
           # props[:default_key_name] = "microbosh"  - via +create_aws_key_pair+
           # props[:ec2_private_key] = "/home/vcap/.ssh/microbosh.pem" - via +create_aws_key_pair+
           # props[:default_security_groups] = ["microbosh"], - via +create_aws_security_group+
@@ -538,12 +538,15 @@ module Bosh::Bootstrap
         if aws?
           choose_aws_region
         else
-          settings[:region_code] = nil
+          settings["region_code"] = nil
           false
         end
       end
 
       def choose_aws_region
+        aws_regions = provider.region_labels
+        default_aws_region = provider.default_region_label
+
         hl.choose do |menu|
           menu.prompt = "Choose AWS region (default: #{default_aws_region}): "
           aws_regions.each do |region|
@@ -559,49 +562,30 @@ module Bosh::Bootstrap
         true
       end
 
-      # supported by fog 1.6.0
-      # FIXME weird that fog has no method to return this list
-      def aws_regions
-        ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'sa-east-1', 'us-east-1', 'us-west-1', 'us-west-2']
-      end
-
-      def default_aws_region
-        'us-east-1'
-      end
-
       # Creates a security group.
       # Also sets up the bosh_cloud_properties for the remote server
       #
       # Adds settings:
       # * bosh_security_group.name
       # * bosh_security_group.ports
-      # * bosh_cloud_properties.aws.default_security_groups
+      # * bosh_cloud_properties.<bosh_provider>.default_security_groups
       def create_security_group(security_group_name)
-        ports = if aws?
-          {
-            ssh_access: 22,
-            nats_server: 4222,
-            message_bus: 6868,
-            blobstore: 25250,
-            bosh_director: 25555,
-            aws_registry: 25777
-          }
+        ports = {
+          ssh_access: 22,
+          nats_server: 4222,
+          message_bus: 6868,
+          blobstore: 25250,
+          bosh_director: 25555
+        }
+        if aws?
+          ports[:aws_registry] = 25777
         elsif openstack?
-          {
-            ssh_access: 22,
-            nats_server: 4222,
-            message_bus: 6868,
-            blobstore: 25250,
-            bosh_director: 25555,
-            openstack_registry: 25889
-          }
-        else
-          raise "Please specific required ports for this provider"
+          ports[:openstack_registry] = 25889
         end
 
         provider.create_security_group(security_group_name, "microbosh", ports)
 
-        settings["bosh_cloud_properties"]["aws"]["default_security_groups"] = [security_group_name]
+        settings["bosh_cloud_properties"][provider_name]["default_security_groups"] = [security_group_name]
         settings["bosh_security_group"]["name"] = security_group_name
         settings["bosh_security_group"]["ports"] = {}
         ports.each { |name, port| settings["bosh_security_group"]["ports"][name.to_s] = port }
@@ -1016,6 +1000,10 @@ module Bosh::Bootstrap
           # get the Name field, reverse sort, and return the first item
           `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
         end
+      end
+
+      def provider_name
+        settings.bosh_provider
       end
 
       # a helper object for the target BOSH provider
