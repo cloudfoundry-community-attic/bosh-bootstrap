@@ -37,9 +37,9 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
   #   http: 80,
   #   https: 443
   # }
-  def create_security_group(security_group_name, ports)
+  def create_security_group(security_group_name, description, ports)
     unless sg = fog_compute.security_groups.get(security_group_name)
-      sg = fog_compute.security_groups.create(name: security_group_name, description: "microbosh")
+      sg = fog_compute.security_groups.create(name: security_group_name, description: description)
       puts "Created security group #{security_group_name}"
     else
       puts "Reusing security group #{security_group_name}"

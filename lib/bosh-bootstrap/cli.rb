@@ -588,26 +588,19 @@ module Bosh::Bootstrap
       # * bosh_security_group.ports
       # * bosh_cloud_properties.aws.default_security_groups
       def create_aws_security_group(security_group_name)
-        unless fog_compute.security_groups.get(security_group_name)
-          sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
-          settings.bosh_cloud_properties["aws"]["default_security_groups"] = [security_group_name]
-          settings[:bosh_security_group] = {}
-          settings[:bosh_security_group][:name] = security_group_name
-          settings[:bosh_security_group][:ports] = {}
-          settings[:bosh_security_group][:ports][:ssh_access] = 22
-          settings[:bosh_security_group][:ports][:nats_server] = 4222
-          settings[:bosh_security_group][:ports][:message_bus] = 6868
-          settings[:bosh_security_group][:ports][:blobstore] = 25250
-          settings[:bosh_security_group][:ports][:bosh_director] = 25555
-          settings[:bosh_security_group][:ports][:aws_registry] = 25777
-          settings.bosh_security_group.ports.values.each do |port|
-            sg.authorize_port_range(port..port)
-            say "opened port #{port} in security group #{security_group_name}"
-          end
-          save_settings!
-        else
-          error "AWS security group '#{security_group_name}' already exists. Rename BOSH or delete old security group manually and re-run CLI."
-        end
+        ports {
+          ssh_access: 22,
+          nats_server: 4222,
+          message_bus: 6868,
+          blobstore: 25250,
+          bosh_director: 25555,
+          aws_registry: 25777
+        }
+        provider.create_security_group(security_group_name, "microbosh", ports)
+
+        settings[:bosh_security_group][:name] = security_group_name
+        settings[:bosh_security_group][:ports] = ports
+        save_settings!
       end
 
       # Creates a OpenStack security group.
