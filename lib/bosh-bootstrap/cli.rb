@@ -600,7 +600,8 @@ module Bosh::Bootstrap
 
         settings["bosh_cloud_properties"]["aws"]["default_security_groups"] = [security_group_name]
         settings["bosh_security_group"]["name"] = security_group_name
-        settings["bosh_security_group"]["ports"] = ports
+        settings["bosh_security_group"]["ports"] = {}
+        ports.each { |name, port| settings["bosh_security_group"]["ports"][name.to_s] = port }
         save_settings!
       end
 
@@ -624,7 +625,8 @@ module Bosh::Bootstrap
 
         settings["bosh_cloud_properties"]["openstack"]["default_security_groups"] = [security_group_name]
         settings["bosh_security_group"]["name"] = security_group_name
-        settings["bosh_security_group"]["ports"] = ports
+        settings["bosh_security_group"]["ports"] = {}
+        ports.each { |name, port| settings["bosh_security_group"]["ports"][name.to_s] = port }
         save_settings!
       end
 
