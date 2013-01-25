@@ -612,10 +612,7 @@ module Bosh::Bootstrap
       # * bosh_cloud_properties.openstack.default_security_groups
       def create_openstack_security_group(security_group_name)
         unless fog_compute.security_groups.find { |sg| sg.name == security_group_name }
-          # Hack until fog 1.9 is released
-          # sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
-          data = fog_compute.create_security_group(security_group_name, "microbosh")
-          sg = fog_compute.security_groups.get(data.body['security_group']['id'])
+          sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
           settings.bosh_cloud_properties["openstack"]["default_security_groups"] = [security_group_name]
           settings[:bosh_security_group] = {}
           settings[:bosh_security_group][:name] = security_group_name
