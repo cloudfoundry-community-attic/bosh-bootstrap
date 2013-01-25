@@ -599,8 +599,8 @@ module Bosh::Bootstrap
         provider.create_security_group(security_group_name, "microbosh", ports)
 
         settings["bosh_cloud_properties"]["aws"]["default_security_groups"] = [security_group_name]
-        settings[:bosh_security_group][:name] = security_group_name
-        settings[:bosh_security_group][:ports] = ports
+        settings["bosh_security_group"]["name"] = security_group_name
+        settings["bosh_security_group"]["ports"] = ports
         save_settings!
       end
 
@@ -612,24 +612,20 @@ module Bosh::Bootstrap
       # * bosh_security_group.ports
       # * bosh_cloud_properties.openstack.default_security_groups
       def create_openstack_security_group(security_group_name)
-        unless fog_compute.security_groups.find { |sg| sg.name == security_group_name }
-          sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
-          settings.bosh_cloud_properties["openstack"]["default_security_groups"] = [security_group_name]
-          settings[:bosh_security_group] = {}
-          settings[:bosh_security_group][:name] = security_group_name
-          settings[:bosh_security_group][:ports] = {}
-          settings[:bosh_security_group][:ports][:ssh_access] = 22
-          settings[:bosh_security_group][:ports][:message_bus] = 6868
-          settings[:bosh_security_group][:ports][:bosh_director] = 25555
-          settings[:bosh_security_group][:ports][:openstack_registry] = 25889
-          settings.bosh_security_group.ports.values.each do |port|
-            sg.create_security_group_rule(port, port)
-            say "opened port #{port} in security group #{security_group_name}"
-          end
-          save_settings!
-        else
-          error "OpenStack security group '#{security_group_name}' already exists. Rename BOSH or delete old security group manually and re-run CLI."
-        end
+        ports {
+          ssh_access: 22,
+          nats_server: 4222,
+          message_bus: 6868,
+          blobstore: 25250,
+          bosh_director: 25555,
+          openstack_registry: 25889
+        }
+        provider.create_security_group(security_group_name, "microbosh", ports)
+
+        settings["bosh_cloud_properties"]["openstack"]["default_security_groups"] = [security_group_name]
+        settings["bosh_security_group"]["name"] = security_group_name
+        settings["bosh_security_group"]["ports"] = ports
+        save_settings!
       end
 
       # Creates a key pair.
