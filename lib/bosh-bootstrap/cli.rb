@@ -5,9 +5,12 @@ require "fileutils"
 require "fog"
 require "escape"
 
+require "bosh-bootstrap/helpers/fog_setup"
+
 module Bosh::Bootstrap
   class Cli < Thor
     include Thor::Actions
+    include Bosh::Bootstrap::Helpers::FogSetup
 
     attr_reader :fog_credentials
     attr_reader :server
@@ -740,10 +743,8 @@ module Bosh::Bootstrap
           server ||= fog_compute.servers.get(settings.inception.server_id)
 
           say "Provisioning IP address for inception VM..."
-          ip_address = provision_elastic_ip_address # returns IP as a String
-          address = fog_compute.addresses.get(ip_address)
-          address.server = server
-          server.reload
+          ip_address = acquire_ip_address
+          associate_ip_address_with_server(ip_address, server)
           host = server.dns_name
 
           settings["inception"]["ip_address"] = ip_address
@@ -882,10 +883,8 @@ module Bosh::Bootstrap
           server ||= fog_compute.servers.get(settings.inception.server_id)
 
           say "Provisioning IP address for inception VM..."
-          ip_address = provision_floating_ip_address # returns IP as a String
-          address = fog_compute.addresses.find { |a| a.ip == ip_address }
-          address.server = server
-          server.reload
+          ip_address = acquire_ip_address
+          associate_ip_address_with_server(ip_address, server)
 
           settings["inception"]["ip_address"] = ip_address
           save_settings!
@@ -957,33 +956,10 @@ module Bosh::Bootstrap
         public_ip
       end
 
-      # fog connection object to Compute tasks (VMs, IP addresses)
-      def fog_compute
-        # Fog::Compute.new requires Hash with keys that are symbols
-        # but Settings converts all keys to strings
-        # So create a version of settings.fog_credentials with symbol keys
-        credentials_with_symbols = settings.fog_credentials.inject({}) do |creds, key_pair|
-          key, value = key_pair
-          creds[key.to_sym] = value
-          creds
-        end
-        @fog_compute ||= Fog::Compute.new(credentials_with_symbols)
-      end
-
-      def fog_config
-        @fog_config ||= begin
-          if File.exists?(fog_config_path)
-            say "Found infrastructure API credentials at #{fog_config_path} (override with --fog)"
-            YAML.load_file(fog_config_path)
-          else
-            say "No existing #{fog_config_path} fog configuration file", :yellow
-            {}
-          end
-        end
-      end
-
-      def fog_config_path
-        settings.fog_path
+      def associate_ip_address_with_server(ip_address, server)
+        address = fog_compute.addresses.get(ip_address)
+        address.server = server
+        server.reload
       end
 
       def display_inception_ssh_access
