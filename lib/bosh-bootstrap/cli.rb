@@ -881,7 +881,7 @@ module Bosh::Bootstrap
         end
 
         unless settings["inception"]["disk_size"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
+          server ||= fog_compute.servers.get(settings["inception"]["server_id"])
 
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
           device = "/dev/vdc"
