@@ -949,32 +949,12 @@ module Bosh::Bootstrap
       # Provision or provide an IP address to use
       # For AWS, it will dynamically provision an elastic IP
       # For OpenStack, it will dynamically provision a floating IP
-      # For other providers, it may opt to prompt for a static IP
-      # to use.
       def acquire_ip_address
-        if aws?
-          provision_elastic_ip_address
-        elsif openstack?
-          provision_floating_ip_address
-        else
-          hl.ask("What static IP to use for micro BOSH?  ")
+        unless public_ip = provider.provision_public_ip_address
+          say "Unable to acquire a public IP. Please check your account for capacity or service issues.".red
+          exit 1
         end
-      end
-
-      # using fog, provision an elastic IP address
-      # TODO what is the error raised if no IPs available?
-      # returns an IP address as a string, e.g. "1.2.3.4"
-      def provision_elastic_ip_address
-        address = fog_compute.addresses.create
-        address.public_ip
-      end
-
-      # using fog, provision a floating IP address
-      # TODO what is the error raised if no IPs available?
-      # returns an IP address as a string, e.g. "1.2.3.4"
-      def provision_floating_ip_address
-        address = fog_compute.addresses.create
-        address.ip
+        public_ip
       end
 
       # fog connection object to Compute tasks (VMs, IP addresses)
@@ -1002,6 +982,10 @@ module Bosh::Bootstrap
         end
       end
 
+      def fog_config_path
+        settings.fog_path
+      end
+
       def display_inception_ssh_access
         _, private_key_path = local_ssh_key_paths
         say "SSH access: ssh -i #{private_key_path} #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
@@ -1023,10 +1007,6 @@ module Bosh::Bootstrap
           save_settings!
         end
         [settings.local.public_key_path, settings.local.private_key_path]
-      end
-
-      def fog_config_path
-        settings.fog_path
       end
 
       def aws?
@@ -1074,6 +1054,11 @@ module Bosh::Bootstrap
           # get the Name field, reverse sort, and return the first item
           `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
         end
+      end
+
+      # a helper object for the target BOSH provider
+      def provider
+        @provider ||= Bosh::Providers.for_bosh_provider_name(settings.bosh_provider, fog_compute)
       end
 
       def cyan; "\033[36m" end
