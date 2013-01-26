@@ -363,7 +363,8 @@ module Bosh::Bootstrap
       end
 
       def settings_path
-        File.expand_path("~/.bosh_bootstrap/manifest.yml")
+        manifest_path = ENV["MANIFEST"] || "~/.bosh_bootstrap/manifest.yml"
+        File.expand_path(manifest_path)
       end
 
       # Displays a prompt for known IaaS that are configured
