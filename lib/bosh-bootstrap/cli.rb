@@ -895,10 +895,17 @@ module Bosh::Bootstrap
             size: disk_size,
             name: "Inception Disk",
             description: '',
+            device: "/dev/sdi",
             availability_zone: server.availability_zone)
-          volume.wait_for { volume.status == 'available' }
-          volume.attach(server.id, device)
-          volume.wait_for { volume.status == 'in-use' }
+          # TODO: the following works in fog 1.9.0+ (but which has a bug in bootstrap)
+          # https://github.com/fog/fog/issues/1516
+          #
+          # volume.wait_for { volume.status == 'available' }
+          # volume.attach(server.id, "/dev/vdc")
+          # volume.wait_for { volume.status == 'in-use' }
+          #
+          # Instead, using:
+          volume.server = server
         end
 
         # Format and mount the volume
@@ -910,7 +917,7 @@ module Bosh::Bootstrap
             server.ssh(["sudo mkfs.ext4 #{device} -F"]) 
             server.ssh(["sudo mkdir -p /var/vcap/store"])
             server.ssh(["sudo mount #{device} /var/vcap/store"])
-            mount_disk
+            disk_mounted = true
           rescue Errno::ETIMEDOUT => e
             say "Timeout error/warning mounting volume, retrying...".yellow
           end
