@@ -587,6 +587,7 @@ module Bosh::Bootstrap
         provider.create_security_group(security_group_name, "microbosh", ports)
 
         settings["bosh_cloud_properties"][provider_name]["default_security_groups"] = [security_group_name]
+        settings["bosh_security_group"] = {}
         settings["bosh_security_group"]["name"] = security_group_name
         settings["bosh_security_group"]["ports"] = {}
         ports.each { |name, port| settings["bosh_security_group"]["ports"][name.to_s] = port }
