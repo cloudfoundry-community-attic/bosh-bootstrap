@@ -5,12 +5,14 @@ require "fileutils"
 require "fog"
 require "escape"
 
+require "bosh-bootstrap/helpers/settings"
 require "bosh-bootstrap/helpers/fog_setup"
 
 module Bosh::Bootstrap
   class Cli < Thor
     include Thor::Actions
     include Bosh::Bootstrap::Helpers::FogSetup
+    include Bosh::Bootstrap::Helpers::Settings
     include FileUtils
 
     attr_reader :fog_credentials
@@ -337,34 +339,6 @@ module Bosh::Bootstrap
           settings.delete("upgrade_deps")
         end
         save_settings!
-      end
-
-      # Previously selected settings are stored in a YAML manifest
-      # Protects the manifest file with user-only priveleges
-      def settings
-        @settings ||= begin
-          FileUtils.mkdir_p(File.dirname(settings_path))
-          unless File.exists?(settings_path)
-            File.open(settings_path, "w") do |file|
-              file << {}.to_yaml
-            end
-          end
-          FileUtils.chmod 0600, settings_path
-          Settingslogic.new(settings_path)
-        end
-      end
-
-      def save_settings!
-        File.open(settings_path, "w") do |file|
-          raw_settings_yaml = settings.to_yaml.gsub(" !ruby/hash:Settingslogic", "")
-          file << raw_settings_yaml
-        end
-        @settings = nil # force to reload & recreate helper methods
-      end
-
-      def settings_path
-        manifest_path = ENV["MANIFEST"] || "~/.bosh_bootstrap/manifest.yml"
-        File.expand_path(manifest_path)
       end
 
       # Displays a prompt for known IaaS that are configured
