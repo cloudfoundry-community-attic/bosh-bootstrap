@@ -2,6 +2,11 @@ require "thor"
 require "highline"
 require "settingslogic"
 require "fileutils"
+
+# for the #sh helper
+require "rake"
+require "rake/file_utils"
+
 require "fog"
 require "escape"
 
@@ -475,6 +480,7 @@ module Bosh::Bootstrap
           props = settings[:bosh_cloud_properties][:aws]
           props[:access_key_id] = settings.fog_credentials.aws_access_key_id
           props[:secret_access_key] = settings.fog_credentials.aws_secret_access_key
+          # props[:ec2_endpoint] = "ec2.REGION.amazonaws.com" - via +choose_aws_region+
           # props[:region] = REGION - via +choose_aws_region+            
           # props[:default_key_name] = "microbosh"  - via +create_aws_key_pair+
           # props[:ec2_private_key] = "/home/vcap/.ssh/microbosh.pem" - via +create_aws_key_pair+
@@ -530,6 +536,7 @@ module Bosh::Bootstrap
               settings["region_code"] = region
               settings["fog_credentials"]["region"] = region
               settings["bosh_cloud_properties"]["aws"]["region"] = region
+              settings["bosh_cloud_properties"]["aws"]["ec2_endpoint"] = "ec2.#{region}.amazonaws.com"
               save_settings!
             end
             menu.default = default_aws_region
