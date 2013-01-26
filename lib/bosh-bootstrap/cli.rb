@@ -2,12 +2,23 @@ require "thor"
 require "highline"
 require "settingslogic"
 require "fileutils"
+
+# for the #sh helper
+require "rake"
+require "rake/file_utils"
+
 require "fog"
 require "escape"
+
+require "bosh-bootstrap/helpers/settings"
+require "bosh-bootstrap/helpers/fog_setup"
 
 module Bosh::Bootstrap
   class Cli < Thor
     include Thor::Actions
+    include Bosh::Bootstrap::Helpers::FogSetup
+    include Bosh::Bootstrap::Helpers::Settings
+    include FileUtils
 
     attr_reader :fog_credentials
     attr_reader :server
@@ -30,20 +41,20 @@ module Bosh::Bootstrap
       deploy_stage_6_setup_new_bosh
     end
 
-    desc "delete", "Delete Micro BOSH"
-    method_option :all, :type => :boolean, :desc => "Delete all micro-boshes and inception VM [coming soon]"
-    def delete
-      delete_stage_1_target_inception_vm
-
-      if options[:all]
-        error "I'm sorry; the awesome --all flag is not yet implemented"
-        delete_all_stage_2_delete_micro_boshes
-        delete_all_stage_3_delete_inception_vm
-      else
-        delete_one_stage_2_delete_micro_bosh
-      end
-    end
-
+    # desc "delete", "Delete Micro BOSH"
+    # method_option :all, :type => :boolean, :desc => "Delete all micro-boshes and inception VM [coming soon]"
+    # def delete
+    #   delete_stage_1_target_inception_vm
+    # 
+    #   if options[:all]
+    #     error "I'm sorry; the awesome --all flag is not yet implemented"
+    #     delete_all_stage_2_delete_micro_boshes
+    #     delete_all_stage_3_delete_inception_vm
+    #   else
+    #     delete_one_stage_2_delete_micro_bosh
+    #   end
+    # end
+    # 
     desc "ssh [COMMAND]", "Open an ssh session to the inception VM [do nothing if local machine is inception VM]"
     long_desc <<-DESC
       If a command is supplied, it will be run, otherwise a session will be
@@ -215,8 +226,8 @@ module Bosh::Bootstrap
         end
 
         say "Locally targeting and login to new BOSH..."
-        puts `bosh -u #{settings.bosh_username} -p #{settings.bosh_password} target #{settings.bosh.ip_address}`
-        puts `bosh login #{settings.bosh_username} #{settings.bosh_password}`
+        sh "bosh -u #{settings.bosh_username} -p #{settings.bosh_password} target #{settings.bosh.ip_address}"
+        sh "bosh login #{settings.bosh_username} #{settings.bosh_password}"
 
         save_settings!
 
@@ -333,33 +344,6 @@ module Bosh::Bootstrap
           settings.delete("upgrade_deps")
         end
         save_settings!
-      end
-
-      # Previously selected settings are stored in a YAML manifest
-      # Protects the manifest file with user-only priveleges
-      def settings
-        @settings ||= begin
-          FileUtils.mkdir_p(File.dirname(settings_path))
-          unless File.exists?(settings_path)
-            File.open(settings_path, "w") do |file|
-              file << {}.to_yaml
-            end
-          end
-          FileUtils.chmod 0600, settings_path
-          Settingslogic.new(settings_path)
-        end
-      end
-
-      def save_settings!
-        File.open(settings_path, "w") do |file|
-          raw_settings_yaml = settings.to_yaml.gsub(" !ruby/hash:Settingslogic", "")
-          file << raw_settings_yaml
-        end
-        @settings = nil # force to reload & recreate helper methods
-      end
-
-      def settings_path
-        File.expand_path("~/.bosh_bootstrap/manifest.yml")
       end
 
       # Displays a prompt for known IaaS that are configured
@@ -496,7 +480,8 @@ module Bosh::Bootstrap
           props = settings[:bosh_cloud_properties][:aws]
           props[:access_key_id] = settings.fog_credentials.aws_access_key_id
           props[:secret_access_key] = settings.fog_credentials.aws_secret_access_key
-          # props[:ec2_endpoint] = "ec2.REGION.amazonaws.com" - via +choose_aws_region+            
+          # props[:ec2_endpoint] = "ec2.REGION.amazonaws.com" - via +choose_aws_region+
+          # props[:region] = REGION - via +choose_aws_region+            
           # props[:default_key_name] = "microbosh"  - via +create_aws_key_pair+
           # props[:ec2_private_key] = "/home/vcap/.ssh/microbosh.pem" - via +create_aws_key_pair+
           # props[:default_security_groups] = ["microbosh"], - via +create_aws_security_group+
@@ -535,12 +520,15 @@ module Bosh::Bootstrap
         if aws?
           choose_aws_region
         else
-          settings[:region_code] = nil
+          settings["region_code"] = nil
           false
         end
       end
 
       def choose_aws_region
+        aws_regions = provider.region_labels
+        default_aws_region = provider.default_region_label
+
         hl.choose do |menu|
           menu.prompt = "Choose AWS region (default: #{default_aws_region}): "
           aws_regions.each do |region|
@@ -548,6 +536,7 @@ module Bosh::Bootstrap
               settings["region_code"] = region
               settings["fog_credentials"]["region"] = region
               settings["bosh_cloud_properties"]["aws"]["region"] = region
+              settings["bosh_cloud_properties"]["aws"]["ec2_endpoint"] = "ec2.#{region}.amazonaws.com"
               save_settings!
             end
             menu.default = default_aws_region
@@ -556,86 +545,35 @@ module Bosh::Bootstrap
         true
       end
 
-      # supported by fog 1.6.0
-      # FIXME weird that fog has no method to return this list
-      def aws_regions
-        ['ap-northeast-1', 'ap-southeast-1', 'eu-west-1', 'sa-east-1', 'us-east-1', 'us-west-1', 'us-west-2']
-      end
-
-      def default_aws_region
-        'us-east-1'
-      end
-
       # Creates a security group.
+      # Also sets up the bosh_cloud_properties for the remote server
+      #
+      # Adds settings:
+      # * bosh_security_group.name
+      # * bosh_security_group.ports
+      # * bosh_cloud_properties.<bosh_provider>.default_security_groups
       def create_security_group(security_group_name)
+        ports = {
+          ssh_access: 22,
+          nats_server: 4222,
+          message_bus: 6868,
+          blobstore: 25250,
+          bosh_director: 25555
+        }
         if aws?
-          create_aws_security_group(security_group_name)
+          ports[:aws_registry] = 25777
         elsif openstack?
-          create_openstack_security_group(security_group_name)
-        else
-          raise "implement #create_security_group for #{settings.fog_credentials.provider}"
+          ports[:openstack_registry] = 25889
         end
-      end
 
-      # Creates an AWS security group.
-      # Also sets up the bosh_cloud_properties for the remote server
-      #
-      # Adds settings:
-      # * bosh_security_group.name
-      # * bosh_security_group.ports
-      # * bosh_cloud_properties.aws.default_security_groups
-      def create_aws_security_group(security_group_name)
-        unless fog_compute.security_groups.get(security_group_name)
-          sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
-          settings.bosh_cloud_properties["aws"]["default_security_groups"] = [security_group_name]
-          settings[:bosh_security_group] = {}
-          settings[:bosh_security_group][:name] = security_group_name
-          settings[:bosh_security_group][:ports] = {}
-          settings[:bosh_security_group][:ports][:ssh_access] = 22
-          settings[:bosh_security_group][:ports][:nats_server] = 4222
-          settings[:bosh_security_group][:ports][:message_bus] = 6868
-          settings[:bosh_security_group][:ports][:blobstore] = 25250
-          settings[:bosh_security_group][:ports][:bosh_director] = 25555
-          settings[:bosh_security_group][:ports][:aws_registry] = 25777
-          settings.bosh_security_group.ports.values.each do |port|
-            sg.authorize_port_range(port..port)
-            say "opened port #{port} in security group #{security_group_name}"
-          end
-          save_settings!
-        else
-          error "AWS security group '#{security_group_name}' already exists. Rename BOSH or delete old security group manually and re-run CLI."
-        end
-      end
+        provider.create_security_group(security_group_name, "microbosh", ports)
 
-      # Creates a OpenStack security group.
-      # Also sets up the bosh_cloud_properties for the remote server
-      #
-      # Adds settings:
-      # * bosh_security_group.name
-      # * bosh_security_group.ports
-      # * bosh_cloud_properties.openstack.default_security_groups
-      def create_openstack_security_group(security_group_name)
-        unless fog_compute.security_groups.find { |sg| sg.name == security_group_name }
-          # Hack until fog 1.9 is released
-          # sg = fog_compute.security_groups.create(:name => security_group_name, description: "microbosh")
-          data = fog_compute.create_security_group(security_group_name, "microbosh")
-          sg = fog_compute.security_groups.get(data.body['security_group']['id'])
-          settings.bosh_cloud_properties["openstack"]["default_security_groups"] = [security_group_name]
-          settings[:bosh_security_group] = {}
-          settings[:bosh_security_group][:name] = security_group_name
-          settings[:bosh_security_group][:ports] = {}
-          settings[:bosh_security_group][:ports][:ssh_access] = 22
-          settings[:bosh_security_group][:ports][:message_bus] = 6868
-          settings[:bosh_security_group][:ports][:bosh_director] = 25555
-          settings[:bosh_security_group][:ports][:openstack_registry] = 25889
-          settings.bosh_security_group.ports.values.each do |port|
-            sg.create_security_group_rule(port, port)
-            say "opened port #{port} in security group #{security_group_name}"
-          end
-          save_settings!
-        else
-          error "OpenStack security group '#{security_group_name}' already exists. Rename BOSH or delete old security group manually and re-run CLI."
-        end
+        settings["bosh_cloud_properties"][provider_name]["default_security_groups"] = [security_group_name]
+        settings["bosh_security_group"] = {}
+        settings["bosh_security_group"]["name"] = security_group_name
+        settings["bosh_security_group"]["ports"] = {}
+        ports.each { |name, port| settings["bosh_security_group"]["ports"][name.to_s] = port }
+        save_settings!
       end
 
       # Creates a key pair.
@@ -736,14 +674,12 @@ module Bosh::Bootstrap
           save_settings!
         end
 
-        unless settings["inception"]["ip_address"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
+        server ||= fog_compute.servers.get(settings["inception"]["server_id"])
 
+        unless settings["inception"]["ip_address"]
           say "Provisioning IP address for inception VM..."
-          ip_address = provision_elastic_ip_address # returns IP as a String
-          address = fog_compute.addresses.get(ip_address)
-          address.server = server
-          server.reload
+          ip_address = acquire_ip_address
+          associate_ip_address_with_server(ip_address, server)
           host = server.dns_name
 
           settings["inception"]["ip_address"] = ip_address
@@ -751,24 +687,12 @@ module Bosh::Bootstrap
         end
 
         unless settings["inception"]["disk_size"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
-
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
-
-          unless volume = server.volumes.all.find {|v| v.device == "/dev/sdi"}
-            say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
-            volume = fog_compute.volumes.create(:size => disk_size, :device => "/dev/sdi", :availability_zone => server.availability_zone)
-            volume.server = server
-          end
-
-          # Format and mount the volume
-          say "Mounting persistent disk as volume on inception VM..."
-          # TODO catch Errno::ETIMEDOUT and re-run ssh commands
-          server.ssh(['sudo mkfs.ext4 /dev/sdi -F']) 
-          server.ssh(['sudo mkdir -p /var/vcap/store'])
-          server.ssh(['sudo mount /dev/sdi /var/vcap/store'])
+          device = "/dev/sdi"
+          provision_and_mount_volume(server, disk_size, device)
 
           settings["inception"]["disk_size"] = disk_size
+          settings["inception"]["disk_device"] = device
           save_settings!
         end
 
@@ -778,7 +702,6 @@ module Bosh::Bootstrap
         # This way we can always rerun the CLI and rerun this method
         # and idempotently get an inception VM
         unless settings["inception"]["host"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
           settings["inception"]["host"] = server.dns_name
           save_settings!
         end
@@ -878,22 +801,28 @@ module Bosh::Bootstrap
           save_settings!
         end
 
-        unless settings["inception"]["ip_address"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
+        server ||= fog_compute.servers.get(settings["inception"]["server_id"])
 
+        unless settings["inception"]["ip_address"]
           say "Provisioning IP address for inception VM..."
-          ip_address = provision_floating_ip_address # returns IP as a String
-          address = fog_compute.addresses.find { |a| a.ip == ip_address }
-          address.server = server
-          server.reload
+          ip_address = acquire_ip_address
+          associate_ip_address_with_server(ip_address, server)
 
           settings["inception"]["ip_address"] = ip_address
           save_settings!
         end
 
         unless settings["inception"]["disk_size"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
+          disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
+          device = "/dev/vdc"
+          provision_and_mount_volume(server, disk_size, device)
 
+          settings["inception"]["disk_size"] = disk_size
+          settings["inception"]["disk_device"] = device
+          save_settings!
+
+          # TODO use provision_and_mount_volume
+          
           disk_size = 16 # Gb
           va = fog_compute.get_server_volumes(server.id).body['volumeAttachments']
           unless vol = va.find { |v| v["device"] == "/dev/vdc" }
@@ -937,7 +866,6 @@ module Bosh::Bootstrap
         # This way we can always rerun the CLI and rerun this method
         # and idempotently get an inception VM
         unless settings["inception"]["host"]
-          server ||= fog_compute.servers.get(settings.inception.server_id)
           settings["inception"]["host"] = settings["inception"]["ip_address"]
           save_settings!
         end
@@ -949,55 +877,56 @@ module Bosh::Bootstrap
       # Provision or provide an IP address to use
       # For AWS, it will dynamically provision an elastic IP
       # For OpenStack, it will dynamically provision a floating IP
-      # For other providers, it may opt to prompt for a static IP
-      # to use.
       def acquire_ip_address
-        if aws?
-          provision_elastic_ip_address
-        elsif openstack?
-          provision_floating_ip_address
-        else
-          hl.ask("What static IP to use for micro BOSH?  ")
+        unless public_ip = provider.provision_public_ip_address
+          say "Unable to acquire a public IP. Please check your account for capacity or service issues.".red
+          exit 1
         end
+        public_ip
       end
 
-      # using fog, provision an elastic IP address
-      # TODO what is the error raised if no IPs available?
-      # returns an IP address as a string, e.g. "1.2.3.4"
-      def provision_elastic_ip_address
-        address = fog_compute.addresses.create
-        address.public_ip
+      def associate_ip_address_with_server(ip_address, server)
+        address = fog_compute.addresses.get(ip_address)
+        address.server = server
+        server.reload
       end
 
-      # using fog, provision a floating IP address
-      # TODO what is the error raised if no IPs available?
-      # returns an IP address as a string, e.g. "1.2.3.4"
-      def provision_floating_ip_address
-        address = fog_compute.addresses.create
-        address.ip
-      end
-
-      # fog connection object to Compute tasks (VMs, IP addresses)
-      def fog_compute
-        # Fog::Compute.new requires Hash with keys that are symbols
-        # but Settings converts all keys to strings
-        # So create a version of settings.fog_credentials with symbol keys
-        credentials_with_symbols = settings.fog_credentials.inject({}) do |creds, key_pair|
-          key, value = key_pair
-          creds[key.to_sym] = value
-          creds
+      # Provision a volume for a specific device (unless already provisioned)
+      # Request that the +server+ mount the volume at the +device+ location.
+      #
+      # Requires that we can SSH into +server+.
+      def provision_and_mount_volume(server, disk_size, device)
+        unless volume = server.volumes.all.find {|v| v.device == device}
+          say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
+          volume = fog_compute.volumes.create(
+            size: disk_size,
+            name: "Inception Disk",
+            description: '',
+            device: "/dev/sdi",
+            availability_zone: server.availability_zone)
+          # TODO: the following works in fog 1.9.0+ (but which has a bug in bootstrap)
+          # https://github.com/fog/fog/issues/1516
+          #
+          # volume.wait_for { volume.status == 'available' }
+          # volume.attach(server.id, "/dev/vdc")
+          # volume.wait_for { volume.status == 'in-use' }
+          #
+          # Instead, using:
+          volume.server = server
         end
-        @fog_compute ||= Fog::Compute.new(credentials_with_symbols)
-      end
 
-      def fog_config
-        @fog_config ||= begin
-          if File.exists?(fog_config_path)
-            say "Found infrastructure API credentials at #{fog_config_path} (override with --fog)"
-            YAML.load_file(fog_config_path)
-          else
-            say "No existing #{fog_config_path} fog configuration file", :yellow
-            {}
+        # Format and mount the volume
+        say "Mounting persistent disk as volume on inception VM..."
+        disk_mounted = false
+        until disk_mounted
+          begin
+            # TODO catch Errno::ETIMEDOUT and re-run ssh commands
+            server.ssh(["sudo mkfs.ext4 #{device} -F"]) 
+            server.ssh(["sudo mkdir -p /var/vcap/store"])
+            server.ssh(["sudo mount #{device} /var/vcap/store"])
+            disk_mounted = true
+          rescue Errno::ETIMEDOUT => e
+            say "Timeout error/warning mounting volume, retrying...", yellow
           end
         end
       end
@@ -1023,10 +952,6 @@ module Bosh::Bootstrap
           save_settings!
         end
         [settings.local.public_key_path, settings.local.private_key_path]
-      end
-
-      def fog_config_path
-        settings.fog_path
       end
 
       def aws?
@@ -1074,6 +999,15 @@ module Bosh::Bootstrap
           # get the Name field, reverse sort, and return the first item
           `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
         end
+      end
+
+      def provider_name
+        settings.bosh_provider
+      end
+
+      # a helper object for the target BOSH provider
+      def provider
+        @provider ||= Bosh::Providers.for_bosh_provider_name(settings.bosh_provider, fog_compute)
       end
 
       def cyan; "\033[36m" end
