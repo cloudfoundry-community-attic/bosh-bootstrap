@@ -919,7 +919,7 @@ module Bosh::Bootstrap
             server.ssh(["sudo mount #{device} /var/vcap/store"])
             disk_mounted = true
           rescue Errno::ETIMEDOUT => e
-            say "Timeout error/warning mounting volume, retrying...".yellow
+            say "Timeout error/warning mounting volume, retrying...", yellow
           end
         end
       end
