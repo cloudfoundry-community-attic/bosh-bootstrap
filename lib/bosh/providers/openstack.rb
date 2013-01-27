@@ -21,13 +21,14 @@ class Bosh::Providers::OpenStack < Bosh::Providers::BaseProvider
   #   https: 443
   # }
   def create_security_group(security_group_name, description, ports)
-    unless sg = fog_compute.security_groups.get(security_group_name)
+    security_groups = fog_compute.security_groups
+    unless sg = security_groups.find { |s| s.name == security_group_name }
       sg = fog_compute.security_groups.create(name: security_group_name, description: description)
       puts "Created security group #{security_group_name}"
     else
       puts "Reusing security group #{security_group_name}"
     end
-    ip_permissions = sg.ip_permissions
+    ip_permissions = sg.rules
     ports_opened = 0
     ports.each do |name, port|
       unless port_open?(ip_permissions, port)
@@ -41,6 +42,6 @@ class Bosh::Providers::OpenStack < Bosh::Providers::BaseProvider
   end
 
   def port_open?(ip_permissions, port)
-    ip_permissions && ip_permissions.find {|ip| ip["fromPort"] <= port && ip["toPort"] >= port }
+    ip_permissions && ip_permissions.find {|ip| ip["from_port"] <= port && ip["to_port"] >= port }
   end
 end
