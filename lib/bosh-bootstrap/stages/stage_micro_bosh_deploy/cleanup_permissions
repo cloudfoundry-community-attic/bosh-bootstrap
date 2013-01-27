@@ -8,5 +8,7 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 chown -R vcap:vcap ~vcap/.bosh*
-chown -R vcap:vcap ~vcap/.gem
+if [[ -d ~vcap/.gem ]]; then
+  chown -R vcap:vcap ~vcap/.gem
+fi
 chown -R vcap:vcap /var/vcap/store/repos
