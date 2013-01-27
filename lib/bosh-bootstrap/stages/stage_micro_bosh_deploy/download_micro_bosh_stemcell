@@ -105,10 +105,10 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
     cd bosh
   fi
 
-  cd $BOSH_DIR/agent
+  cd $BOSH_DIR
   echo "Creating custom stemcell..."
   bundle install --without test development
-  bundle exec rake stemcell2:micro[$PROVIDER,$MICRO_BOSH_MANIFEST_PATH,$LATEST_BOSH_RELEASE_PATH]
+  bundle exec rake stemcell:micro[$PROVIDER,$MICRO_BOSH_MANIFEST_PATH,$LATEST_BOSH_RELEASE_PATH]
 
   echo "Copying to stemcells folder..."
   MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/agent-*/work/work/*.tgz | sort | tail -n 1)
