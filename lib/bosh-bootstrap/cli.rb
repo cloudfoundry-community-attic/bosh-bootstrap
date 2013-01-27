@@ -517,8 +517,7 @@ module Bosh::Bootstrap
         if aws?
           choose_aws_region
         else
-          settings["region_code"] = nil
-          false
+          prompt_openstack_region
         end
       end
 
@@ -541,6 +540,22 @@ module Bosh::Bootstrap
         end
         reset_fog_compute
         true
+      end
+
+      def prompt_openstack_region
+        prompt = hl
+        region = prompt.ask("OpenStack Region: ") { |q| q.default = nil }
+        if region.strip != ""
+          settings[:region_code] = region
+          settings["fog_credentials"]["openstack_region"] = region
+          settings["bosh_cloud_properties"]["openstack"]["region"] = region
+          save_settings!
+          reset_fog_compute
+          true
+        else
+          settings["region_code"] = nil
+          false
+        end
       end
 
       # Creates a security group.
