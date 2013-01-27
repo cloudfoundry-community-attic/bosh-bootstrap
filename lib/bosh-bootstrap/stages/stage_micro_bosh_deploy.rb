@@ -29,7 +29,6 @@ module Bosh::Bootstrap::Stages
                       "BOSH_HOST" => settings.bosh.ip_address,
                       "BOSH_USERNAME" => settings.bosh_username,
                       "BOSH_PASSWORD" => settings.bosh_password)
-        server.cleanup "permissions", script("cleanup_permissions")
       end
     end
 
