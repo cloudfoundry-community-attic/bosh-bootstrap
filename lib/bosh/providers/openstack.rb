@@ -5,6 +5,12 @@ module Bosh; module Providers; end; end
 require "bosh/providers/base_provider"
 
 class Bosh::Providers::OpenStack < Bosh::Providers::BaseProvider
+  def provision_public_ip_address
+    address = fog_compute.addresses.create
+    address.ip
+    # TODO catch error and return nil
+  end
+
   # Creates or reuses an OpenStack security group and opens ports.
   # 
   # +security_group_name+ is the name to be created or reused
