@@ -1,5 +1,6 @@
 # Copyright (c) 2012-2013 Stark & Wayne, LLC
 
+require "settingslogic"
 module Bosh; module Bootstrap; module Helpers; end; end; end
 
 # Helper methods for loading/saving settings

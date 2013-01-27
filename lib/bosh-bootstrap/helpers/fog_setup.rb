@@ -1,5 +1,6 @@
 # Copyright (c) 2012-2013 Stark & Wayne, LLC
 
+require "fog"
 module Bosh; module Bootstrap; module Helpers; end; end; end
 
 # A collection of methods related to getting fog_compute

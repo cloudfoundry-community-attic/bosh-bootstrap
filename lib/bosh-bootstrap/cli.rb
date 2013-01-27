@@ -1,13 +1,11 @@
 require "thor"
 require "highline"
-require "settingslogic"
 require "fileutils"
 
 # for the #sh helper
 require "rake"
 require "rake/file_utils"
 
-require "fog"
 require "escape"
 
 require "bosh-bootstrap/helpers/settings"
