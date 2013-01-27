@@ -8,8 +8,7 @@ require "rake/file_utils"
 
 require "escape"
 
-require "bosh-bootstrap/helpers/settings"
-require "bosh-bootstrap/helpers/fog_setup"
+require "bosh-bootstrap/helpers"
 
 module Bosh::Bootstrap
   class Cli < Thor
@@ -540,6 +539,7 @@ module Bosh::Bootstrap
             menu.default = default_aws_region
           end
         end
+        reset_fog_compute
         true
       end
 
