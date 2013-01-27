@@ -748,19 +748,6 @@ module Bosh::Bootstrap
         end
         confirm "Using key pair #{key_pair.name} for Inception VM"
 
-        # make sure port 22 is open in the default security group
-        security_group = fog_compute.security_groups.find { |sg| sg.name == 'default' }
-        authorized = security_group.rules.detect do |ip_permission|
-            ip_permission['ip_range'].first && ip_permission['ip_range']['cidr'] == '0.0.0.0/0' &&
-            ip_permission['from_port'] == 22 &&
-            ip_permission['ip_protocol'] == 'tcp' &&
-            ip_permission['to_port'] == 22
-        end
-        unless authorized
-          security_group.create_security_group_rule(22, 22)
-        end
-        confirm "Inception VM port 22 open"
-
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
           say "Provisioning server for inception VM..."
