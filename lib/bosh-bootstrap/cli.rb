@@ -589,19 +589,7 @@ module Bosh::Bootstrap
         save_settings!
       end
 
-      # Creates a key pair.
-      def create_key_pair(key_pair_name)
-        if aws?
-          create_aws_key_pair(key_pair_name)
-        elsif openstack?
-          create_openstack_key_pair(key_pair_name)
-        else
-          raise "implement #create_key_pair for #{settings.fog_credentials.provider}"
-        end
-      end
-
-      # Creates an AWS key pair, and stores the private key
-      # in settings manifest.
+      # Creates a key pair, and stores the private key in settings manifest.
       # Also sets up the bosh_cloud_properties for the remote server
       # to have the .pem key installed.
       #
@@ -609,48 +597,30 @@ module Bosh::Bootstrap
       # * bosh_key_pair.name
       # * bosh_key_pair.private_key
       # * bosh_key_pair.fingerprint
+      # For AWS:
       # * bosh_cloud_properties.aws.default_key_name
       # * bosh_cloud_properties.aws.ec2_private_key
-      def create_aws_key_pair(key_pair_name)
-        unless fog_compute.key_pairs.get(key_pair_name)
-          say "creating key pair #{key_pair_name}..."
-          kp = fog_compute.key_pairs.create(:name => key_pair_name)
-          settings[:bosh_key_pair] = {}
-          settings[:bosh_key_pair][:name] = key_pair_name
-          settings[:bosh_key_pair][:private_key] = kp.private_key
-          settings[:bosh_key_pair][:fingerprint] = kp.fingerprint
-          settings["bosh_cloud_properties"]["aws"]["default_key_name"] = key_pair_name
-          settings["bosh_cloud_properties"]["aws"]["ec2_private_key"] = "/home/vcap/.ssh/#{key_pair_name}.pem"
-          save_settings!
-        else
-          error "AWS key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
-        end
-      end
-
-      # Creates an OpenStack key pair, and stores the private key
-      # in settings manifest.
-      # Also sets up the bosh_cloud_properties for the remote server
-      # to have the .pem key installed.
-      #
-      # Adds settings:
-      # * bosh_key_pair.name
-      # * bosh_key_pair.private_key
-      # * bosh_key_pair.fingerprint
+      # For OpenStack:
       # * bosh_cloud_properties.openstack.default_key_name
-      # * bosh_cloud_properties.openstack.ec2_private_key
-      def create_openstack_key_pair(key_pair_name)
+      # * bosh_cloud_properties.openstack.private_key
+      def create_key_pair(key_pair_name)
         unless fog_compute.key_pairs.get(key_pair_name)
           say "creating key pair #{key_pair_name}..."
-          kp = fog_compute.key_pairs.create(:name => key_pair_name)
+          kp = provider.create_key_pair(key_pair_name)
           settings[:bosh_key_pair] = {}
           settings[:bosh_key_pair][:name] = key_pair_name
           settings[:bosh_key_pair][:private_key] = kp.private_key
           settings[:bosh_key_pair][:fingerprint] = kp.fingerprint
-          settings["bosh_cloud_properties"]["openstack"]["default_key_name"] = key_pair_name
-          settings["bosh_cloud_properties"]["openstack"]["private_key"] = "/home/vcap/.ssh/#{key_pair_name}.pem"
+          if aws?
+            settings["bosh_cloud_properties"]["aws"]["default_key_name"] = key_pair_name
+            settings["bosh_cloud_properties"]["aws"]["ec2_private_key"] = "/home/vcap/.ssh/#{key_pair_name}.pem"
+          elsif openstack?
+            settings["bosh_cloud_properties"]["openstack"]["default_key_name"] = key_pair_name
+            settings["bosh_cloud_properties"]["openstack"]["private_key"] = "/home/vcap/.ssh/#{key_pair_name}.pem"
+          end
           save_settings!
         else
-          error "OpenStack key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
+          error "Key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
         end
       end
 

@@ -9,4 +9,7 @@ class Bosh::Providers::BaseProvider
     @fog_compute = fog_compute
   end
 
+  def create_key_pair(key_pair_name)
+    fog_compute.key_pairs.create(:name => key_pair_name)
+  end
 end
