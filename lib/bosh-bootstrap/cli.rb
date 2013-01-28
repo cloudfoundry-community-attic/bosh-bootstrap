@@ -544,8 +544,8 @@ module Bosh::Bootstrap
 
       def prompt_openstack_region
         prompt = hl
-        region = prompt.ask("OpenStack Region: ") { |q| q.default = nil }
-        if region.strip != ""
+        region = prompt.ask("OpenStack Region (optional): ")
+        unless region.strip == ""
           settings[:region_code] = region
           settings["fog_credentials"]["openstack_region"] = region
           settings["bosh_cloud_properties"]["openstack"]["region"] = region
