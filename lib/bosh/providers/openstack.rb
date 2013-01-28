@@ -5,6 +5,8 @@ module Bosh; module Providers; end; end
 require "bosh/providers/base_provider"
 
 class Bosh::Providers::OpenStack < Bosh::Providers::BaseProvider
+  # @return [String] provisions a new public IP address in target region
+  # TODO nil if none available
   def provision_public_ip_address
     address = fog_compute.addresses.create
     address.ip

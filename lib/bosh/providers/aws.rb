@@ -42,6 +42,14 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     aws_compute_flavors.map { |fl| fl[:id] }
   end
 
+  # @return [String] provisions a new public IP address in target region
+  # TODO nil if none available
+  def provision_public_ip_address
+    address = fog_compute.addresses.create
+    address.public_ip
+    # TODO catch error and return nil
+  end
+
   # Creates or reuses an AWS security group and opens ports.
   # 
   # +security_group_name+ is the name to be created or reused
