@@ -858,14 +858,7 @@ module Bosh::Bootstrap
       end
 
       def associate_ip_address_with_server(ip_address, server)
-        if aws?
-          address = fog_compute.addresses.get(ip_address)
-        elsif openstack?
-          address = fog_compute.addresses.find { |a| a.ip == ip_address }
-        else
-          raise "implement #associate_ip_address_with_server for #{settings.fog_credentials.provider}"
-        end
-        address.server = server
+        provider.associate_ip_address_with_server(ip_address, server)
         server.reload
       end
 
