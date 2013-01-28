@@ -782,50 +782,23 @@ module Bosh::Bootstrap
           save_settings!
         end
 
+        # TODO: Hack
+        unless server.public_ip_address
+          server.addresses["public"] = [settings["inception"]["ip_address"]]
+        end
+        unless server.public_key_path
+          server.public_key_path = public_key_path
+        end
+        unless server.private_key_path
+          server.private_key_path = private_key_path
+        end
+        server.username = settings["inception"]["username"]
+        server.sshable?
+
         unless settings["inception"]["disk_size"]
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
           device = "/dev/vdc"
-
-          # TODO use provision_and_mount_volume
-          va = fog_compute.get_server_volumes(server.id).body['volumeAttachments']
-          unless vol = va.find { |v| v["device"] == device }
-            say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
-            volume = fog_compute.volumes.create(:name => "Inception Disk",
-                                                :description => "",
-                                                :size => disk_size,
-                                                :availability_zone => server.availability_zone)
-            volume.wait_for { volume.status == 'available' }
-            volume.attach(server.id, device)
-            volume.wait_for { volume.status == 'in-use' }
-          end
-
-          # Format and mount the volume
-          # TODO: Hack
-          unless server.public_ip_address
-            server.addresses["public"] = [settings["inception"]["ip_address"]]
-          end
-          unless server.public_key_path
-            server.public_key_path = public_key_path
-          end
-          unless server.private_key_path
-            server.private_key_path = private_key_path
-          end
-          server.username = settings["inception"]["username"]
-          server.sshable?
-
-          say "Mounting persistent disk as volume on inception VM..."
-          disk_mounted = false
-          until disk_mounted
-            begin
-              # TODO catch Errno::ETIMEDOUT and re-run ssh commands
-              server.ssh(["sudo mkfs.ext4 #{device} -F"])
-              server.ssh(["sudo mkdir -p /var/vcap/store"])
-              server.ssh(["sudo mount #{device} /var/vcap/store"])
-              disk_mounted = true
-            rescue Errno::ETIMEDOUT => e
-              say "Timeout error/warning mounting volume, retrying...", yellow
-            end
-          end
+          provision_and_mount_volume(server, disk_size, device)
 
           settings["inception"]["disk_size"] = disk_size
           settings["inception"]["disk_device"] = device
@@ -867,23 +840,9 @@ module Bosh::Bootstrap
       #
       # Requires that we can SSH into +server+.
       def provision_and_mount_volume(server, disk_size, device)
-        unless volume = server.volumes.all.find {|v| v.device == device}
+        unless provider.find_server_device(server, device)
           say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
-          volume = fog_compute.volumes.create(
-            size: disk_size,
-            name: "Inception Disk",
-            description: '',
-            device: "/dev/sdi",
-            availability_zone: server.availability_zone)
-          # TODO: the following works in fog 1.9.0+ (but which has a bug in bootstrap)
-          # https://github.com/fog/fog/issues/1516
-          #
-          # volume.wait_for { volume.status == 'available' }
-          # volume.attach(server.id, "/dev/vdc")
-          # volume.wait_for { volume.status == 'in-use' }
-          #
-          # Instead, using:
-          volume.server = server
+          provider.create_and_attach_volume("Inception Disk", disk_size, server, device)
         end
 
         # Format and mount the volume

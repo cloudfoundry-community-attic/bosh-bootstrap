@@ -51,4 +51,19 @@ class Bosh::Providers::OpenStack < Bosh::Providers::BaseProvider
   def port_open?(ip_permissions, port)
     ip_permissions && ip_permissions.find {|ip| ip["from_port"] <= port && ip["to_port"] >= port }
   end
+
+  def find_server_device(server, device)
+    va = fog_compute.get_server_volumes(server.id).body['volumeAttachments']
+    va.find { |v| v["device"] == device }
+  end
+
+  def create_and_attach_volume(name, disk_size, server, device)
+    volume = fog_compute.volumes.create(:name => name,
+                                        :description => "",
+                                        :size => disk_size,
+                                        :availability_zone => server.availability_zone)
+    volume.wait_for { volume.status == 'available' }
+    volume.attach(server.id, device)
+    volume.wait_for { volume.status == 'in-use' }
+  end
 end
