@@ -844,10 +844,18 @@ module Bosh::Bootstrap
           server.sshable?
 
           say "Mounting persistent disk as volume on inception VM..."
-          # TODO if any of these ssh calls fail; retry
-          server.ssh(['sudo mkfs.ext4 #{device} -F'])
-          server.ssh(['sudo mkdir -p /var/vcap/store'])
-          server.ssh(['sudo mount #{device} /var/vcap/store'])
+          disk_mounted = false
+          until disk_mounted
+            begin
+              # TODO catch Errno::ETIMEDOUT and re-run ssh commands
+              server.ssh(["sudo mkfs.ext4 #{device} -F"])
+              server.ssh(["sudo mkdir -p /var/vcap/store"])
+              server.ssh(["sudo mount #{device} /var/vcap/store"])
+              disk_mounted = true
+            rescue Errno::ETIMEDOUT => e
+              say "Timeout error/warning mounting volume, retrying...", yellow
+            end
+          end
 
           settings["inception"]["disk_size"] = disk_size
           settings["inception"]["disk_device"] = device
