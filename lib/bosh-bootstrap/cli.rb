@@ -815,24 +815,17 @@ module Bosh::Bootstrap
         unless settings["inception"]["disk_size"]
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
           device = "/dev/vdc"
-          provision_and_mount_volume(server, disk_size, device)
-
-          settings["inception"]["disk_size"] = disk_size
-          settings["inception"]["disk_device"] = device
-          save_settings!
 
           # TODO use provision_and_mount_volume
-          
-          disk_size = 16 # Gb
           va = fog_compute.get_server_volumes(server.id).body['volumeAttachments']
-          unless vol = va.find { |v| v["device"] == "/dev/vdc" }
+          unless vol = va.find { |v| v["device"] == device }
             say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
             volume = fog_compute.volumes.create(:name => "Inception Disk",
                                                 :description => "",
                                                 :size => disk_size,
                                                 :availability_zone => server.availability_zone)
             volume.wait_for { volume.status == 'available' }
-            volume.attach(server.id, "/dev/vdc")
+            volume.attach(server.id, device)
             volume.wait_for { volume.status == 'in-use' }
           end
 
@@ -852,11 +845,12 @@ module Bosh::Bootstrap
 
           say "Mounting persistent disk as volume on inception VM..."
           # TODO if any of these ssh calls fail; retry
-          server.ssh(['sudo mkfs.ext4 /dev/vdc -F'])
+          server.ssh(['sudo mkfs.ext4 #{device} -F'])
           server.ssh(['sudo mkdir -p /var/vcap/store'])
-          server.ssh(['sudo mount /dev/vdc /var/vcap/store'])
+          server.ssh(['sudo mount #{device} /var/vcap/store'])
 
           settings["inception"]["disk_size"] = disk_size
+          settings["inception"]["disk_device"] = device
           save_settings!
         end
 
