@@ -525,7 +525,7 @@ module Bosh::Bootstrap
         if aws?
           choose_aws_region
         else
-          return false if settings.has_key?(:region_code)
+          return false if settings.has_key?("region_code")
           prompt_openstack_region
         end
       end
@@ -552,8 +552,9 @@ module Bosh::Bootstrap
       end
 
       def prompt_openstack_region
-        settings[:region_code] = hl.ask("OpenStack Region (optional): ")
-        return false if settings[:region_code].strip == ""
+        region = hl.ask("OpenStack Region (optional): ")
+        settings[:region_code] = region.strip == "" ? nil : region
+        return false unless settings[:region_code]
 
         settings["fog_credentials"]["openstack_region"] = settings[:region_code]
         settings["bosh_cloud_properties"]["openstack"]["region"] = settings[:region_code]
