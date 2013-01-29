@@ -109,6 +109,14 @@ module Bosh::Bootstrap
           settings[:bosh][:persistent_disk] = 16384
           save_settings!
         end
+
+        unless settings[:bosh]["network_label"]
+          prompt_for_bosh_network_label
+        end
+        if settings[:bosh]["network_label"]
+          confirm "Micro BOSH will use network #{settings[:bosh]['network_label']}"
+        end
+
         unless settings[:bosh]["ip_address"]
           say "Acquiring IP address for micro BOSH..."
           ip_address = acquire_ip_address
@@ -552,6 +560,17 @@ module Bosh::Bootstrap
         save_settings!
         reset_fog_compute
         true
+      end
+
+      def prompt_for_bosh_network_label
+        if openstack?
+          prompt_openstack_network_label
+        end
+      end
+
+      def prompt_openstack_network_label
+        say ""
+        settings[:network_label] = hl.ask("OpenStack private network label: ")  { |q| q.default = "private" }
       end
 
       # Creates a security group.
