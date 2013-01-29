@@ -570,7 +570,6 @@ module Bosh::Bootstrap
       end
 
       def prompt_openstack_network_label
-        say ""
         settings[:network_label] = hl.ask("OpenStack private network label: ")  { |q| q.default = "private" }
       end
 
@@ -809,7 +808,7 @@ module Bosh::Bootstrap
           server.private_key_path = private_key_path
         end
         server.username = settings["inception"]["username"]
-        Timeout::timeout(60) { server.ssh 'pwd' }
+        Fog.wait_for(60) { server.sshable? }
 
         unless settings["inception"]["disk_size"]
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
