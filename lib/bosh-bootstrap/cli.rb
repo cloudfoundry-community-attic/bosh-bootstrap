@@ -808,7 +808,7 @@ module Bosh::Bootstrap
           server.private_key_path = private_key_path
         end
         server.username = settings["inception"]["username"]
-        server.sshable?
+        Timeout::timeout(60) { server.ssh 'pwd' }
 
         unless settings["inception"]["disk_size"]
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
