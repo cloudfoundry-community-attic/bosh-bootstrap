@@ -79,6 +79,13 @@ module Bosh::Bootstrap
         else
           confirm "No specific region/data center for #{settings.fog_credentials.provider}"
         end
+
+        unless settings["network_label"]
+          choose_provider_network_label
+        end
+        if settings["network_label"]
+          confirm "Using network #{settings['network_label']} for #{settings.fog_credentials.provider}"
+        end
       end
       
       def deploy_stage_2_bosh_configuration
@@ -108,13 +115,6 @@ module Bosh::Bootstrap
           settings[:bosh][:password] = password
           settings[:bosh][:persistent_disk] = 16384
           save_settings!
-        end
-
-        unless settings[:bosh]["network_label"]
-          prompt_for_bosh_network_label
-        end
-        if settings[:bosh]["network_label"]
-          confirm "Micro BOSH will use network #{settings[:bosh]['network_label']}"
         end
 
         unless settings[:bosh]["ip_address"]
@@ -563,7 +563,7 @@ module Bosh::Bootstrap
         true
       end
 
-      def prompt_for_bosh_network_label
+      def choose_provider_network_label
         if openstack?
           prompt_openstack_network_label
         end
