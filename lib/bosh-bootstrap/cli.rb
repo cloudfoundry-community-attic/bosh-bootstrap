@@ -417,7 +417,8 @@ module Bosh::Bootstrap
               "openstack_username" => profile[:openstack_username],
               "openstack_api_key" => profile[:openstack_api_key],
               "openstack_tenant" => profile[:openstack_tenant],
-              "openstack_auth_url" => profile[:openstack_auth_url]
+              "openstack_auth_url" => profile[:openstack_auth_url],
+              "openstack_region" => profile[:openstack_region]
             }
           end
         end
@@ -552,7 +553,8 @@ module Bosh::Bootstrap
       end
 
       def prompt_openstack_region
-        region = hl.ask("OpenStack Region (optional): ")
+        default_region = settings.fog_credentials.openstack_region
+        region = hl.ask("OpenStack Region (optional): ") { |q| q.default = default_region }
         settings[:region_code] = region.strip == "" ? nil : region
         return false unless settings[:region_code]
 
