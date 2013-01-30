@@ -738,35 +738,49 @@ module Bosh::Bootstrap
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
           say "Provisioning server for inception VM..."
-          settings["inception"] = {}
+          settings["inception"] ||= {}
 
           # Select OpenStack flavor
+          if settings["inception"]["flavor_id"]
+            inception_flavor = fog_compute.flavors.find { |f| f.id == settings["inception"]["flavor_id"] }
+            settings["inception"]["flavor_id"] = nil if inception_flavor.nil?
+          end
           unless settings["inception"]["flavor_id"]
             say ""
             hl.choose do |menu|
               menu.prompt = "Choose OpenStack flavor:  "
               fog_compute.flavors.each do |flavor|
                 menu.choice(flavor.name) do
-                  settings["inception"]["flavor_id"] = flavor.id
+                  inception_flavor = flavor
+                  settings["inception"]["flavor_id"] = inception_flavor.id
                   save_settings!
                 end
               end
             end
           end
+          say ""
+          confirm "Using flavor #{inception_flavor.name} for Inception VM"
 
           # Select OpenStack image
+          if settings["inception"]["image_id"]
+            inception_image = fog_compute.images.find { |i| i.id == settings["inception"]["image_id"] }
+            settings["inception"]["image_id"] = nil if inception_image.nil?
+          end
           unless settings["inception"]["image_id"]
             say ""
             hl.choose do |menu|
               menu.prompt = "Choose OpenStack image (Ubuntu):  "
               fog_compute.images.each do |image|
                 menu.choice(image.name) do
-                  settings["inception"]["image_id"] = image.id
+                  inception_image = image
+                  settings["inception"]["image_id"] = inception_image.id
                   save_settings!
                 end
               end
             end
           end
+          say ""
+          confirm "Using image #{inception_image.name} for Inception VM"
 
           # Boot OpenStack server
           server = fog_compute.servers.create(
@@ -774,8 +788,8 @@ module Bosh::Bootstrap
             :key_name => key_pair.name,
             :public_key_path => public_key_path,
             :private_key_path => private_key_path,
-            :flavor_ref => settings["inception"]["flavor_id"],
-            :image_ref => settings["inception"]["image_id"],
+            :flavor_ref => inception_flavor.id,
+            :image_ref => inception_image.id,
             :username => username
           )
           unless server
