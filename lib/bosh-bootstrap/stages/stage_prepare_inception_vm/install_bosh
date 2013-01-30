@@ -44,6 +44,9 @@ if [[ "${INSTALL_BOSH_FROM_SOURCE}X" != "X" ]]; then
 
 else
   install_gem bosh_cli
+  # TODO remove this when bosh_deployer starts installing aws-sdk 1.8.1.1 or higher
+  install_gem httparty
+  # end TODO
   install_gem bosh_deployer
 fi
 
