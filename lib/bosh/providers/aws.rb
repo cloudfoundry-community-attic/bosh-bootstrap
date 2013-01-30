@@ -42,6 +42,19 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     aws_compute_flavors.map { |fl| fl[:id] }
   end
 
+  # @return [String] provisions a new public IP address in target region
+  # TODO nil if none available
+  def provision_public_ip_address
+    address = fog_compute.addresses.create
+    address.public_ip
+    # TODO catch error and return nil
+  end
+
+  def associate_ip_address_with_server(ip_address, server)
+    address = fog_compute.addresses.get(ip_address)
+    address.server = server
+  end
+
   # Creates or reuses an AWS security group and opens ports.
   # 
   # +security_group_name+ is the name to be created or reused
@@ -73,5 +86,27 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
 
   def port_open?(ip_permissions, port)
     ip_permissions && ip_permissions.find {|ip| ip["fromPort"] <= port && ip["toPort"] >= port }
+  end
+
+  def find_server_device(server, device)
+    server.volumes.all.find {|v| v.device == device}
+  end
+
+  def create_and_attach_volume(name, disk_size, server, device)
+    volume = fog_compute.volumes.create(
+        size: disk_size,
+        name: name,
+        description: '',
+        device: device,
+        availability_zone: server.availability_zone)
+    # TODO: the following works in fog 1.9.0+ (but which has a bug in bootstrap)
+    # https://github.com/fog/fog/issues/1516
+    #
+    # volume.wait_for { volume.status == 'available' }
+    # volume.attach(server.id, "/dev/vdc")
+    # volume.wait_for { volume.status == 'in-use' }
+    #
+    # Instead, using:
+    volume.server = server
   end
 end

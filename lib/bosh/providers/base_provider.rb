@@ -9,12 +9,7 @@ class Bosh::Providers::BaseProvider
     @fog_compute = fog_compute
   end
 
-  # @return [String] provisions a new public IP address in target region
-  # TODO nil if none available
-  def provision_public_ip_address
-    address = fog_compute.addresses.create
-    address.public_ip
-    # TODO catch error and return nil
+  def create_key_pair(key_pair_name)
+    fog_compute.key_pairs.create(:name => key_pair_name)
   end
-
 end
