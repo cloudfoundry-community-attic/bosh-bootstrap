@@ -108,6 +108,12 @@ module Bosh::Bootstrap
         end
         confirm "After BOSH is created, your username will be #{settings.bosh_username}"
 
+        unless settings[:bosh_resources_cloud_properties]
+          settings[:bosh_resources_cloud_properties] = bosh_resources_cloud_properties
+          save_settings!
+        end
+        confirm "Micro BOSH instance type will be #{settings[:bosh_resources_cloud_properties]["instance_type"]}"
+
         unless settings[:bosh]
           say "Defaulting to 16Gb persistent disk for BOSH"
           password        = settings.bosh_password # FIXME dual use of password?
@@ -440,7 +446,6 @@ module Bosh::Bootstrap
           settings[:fog_credentials][key] = value
         end
         setup_bosh_cloud_properties
-        settings[:bosh_resources_cloud_properties] = bosh_resources_cloud_properties
         settings[:bosh_provider] = settings.bosh_cloud_properties.keys.first # aws, vsphere...
         save_settings!
       end
@@ -511,10 +516,21 @@ module Bosh::Bootstrap
         if aws?
           {"instance_type" => "m1.medium"}
         elsif openstack?
-          # TODO: Ask for instance type
-          {"instance_type" => "m1.medium"}
+          {"instance_type" => choose_bosh_openstack_flavor}
         else
           raise "implement #bosh_resources_cloud_properties for #{settings.fog_credentials.provider}"
+        end
+      end
+
+      def choose_bosh_openstack_flavor
+        say ""
+        hl.choose do |menu|
+          menu.prompt = "Choose Micro BOSH instance type:  "
+          fog_compute.flavors.each do |flavor|
+            menu.choice(flavor.name) do
+              return flavor.name
+            end
+          end
         end
       end
 
