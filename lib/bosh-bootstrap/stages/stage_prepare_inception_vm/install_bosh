@@ -44,6 +44,7 @@ if [[ "${INSTALL_BOSH_FROM_SOURCE}X" != "X" ]]; then
 
 else
   install_gem bosh_cli
+  install_gem httparty
   install_gem bosh_deployer
 fi
 
