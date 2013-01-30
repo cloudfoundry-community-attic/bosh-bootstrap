@@ -106,7 +106,7 @@ module Bosh::Bootstrap::Stages
       # Openstack settings
       if cloud_plugin.downcase == "openstack"
         # Delete OpenStack registry IP address
-        manifest["properties"].delete("openstack_registry")
+        manifest["apply_spec"]["properties"].delete("openstack_registry")
 
         # OpenStack private network label
         if settings.network_label
