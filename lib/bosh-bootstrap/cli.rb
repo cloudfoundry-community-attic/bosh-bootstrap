@@ -84,7 +84,7 @@ module Bosh::Bootstrap
           choose_provider_network_label
         end
         if settings["network_label"]
-          confirm "Using network #{settings['network_label']} for #{settings.fog_credentials.provider}"
+          confirm "Using #{settings.fog_credentials.provider} network labelled #{settings['network_label']}"
         end
       end
       
