@@ -79,7 +79,7 @@ module Bosh::Bootstrap::Stages
       #   ec2_private_key: /home/vcap/.ssh/#{key_name}.pem
       cloud_properties = settings.bosh_cloud_properties
 
-      {
+      manifest = {
         "name" => name,
         "env" => { "bosh" => {"password" => salted_password}},
         "logging" => { "level" => "DEBUG" },
@@ -101,7 +101,20 @@ module Bosh::Bootstrap::Stages
             "#{cloud_plugin.downcase}_registry" => { "address" => ipaddress }
           }
         }
-      }.to_yaml.gsub(/\s![^ ]+$/, '')
+      }
+
+      # Openstack settings
+      if cloud_plugin.downcase == "openstack"
+        # Delete OpenStack registry IP address
+        manifest["apply_spec"]["properties"].delete("openstack_registry")
+
+        # OpenStack private network label
+        if settings.network_label
+          manifest["network"]["label"] = settings.network_label
+        end
+      end
+
+      manifest.to_yaml.gsub(/\s![^ ]+$/, '')
 
       # /![^ ]+\s/ removes object notation from the YAML which appears to cause problems when being interpretted by the
       # Ruby running on the inception vm. A before and after example would look like;

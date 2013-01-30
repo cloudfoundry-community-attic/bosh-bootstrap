@@ -79,6 +79,13 @@ module Bosh::Bootstrap
         else
           confirm "No specific region/data center for #{settings.fog_credentials.provider}"
         end
+
+        unless settings["network_label"]
+          choose_provider_network_label
+        end
+        if settings["network_label"]
+          confirm "Using #{settings.fog_credentials.provider} network labelled #{settings['network_label']}"
+        end
       end
       
       def deploy_stage_2_bosh_configuration
@@ -101,6 +108,12 @@ module Bosh::Bootstrap
         end
         confirm "After BOSH is created, your username will be #{settings.bosh_username}"
 
+        unless settings[:bosh_resources_cloud_properties]
+          settings[:bosh_resources_cloud_properties] = bosh_resources_cloud_properties
+          save_settings!
+        end
+        confirm "Micro BOSH instance type will be #{settings[:bosh_resources_cloud_properties]["instance_type"]}"
+
         unless settings[:bosh]
           say "Defaulting to 16Gb persistent disk for BOSH"
           password        = settings.bosh_password # FIXME dual use of password?
@@ -109,6 +122,7 @@ module Bosh::Bootstrap
           settings[:bosh][:persistent_disk] = 16384
           save_settings!
         end
+
         unless settings[:bosh]["ip_address"]
           say "Acquiring IP address for micro BOSH..."
           ip_address = acquire_ip_address
@@ -409,7 +423,8 @@ module Bosh::Bootstrap
               "openstack_username" => profile[:openstack_username],
               "openstack_api_key" => profile[:openstack_api_key],
               "openstack_tenant" => profile[:openstack_tenant],
-              "openstack_auth_url" => profile[:openstack_auth_url]
+              "openstack_auth_url" => profile[:openstack_auth_url],
+              "openstack_region" => profile[:openstack_region]
             }
           end
         end
@@ -431,7 +446,6 @@ module Bosh::Bootstrap
           settings[:fog_credentials][key] = value
         end
         setup_bosh_cloud_properties
-        settings[:bosh_resources_cloud_properties] = bosh_resources_cloud_properties
         settings[:bosh_provider] = settings.bosh_cloud_properties.keys.first # aws, vsphere...
         save_settings!
       end
@@ -502,10 +516,21 @@ module Bosh::Bootstrap
         if aws?
           {"instance_type" => "m1.medium"}
         elsif openstack?
-          # TODO: Ask for instance type
-          {"instance_type" => "m1.medium"}
+          {"instance_type" => choose_bosh_openstack_flavor}
         else
           raise "implement #bosh_resources_cloud_properties for #{settings.fog_credentials.provider}"
+        end
+      end
+
+      def choose_bosh_openstack_flavor
+        say ""
+        hl.choose do |menu|
+          menu.prompt = "Choose Micro BOSH instance type:  "
+          fog_compute.flavors.each do |flavor|
+            menu.choice(flavor.name) do
+              return flavor.name
+            end
+          end
         end
       end
 
@@ -517,8 +542,8 @@ module Bosh::Bootstrap
         if aws?
           choose_aws_region
         else
-          settings["region_code"] = nil
-          false
+          return false if settings.has_key?("region_code")
+          prompt_openstack_region
         end
       end
 
@@ -541,6 +566,29 @@ module Bosh::Bootstrap
         end
         reset_fog_compute
         true
+      end
+
+      def prompt_openstack_region
+        default_region = settings.fog_credentials.openstack_region
+        region = hl.ask("OpenStack Region (optional): ") { |q| q.default = default_region }
+        settings[:region_code] = region.strip == "" ? nil : region
+        return false unless settings[:region_code]
+
+        settings["fog_credentials"]["openstack_region"] = settings[:region_code]
+        settings["bosh_cloud_properties"]["openstack"]["region"] = settings[:region_code]
+        save_settings!
+        reset_fog_compute
+        true
+      end
+
+      def choose_provider_network_label
+        if openstack?
+          prompt_openstack_network_label
+        end
+      end
+
+      def prompt_openstack_network_label
+        settings[:network_label] = hl.ask("OpenStack private network label: ")  { |q| q.default = "private" }
       end
 
       # Creates a security group.
@@ -574,19 +622,7 @@ module Bosh::Bootstrap
         save_settings!
       end
 
-      # Creates a key pair.
-      def create_key_pair(key_pair_name)
-        if aws?
-          create_aws_key_pair(key_pair_name)
-        elsif openstack?
-          create_openstack_key_pair(key_pair_name)
-        else
-          raise "implement #create_key_pair for #{settings.fog_credentials.provider}"
-        end
-      end
-
-      # Creates an AWS key pair, and stores the private key
-      # in settings manifest.
+      # Creates a key pair, and stores the private key in settings manifest.
       # Also sets up the bosh_cloud_properties for the remote server
       # to have the .pem key installed.
       #
@@ -594,48 +630,30 @@ module Bosh::Bootstrap
       # * bosh_key_pair.name
       # * bosh_key_pair.private_key
       # * bosh_key_pair.fingerprint
+      # For AWS:
       # * bosh_cloud_properties.aws.default_key_name
       # * bosh_cloud_properties.aws.ec2_private_key
-      def create_aws_key_pair(key_pair_name)
-        unless fog_compute.key_pairs.get(key_pair_name)
-          say "creating key pair #{key_pair_name}..."
-          kp = fog_compute.key_pairs.create(:name => key_pair_name)
-          settings[:bosh_key_pair] = {}
-          settings[:bosh_key_pair][:name] = key_pair_name
-          settings[:bosh_key_pair][:private_key] = kp.private_key
-          settings[:bosh_key_pair][:fingerprint] = kp.fingerprint
-          settings["bosh_cloud_properties"]["aws"]["default_key_name"] = key_pair_name
-          settings["bosh_cloud_properties"]["aws"]["ec2_private_key"] = "/home/vcap/.ssh/#{key_pair_name}.pem"
-          save_settings!
-        else
-          error "AWS key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
-        end
-      end
-
-      # Creates an OpenStack key pair, and stores the private key
-      # in settings manifest.
-      # Also sets up the bosh_cloud_properties for the remote server
-      # to have the .pem key installed.
-      #
-      # Adds settings:
-      # * bosh_key_pair.name
-      # * bosh_key_pair.private_key
-      # * bosh_key_pair.fingerprint
+      # For OpenStack:
       # * bosh_cloud_properties.openstack.default_key_name
-      # * bosh_cloud_properties.openstack.ec2_private_key
-      def create_openstack_key_pair(key_pair_name)
+      # * bosh_cloud_properties.openstack.private_key
+      def create_key_pair(key_pair_name)
         unless fog_compute.key_pairs.get(key_pair_name)
           say "creating key pair #{key_pair_name}..."
-          kp = fog_compute.key_pairs.create(:name => key_pair_name)
+          kp = provider.create_key_pair(key_pair_name)
           settings[:bosh_key_pair] = {}
           settings[:bosh_key_pair][:name] = key_pair_name
           settings[:bosh_key_pair][:private_key] = kp.private_key
           settings[:bosh_key_pair][:fingerprint] = kp.fingerprint
-          settings["bosh_cloud_properties"]["openstack"]["default_key_name"] = key_pair_name
-          settings["bosh_cloud_properties"]["openstack"]["private_key"] = "/home/vcap/.ssh/#{key_pair_name}.pem"
+          if aws?
+            settings["bosh_cloud_properties"]["aws"]["default_key_name"] = key_pair_name
+            settings["bosh_cloud_properties"]["aws"]["ec2_private_key"] = "/home/vcap/.ssh/#{key_pair_name}.pem"
+          elsif openstack?
+            settings["bosh_cloud_properties"]["openstack"]["default_key_name"] = key_pair_name
+            settings["bosh_cloud_properties"]["openstack"]["private_key"] = "/home/vcap/.ssh/#{key_pair_name}.pem"
+          end
           save_settings!
         else
-          error "OpenStack key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
+          error "Key pair '#{key_pair_name}' already exists. Rename BOSH or delete old key pair manually and re-run CLI."
         end
       end
 
@@ -733,51 +751,52 @@ module Bosh::Bootstrap
         end
         confirm "Using key pair #{key_pair.name} for Inception VM"
 
-        # make sure port 22 is open in the default security group
-        security_group = fog_compute.security_groups.find { |sg| sg.name == 'default' }
-        authorized = security_group.rules.detect do |ip_permission|
-            ip_permission['ip_range'].first && ip_permission['ip_range']['cidr'] == '0.0.0.0/0' &&
-            ip_permission['from_port'] == 22 &&
-            ip_permission['ip_protocol'] == 'tcp' &&
-            ip_permission['to_port'] == 22
-        end
-        unless authorized
-          security_group.create_security_group_rule(22, 22)
-        end
-        confirm "Inception VM port 22 open"
-
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
           say "Provisioning server for inception VM..."
-          settings["inception"] = {}
+          settings["inception"] ||= {}
 
           # Select OpenStack flavor
+          if settings["inception"]["flavor_id"]
+            inception_flavor = fog_compute.flavors.find { |f| f.id == settings["inception"]["flavor_id"] }
+            settings["inception"]["flavor_id"] = nil if inception_flavor.nil?
+          end
           unless settings["inception"]["flavor_id"]
             say ""
             hl.choose do |menu|
               menu.prompt = "Choose OpenStack flavor:  "
               fog_compute.flavors.each do |flavor|
                 menu.choice(flavor.name) do
-                  settings["inception"]["flavor_id"] = flavor.id
+                  inception_flavor = flavor
+                  settings["inception"]["flavor_id"] = inception_flavor.id
                   save_settings!
                 end
               end
             end
           end
+          say ""
+          confirm "Using flavor #{inception_flavor.name} for Inception VM"
 
           # Select OpenStack image
+          if settings["inception"]["image_id"]
+            inception_image = fog_compute.images.find { |i| i.id == settings["inception"]["image_id"] }
+            settings["inception"]["image_id"] = nil if inception_image.nil?
+          end
           unless settings["inception"]["image_id"]
             say ""
             hl.choose do |menu|
               menu.prompt = "Choose OpenStack image (Ubuntu):  "
               fog_compute.images.each do |image|
                 menu.choice(image.name) do
-                  settings["inception"]["image_id"] = image.id
+                  inception_image = image
+                  settings["inception"]["image_id"] = inception_image.id
                   save_settings!
                 end
               end
             end
           end
+          say ""
+          confirm "Using image #{inception_image.name} for Inception VM"
 
           # Boot OpenStack server
           server = fog_compute.servers.create(
@@ -785,8 +804,8 @@ module Bosh::Bootstrap
             :key_name => key_pair.name,
             :public_key_path => public_key_path,
             :private_key_path => private_key_path,
-            :flavor_ref => settings["inception"]["flavor_id"],
-            :image_ref => settings["inception"]["image_id"],
+            :flavor_ref => inception_flavor.id,
+            :image_ref => inception_image.id,
             :username => username
           )
           unless server
@@ -810,6 +829,19 @@ module Bosh::Bootstrap
           save_settings!
         end
 
+        # TODO: Hack
+        unless server.public_ip_address
+          server.addresses["public"] = [settings["inception"]["ip_address"]]
+        end
+        unless server.public_key_path
+          server.public_key_path = public_key_path
+        end
+        unless server.private_key_path
+          server.private_key_path = private_key_path
+        end
+        server.username = settings["inception"]["username"]
+        Fog.wait_for(60) { server.sshable? }
+
         unless settings["inception"]["disk_size"]
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
           device = "/dev/vdc"
@@ -817,44 +849,6 @@ module Bosh::Bootstrap
 
           settings["inception"]["disk_size"] = disk_size
           settings["inception"]["disk_device"] = device
-          save_settings!
-
-          # TODO use provision_and_mount_volume
-          
-          disk_size = 16 # Gb
-          va = fog_compute.get_server_volumes(server.id).body['volumeAttachments']
-          unless vol = va.find { |v| v["device"] == "/dev/vdc" }
-            say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
-            volume = fog_compute.volumes.create(:name => "Inception Disk",
-                                                :description => "",
-                                                :size => disk_size,
-                                                :availability_zone => server.availability_zone)
-            volume.wait_for { volume.status == 'available' }
-            volume.attach(server.id, "/dev/vdc")
-            volume.wait_for { volume.status == 'in-use' }
-          end
-
-          # Format and mount the volume
-          # TODO: Hack
-          unless server.public_ip_address
-            server.addresses["public"] = [settings["inception"]["ip_address"]]
-          end
-          unless server.public_key_path
-            server.public_key_path = public_key_path
-          end
-          unless server.private_key_path
-            server.private_key_path = private_key_path
-          end
-          server.username = settings["inception"]["username"]
-          server.sshable?
-
-          say "Mounting persistent disk as volume on inception VM..."
-          # TODO if any of these ssh calls fail; retry
-          server.ssh(['sudo mkfs.ext4 /dev/vdc -F'])
-          server.ssh(['sudo mkdir -p /var/vcap/store'])
-          server.ssh(['sudo mount /dev/vdc /var/vcap/store'])
-
-          settings["inception"]["disk_size"] = disk_size
           save_settings!
         end
 
@@ -884,8 +878,7 @@ module Bosh::Bootstrap
       end
 
       def associate_ip_address_with_server(ip_address, server)
-        address = fog_compute.addresses.get(ip_address)
-        address.server = server
+        provider.associate_ip_address_with_server(ip_address, server)
         server.reload
       end
 
@@ -894,23 +887,9 @@ module Bosh::Bootstrap
       #
       # Requires that we can SSH into +server+.
       def provision_and_mount_volume(server, disk_size, device)
-        unless volume = server.volumes.all.find {|v| v.device == device}
+        unless provider.find_server_device(server, device)
           say "Provisioning #{disk_size}Gb persistent disk for inception VM..."
-          volume = fog_compute.volumes.create(
-            size: disk_size,
-            name: "Inception Disk",
-            description: '',
-            device: "/dev/sdi",
-            availability_zone: server.availability_zone)
-          # TODO: the following works in fog 1.9.0+ (but which has a bug in bootstrap)
-          # https://github.com/fog/fog/issues/1516
-          #
-          # volume.wait_for { volume.status == 'available' }
-          # volume.attach(server.id, "/dev/vdc")
-          # volume.wait_for { volume.status == 'in-use' }
-          #
-          # Instead, using:
-          volume.server = server
+          provider.create_and_attach_volume("Inception Disk", disk_size, server, device)
         end
 
         # Format and mount the volume
