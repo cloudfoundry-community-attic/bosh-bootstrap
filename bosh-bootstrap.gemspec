@@ -26,6 +26,7 @@ EOS
   gem.add_dependency "highline"
   gem.add_dependency "settingslogic"
   gem.add_dependency "POpen4"
+  gem.add_dependency "win32-open3-19" if ( RUBY_PLATFORM =~ /mswin32/i || RUBY_PLATFORM =~ /mingw32/i )
   gem.add_dependency "net-scp"
   gem.add_dependency "fog", "~>1.8.0"
   gem.add_dependency "escape"
