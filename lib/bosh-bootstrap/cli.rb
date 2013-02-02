@@ -62,6 +62,15 @@ module Bosh::Bootstrap
       run_ssh_command_or_open_tunnel(cmd)
     end
 
+    desc "tmux", "Open an ssh (with tmux) session to the inception VM [do nothing if local machine is inception VM]"
+    long_desc <<-DESC
+      Opens a connection using ssh and attaches to the most recent tmux session; 
+      giving you persistance across disconnects.
+    DESC
+    def tmux()
+      run_ssh_command_or_open_tunnel(["-t", "tmux attach || tmux new-session"])
+    end
+
     no_tasks do
       DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
 
@@ -282,7 +291,7 @@ module Bosh::Bootstrap
           exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
         end
         username = 'vcap'
-        exit system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].compact)
+        exit system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].flatten.compact)
 
         # TODO how to use the specific private_key_path as configured in settings
         # _, private_key_path = local_ssh_key_paths
