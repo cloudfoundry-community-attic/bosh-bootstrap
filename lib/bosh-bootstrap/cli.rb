@@ -61,7 +61,7 @@ module Bosh::Bootstrap
       run_ssh_command_or_open_tunnel(cmd)
     end
 
-    desc "tmux [COMMAND]", "Open an ssh (with tmux) session to the inception VM [do nothing if local machine is inception VM]"
+    desc "tmux", "Open an ssh (with tmux) session to the inception VM [do nothing if local machine is inception VM]"
     long_desc <<-DESC
       Opens a connection using ssh and attaches to the most recent tmux session; 
       giving you persistance across disconnects.
