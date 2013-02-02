@@ -185,7 +185,7 @@ module Bosh::Bootstrap
         save_settings!
 
         if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host)
+          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
           confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
         else
           @server = Commander::LocalServer.new
@@ -248,7 +248,7 @@ module Bosh::Bootstrap
       def delete_stage_1_target_inception_vm
         header "Stage 1: Target inception VM to use to delete micro-bosh"
         if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host)
+          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
           confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
         else
           @server = Commander::LocalServer.new

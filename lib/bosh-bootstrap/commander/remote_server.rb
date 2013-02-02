@@ -4,11 +4,12 @@ require "tempfile"
 class Bosh::Bootstrap::Commander::RemoteServer
 
   attr_reader :host
+  attr_reader :private_key_path
   attr_reader :default_username
   attr_reader :logfile
 
-  def initialize(host, logfile=STDERR)
-    @host, @logfile = host, logfile
+  def initialize(host, private_key_path, logfile=STDERR)
+    @host, @private_key_path, @logfile = host, private_key_path, logfile
     @default_username = "vcap" # unless overridden by a Command (before vcap exists)
   end
 
@@ -100,7 +101,8 @@ class Bosh::Bootstrap::Commander::RemoteServer
       "bash -lc 'sudo /usr/bin/env PATH=$PATH #{remote_path}'"
     ]
     script_output = ""
-    results = Fog::SSH.new(host, username).run(commands) do |stdout, stderr|
+    keys = [private_key_path] # path to local private key being used
+    results = Fog::SSH.new(host, username, keys: keys).run(commands) do |stdout, stderr|
       [stdout, stderr].flatten.each do |data|
         logfile << data
         script_output << data
