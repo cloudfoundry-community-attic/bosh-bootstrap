@@ -5,8 +5,11 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+apt-get install python-software-properties
+add-apt-repository ppa:keithw/mosh
+
 apt-get update
-apt-get install build-essential libsqlite3-dev curl rsync git-core tmux \
+apt-get install build-essential libsqlite3-dev curl rsync git-core tmux mosh \
   libmysqlclient-dev libxml2-dev libxslt-dev libpq-dev libsqlite3-dev \
   genisoimage mkpasswd \
   debootstrap kpartx qemu-kvm \

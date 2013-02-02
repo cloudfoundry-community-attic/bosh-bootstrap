@@ -71,8 +71,30 @@ module Bosh::Bootstrap
       run_ssh_command_or_open_tunnel(["-t", "tmux attach || tmux new-session"])
     end
 
+    desc "mosh", "Open an mosh session to the inception VM [do nothing if local machine is inception VM]"
+    long_desc <<-DESC
+      Opens a connection using mosh (http://mosh.mit.edu/); ideal for those with slow or flakey internet connections.
+      Requires outgoing UDP port 60001 to the Inception VM
+    DESC
+    def mosh()
+      open_mosh_session()
+    end
+
     no_tasks do
       DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
+
+
+      def open_mosh_session()
+        unless settings[:inception]
+          say "No inception VM being used", :yellow
+          exit 0
+        end
+        unless host = settings.inception[:host]
+          exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
+        end
+        username = 'vcap'
+        exit system Escape.shell_command(['mosh', "#{username}@#{host}"])
+      end
 
       def deploy_stage_1_choose_infrastructure_provider
         header "Stage 1: Choose infrastructure"
