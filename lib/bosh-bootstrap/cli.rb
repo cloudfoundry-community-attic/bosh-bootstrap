@@ -25,7 +25,8 @@ module Bosh::Bootstrap
     method_option :"private-key", :type => :string, :desc => "Local passphrase-less private key path"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
     method_option :"edge-deployer", :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
-    method_option :"latest-stemcell", :type => :boolean, :desc => "Use latest micro-bosh stemcell; possibly not tagged stable"
+    method_option :"stable-stemcell", :type => :boolean, :desc => "Use recent stable microbosh stemcell"
+    method_option :"latest-stemcell", :type => :boolean, :desc => "Use latest microbosh stemcell; possibly not tagged stable [default]"
     method_option :"edge-stemcell", :type => :boolean, :desc => "Create custom stemcell from BOSH git source"
     def deploy
       load_deploy_options # from method_options above
@@ -319,7 +320,10 @@ module Bosh::Bootstrap
         settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
 
         # determine which micro-bosh stemcell to download/create
-        if options[:"latest-stemcell"]
+        if options[:"stable-stemcell"]
+          settings["micro_bosh_stemcell_type"] = "stable"
+          settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
+        elsif options[:"latest-stemcell"]
           settings["micro_bosh_stemcell_type"] = "latest"
           settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
         elsif options[:"edge-stemcell"]
@@ -327,7 +331,8 @@ module Bosh::Bootstrap
           settings["micro_bosh_stemcell_name"] = "custom"
         else
           # may have already been set from previous deploy run
-          settings["micro_bosh_stemcell_type"] ||= "stable"
+          # default to "latest" for both AWS and OpenStack at the moment (no useful stable stemcells)
+          settings["micro_bosh_stemcell_type"] ||= "latest"
         end
 
         # once a stemcell is downloaded or created; these fields above should
@@ -951,8 +956,7 @@ module Bosh::Bootstrap
       # for the target provider (aws, vsphere, openstack)
       def micro_bosh_stemcell_name
         @micro_bosh_stemcell_name ||= begin
-          provider = settings.bosh_provider.downcase # aws, vsphere, openstack
-          stemcell_filter_tags = ['micro', provider]
+          stemcell_filter_tags = ['micro', provider_name]
           if openstack?
             # FIXME remove this if when openstack has its first stable
           else
