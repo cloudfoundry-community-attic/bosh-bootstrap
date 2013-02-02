@@ -956,8 +956,7 @@ module Bosh::Bootstrap
       # for the target provider (aws, vsphere, openstack)
       def micro_bosh_stemcell_name
         @micro_bosh_stemcell_name ||= begin
-          provider = settings.bosh_provider.downcase # aws, vsphere, openstack
-          stemcell_filter_tags = ['micro', provider]
+          stemcell_filter_tags = ['micro', provider_name]
           if openstack?
             # FIXME remove this if when openstack has its first stable
           else
