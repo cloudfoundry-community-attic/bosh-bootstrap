@@ -73,15 +73,6 @@ if [[ $(grep "export EDITOR" /home/vcap/.bashrc) == "" ]]; then
   echo "export EDITOR=vim" >> /home/vcap/.bashrc
 fi
 
-if [[ $(grep "tmux attach" /home/vcap/.bashrc) == "" ]]; then
-  echo 'setting tmux to start on every shell login'
-  echo "#https://wiki.archlinux.org/index.php/Tmux#Start_tmux_on_every_shell_login" >> /home/vcap/.bashrc
-  echo "if which tmux 2>&1 >/dev/null; then" >> /home/vcap/.bashrc
-  echo "  #if not inside a tmux session, and if no session is started, start a new session" >> /home/vcap/.bashrc
-  echo "  test -z "$TMUX" && (tmux attach || tmux new-session)" >> /home/vcap/.bashrc
-  echo "fi" >> /home/vcap/.bashrc
-fi
-
 if [[ ! -h /home/vcap/.bosh_cache ]]; then
   rm -rf ~vcap/.bosh_cache/
   ln -s /var/vcap/store/bosh_cache ~vcap/.bosh_cache
