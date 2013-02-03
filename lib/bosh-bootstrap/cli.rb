@@ -73,7 +73,7 @@ module Bosh::Bootstrap
 
     desc "mosh", "Open an mosh session to the inception VM [do nothing if local machine is inception VM]"
     long_desc <<-DESC
-      Opens a connection using mosh (http://mosh.mit.edu/); ideal for those with slow or flakey internet connections.
+      Opens a connection using MOSH (http://mosh.mit.edu/); ideal for those with slow or flakey internet connections.
       Requires outgoing UDP port 60001 to the Inception VM
     DESC
     def mosh
@@ -83,8 +83,12 @@ module Bosh::Bootstrap
     no_tasks do
       DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
 
-
       def open_mosh_session()
+        system 'mosh --version'
+        unless $?.exitstatus == 255 #mosh --version returns exit code 255, rather than 0 as one might expect.  Grrr.
+          say "You must have MOSH installed to use this command.  See http://mosh.mit.edu/#getting", :yellow
+          exit 0
+        end
         unless settings[:inception]
           say "No inception VM being used", :yellow
           exit 0
