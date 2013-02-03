@@ -55,6 +55,10 @@ describe Bosh::Bootstrap do
     # So to get the latest version for the filter tags,
     # get the Name field, reverse sort, and return the first item
     it "should return the latest stable stemcell by default for AWS" do
+      @cmd.settings["bosh_provider"] = "aws"
+      @cmd.should_receive(:`).
+        with("bosh public stemcells --tags micro,aws").
+        and_return(File.read(spec_asset("bosh/public_stemcells/aws_micro.out")))
       @cmd.micro_bosh_stemcell_name.should == "micro-bosh-stemcell-aws-0.8.1.tgz"
     end
   end
