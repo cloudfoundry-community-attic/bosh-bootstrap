@@ -268,7 +268,7 @@ module Bosh::Bootstrap
         sleep 5
 
         header "Stage 6: Setup bosh"
-        unless server.run(Bosh::Bootstrap::Stages::SetupNewBosh.new(settings).commands)
+        unless run_server(Bosh::Bootstrap::Stages::SetupNewBosh.new(settings).commands)
           error "Failed to complete Stage 6: Setup bosh"
         end
 
@@ -317,7 +317,8 @@ module Bosh::Bootstrap
           exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
         end
         username = 'vcap'
-        exit system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].flatten.compact)
+        result = system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].flatten.compact)
+        exit result
 
         # TODO how to use the specific private_key_path as configured in settings
         # _, private_key_path = local_ssh_key_paths
@@ -953,6 +954,10 @@ module Bosh::Bootstrap
         say "SSH access: ssh -i #{private_key_path} #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
       end
 
+      def run_server(server_commands)
+        server.run(server_commands)
+      end
+
       # Discover/create local passphrase-less SSH keys to allow
       # communication with Inception VM
       #
@@ -992,10 +997,9 @@ module Bosh::Bootstrap
       def micro_bosh_stemcell_name
         @micro_bosh_stemcell_name ||= begin
           stemcell_filter_tags = ['micro', provider_name]
-          if openstack?
-            # FIXME remove this if when openstack has its first stable
-          else
-            if settings["micro_bosh_stemcell_type"] == "stable"
+          if settings["micro_bosh_stemcell_type"] == "stable"
+            unless openstack?
+              # FIXME remove this if when openstack has its first stable
               stemcell_filter_tags << "stable" # latest stable micro-bosh stemcell by default
             end
           end
@@ -1013,7 +1017,10 @@ module Bosh::Bootstrap
           #
           # So to get the latest version for the filter tags,
           # get the Name field, reverse sort, and return the first item
-          `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
+          # Effectively:
+          # `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
+          stemcell_output = `#{bosh_stemcells_cmd}`
+          stemcell_output.scan(/[\w.-]+\.tgz/).last
         end
       end
 

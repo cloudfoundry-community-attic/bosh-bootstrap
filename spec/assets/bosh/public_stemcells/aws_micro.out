@@ -1,0 +1,7 @@
++-----------------------------------+--------------------+
+| Name                              | Tags               |
++-----------------------------------+--------------------+
+| micro-bosh-stemcell-aws-0.6.4.tgz | aws, micro, stable |
+| micro-bosh-stemcell-aws-0.7.0.tgz | aws, micro, test   |
+| micro-bosh-stemcell-aws-0.8.1.tgz | aws, micro, test   |
++-----------------------------------+--------------------+
