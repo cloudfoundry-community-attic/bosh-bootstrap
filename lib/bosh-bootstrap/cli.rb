@@ -242,7 +242,7 @@ module Bosh::Bootstrap
         sleep 5
 
         header "Stage 6: Setup bosh"
-        unless server.run(Bosh::Bootstrap::Stages::SetupNewBosh.new(settings).commands)
+        unless run_server(Bosh::Bootstrap::Stages::SetupNewBosh.new(settings).commands)
           error "Failed to complete Stage 6: Setup bosh"
         end
 
@@ -926,6 +926,10 @@ module Bosh::Bootstrap
       def display_inception_ssh_access
         _, private_key_path = local_ssh_key_paths
         say "SSH access: ssh -i #{private_key_path} #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
+      end
+
+      def run_server(server_commands)
+        server.run(server_commands)
       end
 
       # Discover/create local passphrase-less SSH keys to allow
