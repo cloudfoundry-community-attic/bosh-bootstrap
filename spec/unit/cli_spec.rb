@@ -16,17 +16,29 @@ describe Bosh::Bootstrap do
       @cmd.settings["inception"] = {}
       @cmd.settings["inception"]["host"] = "5.5.5.5"
     end
-    it "launches ssh session" do
-      @cmd.should_receive(:exit)
-      @cmd.should_receive(:system).
-        with("ssh vcap@5.5.5.5")
-      @cmd.ssh
+
+    describe "normal" do
+      it "launches ssh session" do
+        @cmd.should_receive(:exit)
+        @cmd.should_receive(:system).
+          with("ssh vcap@5.5.5.5")
+        @cmd.ssh
+      end
+      it "runs ssh command" do
+        @cmd.should_receive(:exit)
+        @cmd.should_receive(:system).
+          with("ssh vcap@5.5.5.5 'some command'")
+        @cmd.ssh("some command")
+      end
     end
-    it "runs ssh command" do
-      @cmd.should_receive(:exit)
-      @cmd.should_receive(:system).
-        with("ssh vcap@5.5.5.5 'some command'")
-      @cmd.ssh("some command")
+
+    describe "tmux" do
+      it "launches ssh session" do
+        @cmd.should_receive(:exit)
+        @cmd.should_receive(:system).
+          with("ssh vcap@5.5.5.5 -t 'tmux attach || tmux new-session'")
+        @cmd.tmux
+      end
     end
   end
 

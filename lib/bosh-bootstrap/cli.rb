@@ -67,7 +67,7 @@ module Bosh::Bootstrap
       Opens a connection using ssh and attaches to the most recent tmux session; 
       giving you persistance across disconnects.
     DESC
-    def tmux()
+    def tmux
       run_ssh_command_or_open_tunnel(["-t", "tmux attach || tmux new-session"])
     end
 
