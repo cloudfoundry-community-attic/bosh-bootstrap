@@ -30,5 +30,10 @@ EOS
   gem.add_dependency "fog", "~>1.8.0"
   gem.add_dependency "escape"
   gem.add_dependency "bosh_cli"
+  gem.add_development_dependency "rake"
   gem.add_development_dependency "bosh_deployer"
+  gem.add_development_dependency "rspec"
+  gem.add_development_dependency "ci_reporter"
+  gem.add_development_dependency "debugger"
+  gem.add_development_dependency "guard-rspec"
 end
