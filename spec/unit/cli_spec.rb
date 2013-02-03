@@ -6,7 +6,28 @@ describe Bosh::Bootstrap do
   include FileUtils
 
   before do
+    ENV['MANIFEST'] = File.expand_path("../../../tmp/test-manifest.yml", __FILE__)
+    rm_rf(ENV['MANIFEST'])
     @cmd = Bosh::Bootstrap::Cli.new
+  end
+
+  describe "ssh" do
+    before do
+      @cmd.settings["inception"] = {}
+      @cmd.settings["inception"]["host"] = "5.5.5.5"
+    end
+    it "launches ssh session" do
+      @cmd.should_receive(:exit)
+      @cmd.should_receive(:system).
+        with("ssh vcap@5.5.5.5")
+      @cmd.ssh
+    end
+    it "runs ssh command" do
+      @cmd.should_receive(:exit)
+      @cmd.should_receive(:system).
+        with("ssh vcap@5.5.5.5 'some command'")
+      @cmd.ssh("some command")
+    end
   end
 
   describe "micro_bosh_stemcell_name" do
