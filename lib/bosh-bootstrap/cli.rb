@@ -229,7 +229,7 @@ module Bosh::Bootstrap
 
       def deploy_stage_5_deploy_micro_bosh
         header "Stage 5: Deploying micro BOSH"
-        unless server.run(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
+        unless run_server(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
           error "Failed to complete Stage 5: Deploying micro BOSH"
         end
 

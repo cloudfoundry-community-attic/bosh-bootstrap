@@ -44,6 +44,25 @@ describe Bosh::Bootstrap do
       @cmd.deploy
     end
 
+    it "stage 5 - download stemcell and deploy microbosh" do
+      testing_stage(5)
+      setting "bosh_provider", "aws"
+      setting "micro_bosh_stemcell_name", "micro-bosh-stemcell-aws-0.8.1.tgz"
+      setting "bosh_username", "drnic"
+      setting "bosh_password", "password"
+      setting "bosh", {}
+      @cmd.settings["bosh"]["salted_password"] = "SALTED"
+      @cmd.settings["bosh"]["ip_address"] = "1.2.3.4"
+      @cmd.settings["bosh"]["persistent_disk"] = 16384
+      @cmd.should_receive(:run_server).and_return(true)
+      setting "bosh_resources_cloud_properties", {}
+      setting "bosh_cloud_properties", {}
+      setting "bosh_key_pair", {}
+      @cmd.settings["bosh_key_pair"]["private_key"] = "PRIVATE_KEY"
+      @cmd.settings["bosh_key_pair"]["name"] = "KEYNAME"
+      @cmd.deploy
+    end
+
     it "stage 6 - sets up new microbosh" do
       testing_stage(6)
       setting "bosh_name", "microbosh-aws-us-east-1"
