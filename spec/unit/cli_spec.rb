@@ -44,7 +44,7 @@ describe Bosh::Bootstrap do
       @cmd.deploy
     end
 
-    it "deploys microbosh" do
+    it "stage 6 - sets up new microbosh" do
       testing_stage(6)
       setting "bosh_name", "microbosh-aws-us-east-1"
       setting "bosh_username", "drnic"
