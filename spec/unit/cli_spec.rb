@@ -46,6 +46,14 @@ describe Bosh::Bootstrap do
       @cmd.deploy
     end
 
+    it "stage 4 - prepare inception VM" do
+      testing_stage(4)
+      setting "inception.username", "ubuntu"
+      setting "bosh.password", "UNSALTED"
+      @cmd.should_receive(:run_server).and_return(true)
+      @cmd.deploy
+    end
+
     it "stage 5 - download stemcell and deploy microbosh" do
       testing_stage(5)
       setting "bosh_provider", "aws"

@@ -52,6 +52,7 @@ class Bosh::Bootstrap::Commander::RemoteServer
     output =~ /^(.*)\Z/
     last_line = $1
     # store output into a settings field, if requested
+    # TODO replace this with SettingsSetting#setting(settings_key, last_line.strip)
     if settings_key
       settings_key_portions = settings_key.split(".")
       parent_key_portions, final_key = settings_key_portions[0..-2], settings_key_portions[-1]
