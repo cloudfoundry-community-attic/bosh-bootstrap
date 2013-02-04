@@ -212,7 +212,7 @@ module Bosh::Bootstrap
       end
 
       def deploy_stage_4_prepare_inception_vm
-        unless settings["inception"]["prepared"] && !settings["upgrade_deps"]
+        unless settings["inception"] && settings["inception"]["prepared"] && !settings["upgrade_deps"]
           header "Stage 4: Preparing the Inception VM"
           unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
             error "Failed to complete Stage 4: Preparing the Inception VM"
