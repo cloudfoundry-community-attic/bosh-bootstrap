@@ -324,6 +324,7 @@ module Bosh::Bootstrap
         ensure_mosh_installed
         ensure_inception_vm
         ensure_inception_vm_has_launched
+        ensure_security_group_allows_mosh
 
         username = 'vcap'
         host = settings.inception[:host]
@@ -336,6 +337,28 @@ module Bosh::Bootstrap
           say "You must have MOSH installed to use this command.  See http://mosh.mit.edu/#getting", :yellow
           exit 0
         end
+      end
+
+      def ensure_security_group_allows_mosh
+        ports = {
+          mosh: { 
+            protocol: "udp", 
+            ports: (60000..60050) 
+          }
+        }
+        inception_server = fog_compute.servers.get(settings["inception"]["server_id"])
+        security_group_name = inception_server.groups.first
+
+        say "Ensuring #{ports[:mosh][:protocol]} ports #{ports[:mosh][:ports].to_s} are open", [:yellow, :bold]
+        say "on Inception VM's security group (#{security_group_name}) ...", [:yellow, :bold]
+
+        #TODO - remove this guard once the other providers have been extended
+        unless settings['bosh_provider'] == 'aws'
+          say "TODO: Non-AWS providers need to be extended to allow creation of UDP ports (60000..60050) in their security groups", :yellow
+          exit 0
+        end
+
+        provider.create_security_group(security_group_name, 'not used', ports)
       end
 
       # Display header for a new section of the bootstrapper

@@ -71,8 +71,10 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
   #   http: { ports: (80..82) },
   #   mosh: { protocol: "udp", ports: (60000..60050) }
   # }
-  # In this example, TCP 22 will be opened for ssh, TCP ports 80, 81, 82 for http 
-  # and UDP 60000 -> 60050 for mosh
+  # In this example, 
+  #  * TCP 22 will be opened for ssh, 
+  #  * TCP ports 80, 81, 82 for http and
+  #  * UDP 60000 -> 60050 for mosh
   def create_security_group(security_group_name, description, ports)
     unless sg = fog_compute.security_groups.get(security_group_name)
       sg = fog_compute.security_groups.create(name: security_group_name, description: description)
