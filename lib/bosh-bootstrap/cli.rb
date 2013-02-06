@@ -25,7 +25,8 @@ module Bosh::Bootstrap
     method_option :"private-key", :type => :string, :desc => "Local passphrase-less private key path"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
     method_option :"edge-deployer", :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
-    method_option :"latest-stemcell", :type => :boolean, :desc => "Use latest micro-bosh stemcell; possibly not tagged stable"
+    method_option :"stable-stemcell", :type => :boolean, :desc => "Use recent stable microbosh stemcell"
+    method_option :"latest-stemcell", :type => :boolean, :desc => "Use latest microbosh stemcell; possibly not tagged stable [default]"
     method_option :"edge-stemcell", :type => :boolean, :desc => "Create custom stemcell from BOSH git source"
     def deploy
       load_deploy_options # from method_options above
@@ -59,6 +60,15 @@ module Bosh::Bootstrap
     DESC
     def ssh(cmd=nil)
       run_ssh_command_or_open_tunnel(cmd)
+    end
+
+    desc "tmux", "Open an ssh (with tmux) session to the inception VM [do nothing if local machine is inception VM]"
+    long_desc <<-DESC
+      Opens a connection using ssh and attaches to the most recent tmux session; 
+      giving you persistance across disconnects.
+    DESC
+    def tmux
+      run_ssh_command_or_open_tunnel(["-t", "tmux attach || tmux new-session"])
     end
 
     no_tasks do
@@ -185,7 +195,7 @@ module Bosh::Bootstrap
         save_settings!
 
         if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host)
+          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
           confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
         else
           @server = Commander::LocalServer.new
@@ -202,9 +212,9 @@ module Bosh::Bootstrap
       end
 
       def deploy_stage_4_prepare_inception_vm
-        unless settings["inception"]["prepared"] && !settings["upgrade_deps"]
+        unless settings["inception"] && settings["inception"]["prepared"] && !settings["upgrade_deps"]
           header "Stage 4: Preparing the Inception VM"
-          unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
+          unless run_server(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
             error "Failed to complete Stage 4: Preparing the Inception VM"
           end
           # Settings are updated by this stage
@@ -219,7 +229,7 @@ module Bosh::Bootstrap
 
       def deploy_stage_5_deploy_micro_bosh
         header "Stage 5: Deploying micro BOSH"
-        unless server.run(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
+        unless run_server(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
           error "Failed to complete Stage 5: Deploying micro BOSH"
         end
 
@@ -232,7 +242,7 @@ module Bosh::Bootstrap
         sleep 5
 
         header "Stage 6: Setup bosh"
-        unless server.run(Bosh::Bootstrap::Stages::SetupNewBosh.new(settings).commands)
+        unless run_server(Bosh::Bootstrap::Stages::SetupNewBosh.new(settings).commands)
           error "Failed to complete Stage 6: Setup bosh"
         end
 
@@ -248,7 +258,7 @@ module Bosh::Bootstrap
       def delete_stage_1_target_inception_vm
         header "Stage 1: Target inception VM to use to delete micro-bosh"
         if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host)
+          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
           confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
         else
           @server = Commander::LocalServer.new
@@ -281,7 +291,8 @@ module Bosh::Bootstrap
           exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
         end
         username = 'vcap'
-        exit system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].compact)
+        result = system Escape.shell_command(['ssh', "#{username}@#{host}", cmd].flatten.compact)
+        exit result
 
         # TODO how to use the specific private_key_path as configured in settings
         # _, private_key_path = local_ssh_key_paths
@@ -319,7 +330,10 @@ module Bosh::Bootstrap
         settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
 
         # determine which micro-bosh stemcell to download/create
-        if options[:"latest-stemcell"]
+        if options[:"stable-stemcell"]
+          settings["micro_bosh_stemcell_type"] = "stable"
+          settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
+        elsif options[:"latest-stemcell"]
           settings["micro_bosh_stemcell_type"] = "latest"
           settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
         elsif options[:"edge-stemcell"]
@@ -327,7 +341,8 @@ module Bosh::Bootstrap
           settings["micro_bosh_stemcell_name"] = "custom"
         else
           # may have already been set from previous deploy run
-          settings["micro_bosh_stemcell_type"] ||= "stable"
+          # default to "latest" for both AWS and OpenStack at the moment (no useful stable stemcells)
+          settings["micro_bosh_stemcell_type"] ||= "latest"
         end
 
         # once a stemcell is downloaded or created; these fields above should
@@ -913,6 +928,10 @@ module Bosh::Bootstrap
         say "SSH access: ssh -i #{private_key_path} #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
       end
 
+      def run_server(server_commands)
+        server.run(server_commands)
+      end
+
       # Discover/create local passphrase-less SSH keys to allow
       # communication with Inception VM
       #
@@ -951,12 +970,10 @@ module Bosh::Bootstrap
       # for the target provider (aws, vsphere, openstack)
       def micro_bosh_stemcell_name
         @micro_bosh_stemcell_name ||= begin
-          provider = settings.bosh_provider.downcase # aws, vsphere, openstack
-          stemcell_filter_tags = ['micro', provider]
-          if openstack?
-            # FIXME remove this if when openstack has its first stable
-          else
-            if settings["micro_bosh_stemcell_type"] == "stable"
+          stemcell_filter_tags = ['micro', provider_name]
+          if settings["micro_bosh_stemcell_type"] == "stable"
+            unless openstack?
+              # FIXME remove this if when openstack has its first stable
               stemcell_filter_tags << "stable" # latest stable micro-bosh stemcell by default
             end
           end
@@ -974,7 +991,10 @@ module Bosh::Bootstrap
           #
           # So to get the latest version for the filter tags,
           # get the Name field, reverse sort, and return the first item
-          `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
+          # Effectively:
+          # `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
+          stemcell_output = `#{bosh_stemcells_cmd}`
+          stemcell_output.scan(/[\w.-]+\.tgz/).last
         end
       end
 
