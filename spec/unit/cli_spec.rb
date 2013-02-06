@@ -4,6 +4,7 @@ require File.expand_path("../../spec_helper", __FILE__)
 
 describe Bosh::Bootstrap do
   include FileUtils
+  include Bosh::Bootstrap::Helpers::SettingsSetter
 
   before do
     ENV['MANIFEST'] = File.expand_path("../../../tmp/test-manifest.yml", __FILE__)
@@ -29,8 +30,9 @@ describe Bosh::Bootstrap do
     end
   end
 
-  def setting(key, value)
-    @cmd.settings[key] = value
+  # used by +SettingsSetter+ to access the settings
+  def settings
+    @cmd.settings
   end
 
   describe "deploy" do
@@ -44,13 +46,45 @@ describe Bosh::Bootstrap do
       @cmd.deploy
     end
 
-    it "deploys microbosh" do
+    it "stage 3 - create inception VM"
+    #  do
+    #   testing_stage(3)
+    #   setting "fog_credentials.provider", "AWS"
+    #   @cmd.should_receive(:run_server).and_return(true)
+    #   @cmd.deploy
+    # end
+
+    it "stage 4 - prepare inception VM" do
+      testing_stage(4)
+      setting "inception.username", "ubuntu"
+      setting "bosh.password", "UNSALTED"
+      @cmd.should_receive(:run_server).and_return(true)
+      @cmd.deploy
+    end
+
+    it "stage 5 - download stemcell and deploy microbosh" do
+      testing_stage(5)
+      setting "bosh_provider", "aws"
+      setting "micro_bosh_stemcell_name", "micro-bosh-stemcell-aws-0.8.1.tgz"
+      setting "bosh_username", "drnic"
+      setting "bosh_password", "password"
+      setting "bosh.salted_password", "SALTED"
+      setting "bosh.ip_address", "1.2.3.4"
+      setting "bosh.persistent_disk", 16384
+      setting "bosh_resources_cloud_properties", {}
+      setting "bosh_cloud_properties", {}
+      setting "bosh_key_pair.private_key", "PRIVATE_KEY"
+      setting "bosh_key_pair.name", "KEYNAME"
+      @cmd.should_receive(:run_server).and_return(true)
+      @cmd.deploy
+    end
+
+    it "stage 6 - sets up new microbosh" do
       testing_stage(6)
       setting "bosh_name", "microbosh-aws-us-east-1"
       setting "bosh_username", "drnic"
       setting "bosh_password", "password"
-      setting "bosh", {}
-      @cmd.settings["bosh"]["ip_address"] = "1.2.3.4"
+      setting "bosh.ip_address", "1.2.3.4"
       @cmd.should_receive(:sleep)
       @cmd.should_receive(:run_server).and_return(true)
       @cmd.should_receive(:sh).with("bosh -u drnic -p password target 1.2.3.4")

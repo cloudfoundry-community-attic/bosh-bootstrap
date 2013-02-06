@@ -107,7 +107,7 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
   cd $BOSH_DIR
   echo "Creating custom stemcell..."
-  bundle install --without test development
+  bundle install
   bundle exec rake stemcell:micro[$PROVIDER,$MICRO_BOSH_MANIFEST_PATH,$LATEST_BOSH_RELEASE_PATH]
 
   echo "Copying to stemcells folder..."

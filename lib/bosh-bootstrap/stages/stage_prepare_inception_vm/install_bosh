@@ -32,7 +32,22 @@ if [[ "${INSTALL_BOSH_FROM_SOURCE}X" != "X" ]]; then
   fi
 
   bosh_dir=/var/vcap/store/repos/bosh
-  for project in common cli deployer aws_registry openstack_registry; do
+  projects=(
+    bosh_common 
+    blobstore_client 
+    bosh_cpi
+    ruby_vcloud_sdk
+    bosh_vcloud_cpi 
+    ruby_vim_sdk
+    bosh_vsphere_cpi
+    bosh_aws_cpi 
+    agent_client 
+    bosh_cli 
+    bosh_deployer 
+    bosh_aws_registry 
+    bosh_openstack_registry
+  )
+  for project in "${projects[@]}"; do
     cd $bosh_dir/$project/
     rm -rf pkg
     bundle install --without=development test

@@ -221,9 +221,9 @@ module Bosh::Bootstrap
       end
 
       def deploy_stage_4_prepare_inception_vm
-        unless settings["inception"]["prepared"] && !settings["upgrade_deps"]
+        unless settings["inception"] && settings["inception"]["prepared"] && !settings["upgrade_deps"]
           header "Stage 4: Preparing the Inception VM"
-          unless server.run(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
+          unless run_server(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
             error "Failed to complete Stage 4: Preparing the Inception VM"
           end
           # Settings are updated by this stage
@@ -238,7 +238,7 @@ module Bosh::Bootstrap
 
       def deploy_stage_5_deploy_micro_bosh
         header "Stage 5: Deploying micro BOSH"
-        unless server.run(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
+        unless run_server(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
           error "Failed to complete Stage 5: Deploying micro BOSH"
         end
 
