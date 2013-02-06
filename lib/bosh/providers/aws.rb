@@ -96,6 +96,16 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     true
   end
 
+  # Any of the following +port_defn+ can be used:
+  # {
+  #   ssh: 22,
+  #   http: { ports: (80..82) },
+  #   mosh: { protocol: "udp", ports: (60000..60050) }
+  # }
+  # In this example, 
+  #  * TCP 22 will be opened for ssh, 
+  #  * TCP ports 80, 81, 82 for http and
+  #  * UDP 60000 -> 60050 for mosh
   def extract_port_definition(port_defn)
     if port_defn.is_a? Integer
       protocol = "tcp"
