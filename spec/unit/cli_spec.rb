@@ -46,6 +46,14 @@ describe Bosh::Bootstrap do
       @cmd.deploy
     end
 
+    it "stage 3 - create inception VM"
+    #  do
+    #   testing_stage(3)
+    #   setting "fog_credentials.provider", "AWS"
+    #   @cmd.should_receive(:run_server).and_return(true)
+    #   @cmd.deploy
+    # end
+
     it "stage 4 - prepare inception VM" do
       testing_stage(4)
       setting "inception.username", "ubuntu"
