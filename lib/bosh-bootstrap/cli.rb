@@ -993,6 +993,7 @@ module Bosh::Bootstrap
           # Effectively:
           # `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
           stemcell_output = `#{bosh_stemcells_cmd}`
+          say stemcell_output
           stemcell_output.scan(/[\w.-]+\.tgz/).last
         end
       end
