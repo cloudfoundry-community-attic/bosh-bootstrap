@@ -10,10 +10,9 @@ Gem::Specification.new do |gem|
   gem.email         = ["drnicwilliams@gmail.com"]
   gem.description   = %q{Bootstrap a micro BOSH universe from one CLI}
   gem.summary       = <<-EOS
-Now very simple to bootstrap a micro BOSH from a single, local CLI.
-The bootstrapper first creates an inception VM and then uses
-bosh_deployer (bosh micro deploy) to deploy micro BOSH from
-an available stemcell.
+bosh-bootstrap is a command line tool that you can run on your laptop and
+automatically get a microbosh (and an inception VM) deployed on either
+AWS or OpenStack.
 EOS
   gem.homepage      = "https://github.com/StarkAndWayne/bosh-bootstrap"
 
