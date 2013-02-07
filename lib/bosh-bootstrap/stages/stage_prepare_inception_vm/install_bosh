@@ -31,31 +31,8 @@ if [[ "${INSTALL_BOSH_FROM_SOURCE}X" != "X" ]]; then
     git clone https://github.com/cloudfoundry/bosh.git
   fi
 
-  bosh_dir=/var/vcap/store/repos/bosh
-  projects=(
-    bosh_common 
-    blobstore_client 
-    bosh_cpi
-    ruby_vcloud_sdk
-    bosh_vcloud_cpi 
-    ruby_vim_sdk
-    bosh_vsphere_cpi
-    bosh_aws_cpi 
-    agent_client 
-    bosh_cli 
-    bosh_aws_registry 
-    bosh_openstack_registry
-    bosh_deployer 
-  )
-  for project in "${projects[@]}"; do
-    cd $bosh_dir/$project/
-    rm -rf pkg
-    bundle install --without=development test
-    gem build *.gemspec
-    mkdir -p pkg
-    mv *.gem pkg/
-    gem install pkg/*.gem --no-ri --no-rdoc
-  done
+  cd /var/vcap/store/repos/bosh
+  bundle --binstubs=/usr/bin
 
 else
   install_gem bosh_cli
