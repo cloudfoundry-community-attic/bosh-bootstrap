@@ -339,11 +339,10 @@ module Bosh::Bootstrap
         elsif options[:"edge-stemcell"]
           settings["micro_bosh_stemcell_type"] = "custom"
           settings["micro_bosh_stemcell_name"] = "custom"
-        else
-          # may have already been set from previous deploy run
-          # default to "latest" for both AWS and OpenStack at the moment (no useful stable stemcells)
-          settings["micro_bosh_stemcell_type"] ||= "latest"
         end
+        # may have already been set from previous deploy run
+        # default to "latest" for both AWS and OpenStack at the moment (no useful stable stemcells)
+        settings["micro_bosh_stemcell_type"] ||= "latest"
 
         # once a stemcell is downloaded or created; these fields above should
         # be uploaded with values such as:
