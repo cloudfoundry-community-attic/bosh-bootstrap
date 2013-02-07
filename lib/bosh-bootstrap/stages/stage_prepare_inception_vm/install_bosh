@@ -43,9 +43,9 @@ if [[ "${INSTALL_BOSH_FROM_SOURCE}X" != "X" ]]; then
     bosh_aws_cpi 
     agent_client 
     bosh_cli 
-    bosh_deployer 
     bosh_aws_registry 
     bosh_openstack_registry
+    bosh_deployer 
   )
   for project in "${projects[@]}"; do
     cd $bosh_dir/$project/
