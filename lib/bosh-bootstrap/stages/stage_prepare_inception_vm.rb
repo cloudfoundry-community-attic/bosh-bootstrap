@@ -18,6 +18,7 @@ module Bosh::Bootstrap::Stages
         server.install "bosh", script("install_bosh",
           "UPGRADE" => settings[:upgrade_deps],
           "INSTALL_BOSH_FROM_SOURCE" => settings["bosh_git_source"] || "")
+        server.install "bosh plugins", script("install_bosh_plugins", "UPGRADE" => settings[:upgrade_deps])
         # use inception VM to generate a salted password (local machine may not have mkpasswd)
         server.capture_value "salted password", script("convert_salted_password", "PASSWORD" => settings.bosh.password),
           :settings => settings, :save_output_to_settings_key => "bosh.salted_password"
