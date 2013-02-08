@@ -9,10 +9,14 @@ module Bosh::Bootstrap::Stages
     def commands
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
         # using inception VM username login, create a vcap user with same authorizations
-        server.create "vcap user", script("create_vcap_user", "ORIGUSER" => settings.inception.username),
+        server.create "vcap user", script("create_vcap_user",
+          "ORIGUSER" => settings.inception.username),
           :user => settings.inception.username
         # install base Ubuntu packages used for bosh micro deployer
         server.install "base packages", script("install_base_packages")
+        server.configure "git", script("configure_git",
+          "GIT_USER_NAME" => settings["git"]["name"],
+          "GIT_USER_EMAIL" => settings["git"]["email"])
         server.install "ruby 1.9.3", script("install_ruby", "UPGRADE" => settings[:upgrade_deps])
         server.install "useful ruby gems", script("install_useful_gems", "UPGRADE" => settings[:upgrade_deps])
         server.install "bosh", script("install_bosh",
@@ -41,7 +45,7 @@ module Bosh::Bootstrap::Stages
         if variables.keys.size > 0
           inline_variables = "#!/usr/bin/env bash\n\n"
           env_variables = variables.reject { |var| var.is_a?(Symbol) }
-          env_variables.each { |name, value| inline_variables << "#{name}=#{value}\n" }
+          env_variables.each { |name, value| inline_variables << "#{name}='#{value}'\n" }
           script.gsub!("#!/usr/bin/env bash", inline_variables)
         end
         script
