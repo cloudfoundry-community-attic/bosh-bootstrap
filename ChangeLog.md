@@ -1,5 +1,9 @@
 # Change Log
 
+## Next
+
+* For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added
+
 ## v0.6
 
 Highlights:

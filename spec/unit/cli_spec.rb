@@ -56,6 +56,8 @@ describe Bosh::Bootstrap do
 
     it "stage 4 - prepare inception VM" do
       testing_stage(4)
+      setting "git.name", "Dr Nic Williams"
+      setting "git.email", "drnicwilliams@gmail.com"
       setting "inception.username", "ubuntu"
       setting "bosh.password", "UNSALTED"
       @cmd.should_receive(:run_server).and_return(true)
