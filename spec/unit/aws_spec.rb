@@ -67,18 +67,6 @@ describe "AWS deployment" do
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do
-    # create a VPC
-    # create a BOSH subnet 10.10.0.0/24
-    # create BOSH security group
-    # create INCEPTION security group allowing only 22
-    # create NATS security group, allowing only 4222
-    # create DHCP options with 2 nameserver (1 amazon for public resolves, 1 for private resolves (.bosh)?)
-    # create Internet Gateway, attach to VPC
-    # create default route (0.0.0.0/0) to IG
-
-    # create inception VM (attaching elastic IP, sg of [BOSH, INCEPTION]) in BOSH subnet at 10.10.0.5
-    # create MB VM from inception VM (sg of [BOSH, NATS])  in BOSH subnet at 10.10.0.6
-
     setting "use_vpc", false
 
     @cmd.should_receive(:provision_and_mount_volume)
