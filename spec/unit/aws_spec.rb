@@ -8,6 +8,7 @@ describe "AWS deployment" do
 
   before do
     Fog.mock!
+    Fog::Mock.reset
     ENV['MANIFEST'] = File.expand_path("../../../tmp/test-manifest.yml", __FILE__)
     rm_rf(ENV['MANIFEST'])
     @cmd = Bosh::Bootstrap::Cli.new
@@ -42,7 +43,7 @@ describe "AWS deployment" do
     YAML.load(File.read(filename).gsub('$MICROBOSH_IP$', public_ip))
   end
 
-  xit "creates a VPC inception/microbosh with the associated resources" do
+  it "creates a VPC inception/microbosh with the associated resources" do
     # create a VPC
     # create a BOSH subnet 10.10.0.0/24
     # create BOSH security group
