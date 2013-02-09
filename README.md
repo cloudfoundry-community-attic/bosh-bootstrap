@@ -7,7 +7,7 @@ The Stark & Wayne Bosh Bootstrapper is the simplest way to get a Micro BOSH runn
 Bootstrap a Micro BOSH universe from one CLI command. Also allows SSH access and the ability to delete created Micro BOSHes.
 
 ```
-$ bosh-bootstrap deploy --latest-stemcell
+$ bosh-bootstrap deploy
 Creating inception VM...
 Creating micro BOSH VM...
 
