@@ -13,7 +13,7 @@ describe Bosh::Providers do
           :provider  => 'AWS', 
           :aws_access_key_id  => 'MOCK_AWS_ACCESS_KEY_ID',
           :aws_secret_access_key  => 'MOCK_AWS_SECRET_ACCESS_KEY')
-      @aws_provider ||= Bosh::Providers.for_bosh_provider_name("aws", @fog_compute)
+      @aws_provider = Bosh::Providers.for_bosh_provider_name("aws", @fog_compute)
     end
 
     describe "create security group" do
@@ -54,6 +54,41 @@ describe Bosh::Providers do
         created_sg.ip_permissions.should == [
           { 
             "ipProtocol"=>"udp",
+            "fromPort"=>60000, 
+            "toPort"=>600050, 
+            "groups"=>[], 
+            "ipRanges"=>[ { "cidrIp"=>"0.0.0.0/0" } ] 
+          }
+        ]
+      end
+      it "should open not open ports if they are already open" do
+        @aws_provider.create_security_group("sg1", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
+        @aws_provider.create_security_group("sg1", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
+        created_sg = @fog_compute.security_groups.get("sg1")
+        created_sg.ip_permissions.should == [
+          { 
+            "ipProtocol"=>"udp",
+            "fromPort"=>60000, 
+            "toPort"=>600050, 
+            "groups"=>[], 
+            "ipRanges"=>[ { "cidrIp"=>"0.0.0.0/0" } ] 
+          }
+        ]
+      end
+      it "should open ports even if they are already open for a different protocol" do
+        @aws_provider.create_security_group("sg1", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
+        @aws_provider.create_security_group("sg1", "", { ssh: { protocol: "tcp", ports: (60000..600050) } })
+        created_sg = @fog_compute.security_groups.get("sg1")
+        created_sg.ip_permissions.should == [
+          { 
+            "ipProtocol"=>"udp",
+            "fromPort"=>60000, 
+            "toPort"=>600050, 
+            "groups"=>[], 
+            "ipRanges"=>[ { "cidrIp"=>"0.0.0.0/0" } ] 
+          },
+          { 
+            "ipProtocol"=>"tcp",
             "fromPort"=>60000, 
             "toPort"=>600050, 
             "groups"=>[], 

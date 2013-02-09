@@ -86,7 +86,7 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     ports_opened = 0
     ports.each do |name, port_defn|
       (protocol, port_range) = extract_port_definition(port_defn)
-      unless port_open?(ip_permissions, port_range)
+      unless port_open?(ip_permissions, port_range, protocol)
         sg.authorize_port_range(port_range, {:ip_protocol => protocol})
         puts " -> opened #{name} ports #{protocol.upcase} #{port_range.min}..#{port_range.max}"
         ports_opened += 1
@@ -120,8 +120,12 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     [protocol, port_range]
   end
 
-  def port_open?(ip_permissions, port_range)
-    ip_permissions && ip_permissions.find {|ip| ip["fromPort"] <= port_range.min && ip["toPort"] >= port_range.max }
+  def port_open?(ip_permissions, port_range, protocol)
+    ip_permissions && ip_permissions.find do |ip| 
+      ip["ipProtocol"] == protocol \
+      && ip["fromPort"] <= port_range.min \
+      && ip["toPort"] >= port_range.max 
+    end
   end
 
   def find_server_device(server, device)
