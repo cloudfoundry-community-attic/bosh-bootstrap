@@ -94,6 +94,10 @@ module Bosh::Bootstrap
         end
         confirm "Using infrastructure provider #{settings.fog_credentials.provider}"
 
+        if aws?
+          choose_aws_vpc_or_ec2
+        end
+
         unless settings[:region_code]
           choose_provider_region
         end
@@ -160,6 +164,10 @@ module Bosh::Bootstrap
           confirm "Micro BOSH will be assigned IP address #{settings[:bosh]['ip_address']}"
         end
         save_settings!
+
+        if aws? && settings["use_vpc"]
+          create_vpc(settings.bosh_name)
+        end
 
         unless settings[:bosh_security_group]
           security_group_name = settings.bosh_name
@@ -301,6 +309,15 @@ module Bosh::Bootstrap
 
       def delete_all_stage_3_delete_inception_vm
 
+      end
+
+      def create_vpc(name)
+        unless settings["vpc"]
+          say "Creating VPC '#{name}'..."
+          settings["vpc"] = {}
+          settings["vpc"]["id"] = provider.create_vpc(name, '10.10.0.0/16')
+          save_settings!
+        end
       end
 
       def run_ssh_command_or_open_tunnel(cmd)
@@ -637,6 +654,16 @@ module Bosh::Bootstrap
         else
           return false if settings.has_key?("region_code")
           prompt_openstack_region
+        end
+      end
+
+      def choose_aws_vpc_or_ec2
+        if settings["use_vpc"].nil?
+          settings["use_vpc"] = begin
+            answer = hl.ask("You want to use VPC, right? ") {|q| q.default="yes"; q.validate = /(yes|no)/i }.match(/y/)
+            !!answer
+          end
+          save_settings!
         end
       end
 

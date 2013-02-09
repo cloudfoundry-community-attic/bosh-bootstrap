@@ -24,7 +24,7 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     end
   end
 
-  # @return [Hash] e.g. { :bits => 0, :cores => 2, :disk => 0, 
+  # @return [Hash] e.g. { :bits => 0, :cores => 2, :disk => 0,
   #   :id => 't1.micro', :name => 'Micro Instance', :ram => 613}
   # or nil if +server_flavor_id+ is not a supported flavor ID
   def fog_compute_flavor(server_flavor_id)
@@ -32,7 +32,7 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
   end
 
   # @return [Array] of [Hash] for each supported compute flavor
-  # Example [Hash] { :bits => 0, :cores => 2, :disk => 0, 
+  # Example [Hash] { :bits => 0, :cores => 2, :disk => 0,
   #   :id => 't1.micro', :name => 'Micro Instance', :ram => 613}
   def aws_compute_flavors
     Fog::Compute::AWS::FLAVORS
@@ -55,8 +55,13 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     address.server = server
   end
 
+  def create_vpc(name, cidr_block)
+    vpc = fog_compute.vpcs.create(name: name, cidr_block: cidr_block)
+    vpc.id
+  end
+
   # Creates or reuses an AWS security group and opens ports.
-  # 
+  #
   # +security_group_name+ is the name to be created or reused
   # +ports+ is a hash of name/port for ports to open, for example:
   # {
