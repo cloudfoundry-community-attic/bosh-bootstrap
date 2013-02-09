@@ -103,7 +103,10 @@ module Bosh::Bootstrap
         unless settings[:region_code]
           choose_provider_region
         end
-        if settings[:region_code]
+        if region = settings[:region_code]
+          settings["fog_credentials"]["region"] = region
+          settings["bosh_cloud_properties"][settings["bosh_provider"]]["region"] = region
+          settings["bosh_cloud_properties"][settings["bosh_provider"]]["ec2_endpoint"] = "ec2.#{region}.amazonaws.com"
           confirm "Using #{settings.fog_credentials.provider} region #{settings.region_code}"
         else
           confirm "No specific region/data center for #{settings.fog_credentials.provider}"
@@ -662,9 +665,6 @@ module Bosh::Bootstrap
           aws_regions.each do |region|
             menu.choice(region) do
               settings["region_code"] = region
-              settings["fog_credentials"]["region"] = region
-              settings["bosh_cloud_properties"]["aws"]["region"] = region
-              settings["bosh_cloud_properties"]["aws"]["ec2_endpoint"] = "ec2.#{region}.amazonaws.com"
               save_settings!
             end
             menu.default = default_aws_region
@@ -1097,6 +1097,12 @@ module Bosh::Bootstrap
       # a helper object for the target BOSH provider
       def provider
         @provider ||= Bosh::Providers.for_bosh_provider_name(settings.bosh_provider, fog_compute)
+      end
+
+      # The micro_bosh.yml that is uploaded to the Inception VM before deploying the
+      # MicroBOSH
+      def micro_bosh_yml
+        Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).micro_bosh_manifest
       end
 
       def cyan; "\033[36m" end
