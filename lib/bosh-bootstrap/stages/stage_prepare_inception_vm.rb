@@ -18,6 +18,7 @@ module Bosh::Bootstrap::Stages
         server.install "bosh", script("install_bosh",
           "UPGRADE" => settings[:upgrade_deps],
           "INSTALL_BOSH_FROM_SOURCE" => settings["bosh_git_source"] || "")
+        server.install "bosh plugins", script("install_bosh_plugins", "UPGRADE" => settings[:upgrade_deps])
         # use inception VM to generate a salted password (local machine may not have mkpasswd)
         server.capture_value "salted password", script("convert_salted_password", "PASSWORD" => settings.bosh.password),
           :settings => settings, :save_output_to_settings_key => "bosh.salted_password"
@@ -39,7 +40,8 @@ module Bosh::Bootstrap::Stages
         script = File.read(path)
         if variables.keys.size > 0
           inline_variables = "#!/usr/bin/env bash\n\n"
-          variables.each { |name, value| inline_variables << "#{name}=#{value}\n" }
+          env_variables = variables.reject { |var| var.is_a?(Symbol) }
+          env_variables.each { |name, value| inline_variables << "#{name}=#{value}\n" }
           script.gsub!("#!/usr/bin/env bash", inline_variables)
         end
         script
