@@ -43,7 +43,7 @@ module Bosh::Bootstrap
     # method_option :all, :type => :boolean, :desc => "Delete all micro-boshes and inception VM [coming soon]"
     # def delete
     #   delete_stage_1_target_inception_vm
-    # 
+    #
     #   if options[:all]
     #     error "I'm sorry; the awesome --all flag is not yet implemented"
     #     delete_all_stage_2_delete_micro_boshes
@@ -52,7 +52,7 @@ module Bosh::Bootstrap
     #     delete_one_stage_2_delete_micro_bosh
     #   end
     # end
-    # 
+    #
     desc "ssh [COMMAND]", "Open an ssh session to the inception VM [do nothing if local machine is inception VM]"
     long_desc <<-DESC
       If a command is supplied, it will be run, otherwise a session will be
@@ -64,7 +64,7 @@ module Bosh::Bootstrap
 
     desc "tmux", "Open an ssh (with tmux) session to the inception VM [do nothing if local machine is inception VM]"
     long_desc <<-DESC
-      Opens a connection using ssh and attaches to the most recent tmux session; 
+      Opens a connection using ssh and attaches to the most recent tmux session;
       giving you persistance across disconnects.
     DESC
     def tmux
@@ -88,6 +88,10 @@ module Bosh::Bootstrap
         unless settings[:fog_credentials]
           choose_fog_provider
         end
+
+        unless settings[:bosh_cloud_properties]
+          build_cloud_properties
+        end
         confirm "Using infrastructure provider #{settings.fog_credentials.provider}"
 
         unless settings[:region_code]
@@ -106,7 +110,7 @@ module Bosh::Bootstrap
           confirm "Using #{settings.fog_credentials.provider} network labelled #{settings['network_label']}"
         end
       end
-      
+
       def deploy_stage_2_bosh_configuration
         header "Stage 2: BOSH configuration"
         unless settings[:bosh_name]
@@ -178,12 +182,12 @@ module Bosh::Bootstrap
 
       def deploy_stage_3_create_allocate_inception_vm
         header "Stage 3: Create/Allocate the Inception VM"
-        unless settings["inception"] && settings["inception"]["host"]
+        unless settings["inception"]
           hl.choose do |menu|
             menu.prompt = "Create or specify an Inception VM:  "
             if aws? || openstack?
               menu.choice("create new inception VM") do
-                aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
+                settings["inception"] = {"create_new" => true}
               end
             end
             menu.choice("use an existing Ubuntu server") do
@@ -200,6 +204,11 @@ module Bosh::Bootstrap
             end
           end
         end
+        save_settings!
+
+        if settings["inception"]["create_new"] && !settings["inception"]["host"]
+          aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
+        end
         # If successfully validate inception VM, then save those settings.
         save_settings!
 
@@ -211,7 +220,7 @@ module Bosh::Bootstrap
           confirm "Using this server as the inception VM"
         end
         unless settings["inception"]["validated"]
-          unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
+          unless run_server(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
             error "Failed to complete Stage 3: Create/Allocate the Inception VM"
           end
           settings["inception"]["validated"] = true
@@ -277,18 +286,18 @@ module Bosh::Bootstrap
 
       def delete_one_stage_2_delete_micro_bosh
         header "Stage 2: Deleting micro BOSH"
-        unless server.run(Bosh::Bootstrap::Stages::MicroBoshDelete.new(settings).commands)
+        unless run_server(Bosh::Bootstrap::Stages::MicroBoshDelete.new(settings).commands)
           error "Failed to complete Stage 1: Delete micro BOSH"
         end
         save_settings!
       end
 
       def delete_all_stage_2_delete_micro_boshes
-        
+
       end
 
       def delete_all_stage_3_delete_inception_vm
-        
+
       end
 
       def run_ssh_command_or_open_tunnel(cmd)
@@ -522,6 +531,10 @@ module Bosh::Bootstrap
         @fog_credentials.each do |key, value|
           settings[:fog_credentials][key] = value
         end
+        save_settings!
+      end
+
+      def build_cloud_properties
         setup_bosh_cloud_properties
         settings[:bosh_provider] = settings.bosh_cloud_properties.keys.first # aws, vsphere...
         save_settings!
@@ -569,7 +582,7 @@ module Bosh::Bootstrap
           props[:access_key_id] = settings.fog_credentials.aws_access_key_id
           props[:secret_access_key] = settings.fog_credentials.aws_secret_access_key
           # props[:ec2_endpoint] = "ec2.REGION.amazonaws.com" - via +choose_aws_region+
-          # props[:region] = REGION - via +choose_aws_region+            
+          # props[:region] = REGION - via +choose_aws_region+
           # props[:default_key_name] = "microbosh"  - via +create_aws_key_pair+
           # props[:ec2_private_key] = "/home/vcap/.ssh/microbosh.pem" - via +create_aws_key_pair+
           # props[:default_security_groups] = ["microbosh"], - via +create_aws_security_group+
@@ -975,7 +988,7 @@ module Bosh::Bootstrap
         until disk_mounted
           begin
             # TODO catch Errno::ETIMEDOUT and re-run ssh commands
-            server.ssh(["sudo mkfs.ext4 #{device} -F"]) 
+            server.ssh(["sudo mkfs.ext4 #{device} -F"])
             server.ssh(["sudo mkdir -p /var/vcap/store"])
             server.ssh(["sudo mount #{device} /var/vcap/store"])
             disk_mounted = true
