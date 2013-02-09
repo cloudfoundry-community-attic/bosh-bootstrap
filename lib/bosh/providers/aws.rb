@@ -82,17 +82,30 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     else
       puts "Reusing security group #{security_group_name}"
     end
-    ip_permissions = sg.ip_permissions
-    ports_opened = 0
+
+    ip_permissions = sg.ip_permissions || []
     ports.each do |name, port_defn|
       (protocol, port_range) = extract_port_definition(port_defn)
-      unless port_open?(ip_permissions, port_range, protocol)
-        sg.authorize_port_range(port_range, {:ip_protocol => protocol})
-        puts " -> opened #{name} ports #{protocol.upcase} #{port_range.min}..#{port_range.max}"
-        ports_opened += 1
-      end   
+      puts " -> #{name}:" 
+      if closest_rule = find_closest_rule(ip_permissions, port_range, protocol)
+        current_ports   = (closest_rule["fromPort"]..closest_rule["toPort"]) 
+        puts "    - requested rule #{protocol.upcase} #{port_range.inspect} overlaps with existing rule: #{protocol.upcase} #{current_ports.inspect}"
+        puts "    - removing existing overlapping rule: #{protocol.upcase} #{current_ports.inspect}"
+        sg.revoke_port_range( current_ports, { :ip_protocol => closest_rule['ipProtocol'] } )
+ 
+        if closest_rule["fromPort"] < port_range.min
+          puts "    - decreasing port_range.min from #{port_range.min} to #{closest_rule["fromPort"]}"
+          port_range = (closest_rule["fromPort"]..port_range.max)
+        end
+        if closest_rule["toPort"] > port_range.max 
+          puts "    - increasing port_range.max from #{port_range.max} to #{closest_rule["toPort"]}"
+          port_range = ( port_range.min..closest_rule["toPort"] )
+        end
+      end
+      puts "    => creating rule #{protocol.upcase} #{port_range.inspect}" 
+      sg.authorize_port_range(port_range, {:ip_protocol => protocol})
     end
-    puts " -> no additional ports opened" if ports_opened == 0
+
     true
   end
 
@@ -120,11 +133,21 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     [protocol, port_range]
   end
 
-  def port_open?(ip_permissions, port_range, protocol)
-    ip_permissions && ip_permissions.find do |ip| 
-      ip["ipProtocol"] == protocol \
-      && ip["fromPort"] <= port_range.min \
-      && ip["toPort"] >= port_range.max 
+  def find_closest_rule(ip_permissions, port_range, protocol)
+    ip_permissions.find do |rule| 
+      rule["ipProtocol"] == protocol && \
+      #     given     |--------|         is the requested port_range
+      # (a) match     |--------|         rule with same range
+      # (b) match    |-----------|       rule with larger range
+      # (c) match    |----|              rule with left-lapping range
+      # (d) match             |----|     rule with right-lapping range
+      # (e) match         |--|           rule inside range
+      #     not                     |-|  rule outside range
+      #     not   |-|                    rule outside range
+      (   ( rule["fromPort"] >= port_range.min && rule["fromPort"] <= port_range.max ) \
+       || ( rule["toPort"]   >= port_range.min && rule["toPort"]   <= port_range.max ) \
+       || ( rule["fromPort"] <= port_range.min && rule["toPort"] >= port_range.max ) \
+      )
     end
   end
 
