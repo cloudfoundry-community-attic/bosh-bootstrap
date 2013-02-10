@@ -64,6 +64,17 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
   #   http: 80,
   #   https: 443
   # }
+  # protocol defaults to TCP
+  # You can also use a more verbose +ports+ using the format:
+  # {
+  #   ssh: 22,
+  #   http: { ports: (80..82) },
+  #   mosh: { protocol: "udp", ports: (60000..60050) }
+  # }
+  # In this example, 
+  #  * TCP 22 will be opened for ssh, 
+  #  * TCP ports 80, 81, 82 for http and
+  #  * UDP 60000 -> 60050 for mosh
   def create_security_group(security_group_name, description, ports)
     unless sg = fog_compute.security_groups.get(security_group_name)
       sg = fog_compute.security_groups.create(name: security_group_name, description: description)
@@ -73,19 +84,48 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     end
     ip_permissions = sg.ip_permissions
     ports_opened = 0
-    ports.each do |name, port|
-      unless port_open?(ip_permissions, port)
-        sg.authorize_port_range(port..port)
-        puts " -> opened #{name} port #{port}"
+    ports.each do |name, port_defn|
+      (protocol, port_range) = extract_port_definition(port_defn)
+      unless port_open?(ip_permissions, port_range, protocol)
+        sg.authorize_port_range(port_range, {:ip_protocol => protocol})
+        puts " -> opened #{name} ports #{protocol.upcase} #{port_range.min}..#{port_range.max}"
         ports_opened += 1
-      end
+      end   
     end
     puts " -> no additional ports opened" if ports_opened == 0
     true
   end
 
-  def port_open?(ip_permissions, port)
-    ip_permissions && ip_permissions.find {|ip| ip["fromPort"] <= port && ip["toPort"] >= port }
+  # Any of the following +port_defn+ can be used:
+  # {
+  #   ssh: 22,
+  #   http: { ports: (80..82) },
+  #   mosh: { protocol: "udp", ports: (60000..60050) }
+  # }
+  # In this example, 
+  #  * TCP 22 will be opened for ssh, 
+  #  * TCP ports 80, 81, 82 for http and
+  #  * UDP 60000 -> 60050 for mosh
+  def extract_port_definition(port_defn)
+    if port_defn.is_a? Integer
+      protocol = "tcp"
+      port_range = (port_defn..port_defn)
+    elsif port_defn.is_a? Range
+      protocol = "tcp"
+      port_range = port_defn
+    elsif port_defn.is_a? Hash
+      protocol = port_defn[:protocol]
+      port_range = port_defn[:ports]
+    end
+    [protocol, port_range]
+  end
+
+  def port_open?(ip_permissions, port_range, protocol)
+    ip_permissions && ip_permissions.find do |ip| 
+      ip["ipProtocol"] == protocol \
+      && ip["fromPort"] <= port_range.min \
+      && ip["toPort"] >= port_range.max 
+    end
   end
 
   def find_server_device(server, device)
