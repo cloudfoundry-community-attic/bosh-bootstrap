@@ -62,9 +62,10 @@ describe Bosh::Providers do
         ]
       end
       it "should open not open ports if they are already open" do
-        @aws_provider.create_security_group("sg1", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
-        @aws_provider.create_security_group("sg1", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
-        created_sg = @fog_compute.security_groups.get("sg1")
+        @aws_provider.create_security_group("sg2", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
+        @aws_provider.create_security_group("sg2", "", { ssh: { protocol: "udp", ports: (60010..600040) } })
+        @aws_provider.create_security_group("sg2", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
+        created_sg = @fog_compute.security_groups.get("sg2")
         created_sg.ip_permissions.should == [
           { 
             "ipProtocol"=>"udp",
@@ -76,9 +77,9 @@ describe Bosh::Providers do
         ]
       end
       it "should open ports even if they are already open for a different protocol" do
-        @aws_provider.create_security_group("sg1", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
-        @aws_provider.create_security_group("sg1", "", { ssh: { protocol: "tcp", ports: (60000..600050) } })
-        created_sg = @fog_compute.security_groups.get("sg1")
+        @aws_provider.create_security_group("sg3", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
+        @aws_provider.create_security_group("sg3", "", { ssh: { protocol: "tcp", ports: (60000..600050) } })
+        created_sg = @fog_compute.security_groups.get("sg3")
         created_sg.ip_permissions.should == [
           { 
             "ipProtocol"=>"udp",
@@ -91,6 +92,28 @@ describe Bosh::Providers do
             "ipProtocol"=>"tcp",
             "fromPort"=>60000, 
             "toPort"=>600050, 
+            "groups"=>[], 
+            "ipRanges"=>[ { "cidrIp"=>"0.0.0.0/0" } ] 
+          }
+        ]
+      end
+      #AWS allows overlapping port ranges, and it makes it easier to see the separate "rules" that were added
+      it "should create overlapping port ranges" do
+        @aws_provider.create_security_group("sg4", "", { ssh: { protocol: "udp", ports: (10..20) } })
+        @aws_provider.create_security_group("sg4", "", { ssh: { protocol: "udp", ports: (15..30) } })
+        created_sg = @fog_compute.security_groups.get("sg4")
+        created_sg.ip_permissions.should == [
+          { 
+            "ipProtocol"=>"udp",
+            "fromPort"=>10, 
+            "toPort"=>20, 
+            "groups"=>[], 
+            "ipRanges"=>[ { "cidrIp"=>"0.0.0.0/0" } ] 
+          },
+          { 
+            "ipProtocol"=>"udp",
+            "fromPort"=>15, 
+            "toPort"=>30, 
             "groups"=>[], 
             "ipRanges"=>[ { "cidrIp"=>"0.0.0.0/0" } ] 
           }
