@@ -41,7 +41,8 @@ module Bosh::Bootstrap
 
     desc "upgrade-inception", "Upgrade inception VM with latest packages, gems, security group ports"
     def upgrade_inception
-      upgrade_inception_prepare_inception_vm
+      setup_server
+      upgrade_inception_stage_1_prepare_inception_vm
     end
 
     # desc "delete", "Delete Micro BOSH"
@@ -269,7 +270,7 @@ module Bosh::Bootstrap
         confirm "You are now targeting and logged in to your BOSH"
       end
 
-      def upgrade_inception_prepare_inception_vm
+      def setup_server
         if settings["inception"]["host"]
           @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
           confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
@@ -277,11 +278,13 @@ module Bosh::Bootstrap
           @server = Commander::LocalServer.new
           confirm "Using this server as the inception VM"
         end
+      end
 
+      def upgrade_inception_stage_1_prepare_inception_vm
         if settings["inception"] && settings["inception"]["prepared"]
-          header "Upgrade Inception VM"
+          header "Stage 1: Upgrade Inception VM"
           unless run_server(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
-            error "Failed to complete: Upgrade Inception VM"
+            error "Failed to complete Stage 2: Upgrade Inception VM"
           end
           # Settings are updated by this stage
           # it generates a salted password from settings.bosh.password
