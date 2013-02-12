@@ -209,13 +209,8 @@ module Bosh::Bootstrap
         # If successfully validate inception VM, then save those settings.
         save_settings!
 
-        if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
-          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
-        else
-          @server = Commander::LocalServer.new
-          confirm "Using this server as the inception VM"
-        end
+        setup_server
+
         unless settings["inception"]["validated"]
           unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
             error "Failed to complete Stage 3: Create/Allocate the Inception VM"
@@ -270,27 +265,12 @@ module Bosh::Bootstrap
         confirm "You are now targeting and logged in to your BOSH"
       end
 
-      def setup_server
-        if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
-          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
-        else
-          @server = Commander::LocalServer.new
-          confirm "Using this server as the inception VM"
-        end
-      end
-
       def upgrade_inception_stage_1_prepare_inception_vm
         if settings["inception"] && settings["inception"]["prepared"]
           header "Stage 1: Upgrade Inception VM"
           unless run_server(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
             error "Failed to complete Stage 2: Upgrade Inception VM"
           end
-          # Settings are updated by this stage
-          # it generates a salted password from settings.bosh.password
-          # and stores it in settings.bosh.salted_password
-          settings["inception"]["prepared"] = true
-          save_settings!
         else
           error "Please deploy an Inception VM first, using 'bosh-bootstrap deploy' command."
         end
@@ -298,13 +278,7 @@ module Bosh::Bootstrap
 
       def delete_stage_1_target_inception_vm
         header "Stage 1: Target inception VM to use to delete micro-bosh"
-        if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
-          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
-        else
-          @server = Commander::LocalServer.new
-          confirm "Using this server as the inception VM"
-        end
+        setup_server
       end
 
       def delete_one_stage_2_delete_micro_bosh
@@ -321,6 +295,16 @@ module Bosh::Bootstrap
 
       def delete_all_stage_3_delete_inception_vm
         
+      end
+
+      def setup_server
+        if settings["inception"]["host"]
+          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
+          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
+        else
+          @server = Commander::LocalServer.new
+          confirm "Using this server as the inception VM"
+        end
       end
 
       def run_ssh_command_or_open_tunnel(cmd)
