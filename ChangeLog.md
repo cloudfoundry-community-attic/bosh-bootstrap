@@ -2,7 +2,11 @@
 
 ## Next
 
-* For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added
+* For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added and new security group ports opened for `mosh` command.
+
+Added:
+
+* `mosh` command - connect to Inception VM on trains over flaky internet connections (use instead of `ssh` or `tmux` command) [thx @mrdavidlang]
 
 ## v0.6
 
