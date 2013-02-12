@@ -350,6 +350,16 @@ module Bosh::Bootstrap
         end
       end
 
+      def setup_server
+        if settings["inception"]["host"]
+          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
+          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
+        else
+          @server = Commander::LocalServer.new
+          confirm "Using this server as the inception VM"
+        end
+      end
+
       def run_ssh_command_or_open_tunnel(cmd)
         ensure_inception_vm
         ensure_inception_vm_has_launched
