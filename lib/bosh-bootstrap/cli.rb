@@ -386,6 +386,10 @@ module Bosh::Bootstrap
       def load_deploy_options
         settings["fog_path"] = File.expand_path(options[:fog] || "~/.fog")
 
+        settings["git"] ||= {}
+        settings["git"]["name"] ||= `git config user.name`.strip
+        settings["git"]["email"] ||= `git config user.email`.strip
+
         settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
 
         # determine which micro-bosh stemcell to download/create
