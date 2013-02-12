@@ -83,7 +83,7 @@ module Bosh::Bootstrap
       Requires outgoing UDP port 60001 to the Inception VM
     DESC
     def mosh
-      open_mosh_session()
+      open_mosh_session
     end
 
     no_tasks do
@@ -352,7 +352,7 @@ module Bosh::Bootstrap
         end
       end
 
-      def open_mosh_session()  
+      def open_mosh_session
         ensure_mosh_installed
         ensure_inception_vm
         ensure_inception_vm_has_launched
