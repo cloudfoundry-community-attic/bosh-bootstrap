@@ -15,6 +15,7 @@ module Bosh::Bootstrap
     include Thor::Actions
     include Bosh::Bootstrap::Helpers::FogSetup
     include Bosh::Bootstrap::Helpers::Settings
+    include Bosh::Bootstrap::Helpers::SettingsSetter
     include FileUtils
 
     attr_reader :fog_credentials
@@ -43,7 +44,7 @@ module Bosh::Bootstrap
     # method_option :all, :type => :boolean, :desc => "Delete all micro-boshes and inception VM [coming soon]"
     # def delete
     #   delete_stage_1_target_inception_vm
-    # 
+    #
     #   if options[:all]
     #     error "I'm sorry; the awesome --all flag is not yet implemented"
     #     delete_all_stage_2_delete_micro_boshes
@@ -52,7 +53,7 @@ module Bosh::Bootstrap
     #     delete_one_stage_2_delete_micro_bosh
     #   end
     # end
-    # 
+    #
     desc "ssh [COMMAND]", "Open an ssh session to the inception VM [do nothing if local machine is inception VM]"
     long_desc <<-DESC
       If a command is supplied, it will be run, otherwise a session will be
@@ -64,7 +65,7 @@ module Bosh::Bootstrap
 
     desc "tmux", "Open an ssh (with tmux) session to the inception VM [do nothing if local machine is inception VM]"
     long_desc <<-DESC
-      Opens a connection using ssh and attaches to the most recent tmux session; 
+      Opens a connection using ssh and attaches to the most recent tmux session;
       giving you persistance across disconnects.
     DESC
     def tmux
@@ -88,12 +89,23 @@ module Bosh::Bootstrap
         unless settings[:fog_credentials]
           choose_fog_provider
         end
+
+        unless settings[:bosh_cloud_properties]
+          build_cloud_properties
+        end
         confirm "Using infrastructure provider #{settings.fog_credentials.provider}"
+
+        if aws?
+          choose_aws_vpc_or_ec2
+        end
 
         unless settings[:region_code]
           choose_provider_region
         end
-        if settings[:region_code]
+        if region = settings[:region_code]
+          settings["fog_credentials"]["region"] = region
+          settings["bosh_cloud_properties"][settings["bosh_provider"]]["region"] = region
+          settings["bosh_cloud_properties"][settings["bosh_provider"]]["ec2_endpoint"] = "ec2.#{region}.amazonaws.com"
           confirm "Using #{settings.fog_credentials.provider} region #{settings.region_code}"
         else
           confirm "No specific region/data center for #{settings.fog_credentials.provider}"
@@ -106,7 +118,7 @@ module Bosh::Bootstrap
           confirm "Using #{settings.fog_credentials.provider} network labelled #{settings['network_label']}"
         end
       end
-      
+
       def deploy_stage_2_bosh_configuration
         header "Stage 2: BOSH configuration"
         unless settings[:bosh_name]
@@ -143,9 +155,13 @@ module Bosh::Bootstrap
         end
 
         unless settings[:bosh]["ip_address"]
-          say "Acquiring IP address for micro BOSH..."
-          ip_address = acquire_ip_address
-          settings[:bosh]["ip_address"] = ip_address
+          if vpc?
+            settings[:bosh]["ip_address"] = "10.0.0.6"
+          else
+            say "Acquiring IP address for micro BOSH..."
+            ip_address = acquire_ip_address
+            settings[:bosh]["ip_address"] = ip_address
+          end
         end
         unless settings[:bosh]["ip_address"]
           error "IP address not available/provided currently"
@@ -153,6 +169,10 @@ module Bosh::Bootstrap
           confirm "Micro BOSH will be assigned IP address #{settings[:bosh]['ip_address']}"
         end
         save_settings!
+
+        if aws? && vpc?
+          create_complete_vpc(settings.bosh_name, "10.0.0.0/16", "10.0.0.0/24")
+        end
 
         unless settings[:bosh_security_group]
           security_group_name = settings.bosh_name
@@ -178,12 +198,12 @@ module Bosh::Bootstrap
 
       def deploy_stage_3_create_allocate_inception_vm
         header "Stage 3: Create/Allocate the Inception VM"
-        unless settings["inception"] && settings["inception"]["host"]
+        unless settings["inception"]
           hl.choose do |menu|
             menu.prompt = "Create or specify an Inception VM:  "
             if aws? || openstack?
               menu.choice("create new inception VM") do
-                aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
+                settings["inception"] = {"create_new" => true}
               end
             end
             menu.choice("use an existing Ubuntu server") do
@@ -200,6 +220,11 @@ module Bosh::Bootstrap
             end
           end
         end
+        save_settings!
+
+        if settings["inception"]["create_new"] && !settings["inception"]["host"]
+          aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
+        end
         # If successfully validate inception VM, then save those settings.
         save_settings!
 
@@ -211,7 +236,7 @@ module Bosh::Bootstrap
           confirm "Using this server as the inception VM"
         end
         unless settings["inception"]["validated"]
-          unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
+          unless run_server(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
             error "Failed to complete Stage 3: Create/Allocate the Inception VM"
           end
           settings["inception"]["validated"] = true
@@ -277,18 +302,36 @@ module Bosh::Bootstrap
 
       def delete_one_stage_2_delete_micro_bosh
         header "Stage 2: Deleting micro BOSH"
-        unless server.run(Bosh::Bootstrap::Stages::MicroBoshDelete.new(settings).commands)
+        unless run_server(Bosh::Bootstrap::Stages::MicroBoshDelete.new(settings).commands)
           error "Failed to complete Stage 1: Delete micro BOSH"
         end
         save_settings!
       end
 
       def delete_all_stage_2_delete_micro_boshes
-        
+
       end
 
       def delete_all_stage_3_delete_inception_vm
-        
+
+      end
+
+      def create_complete_vpc(name, vpc_range="10.0.0.0/16", subnet_cidr_block="10.0.0.0/24")
+        with_setting "vpc" do |setting|
+          say "Creating VPC '#{name}'..."
+          setting["id"] = provider.create_vpc(name, vpc_range)
+        end
+
+        vpc_id = settings["vpc"]["id"]
+        with_setting "internet_gateway" do |setting|
+          say "Creating internet gateway..."
+          setting["id"] = provider.create_internet_gateway(vpc_id)
+        end
+
+        with_setting "subnet" do |setting|
+          say "Creating subnet #{subnet_cidr_block}..."
+          setting["id"] = provider.create_subnet(vpc_id, subnet_cidr_block)
+        end
       end
 
       def run_ssh_command_or_open_tunnel(cmd)
@@ -320,7 +363,7 @@ module Bosh::Bootstrap
         end
       end
 
-      def open_mosh_session()  
+      def open_mosh_session()
         ensure_mosh_installed
         ensure_inception_vm
         ensure_inception_vm_has_launched
@@ -341,9 +384,9 @@ module Bosh::Bootstrap
 
       def ensure_security_group_allows_mosh
         ports = {
-          mosh: { 
-            protocol: "udp", 
-            ports: (60000..60050) 
+          mosh: {
+            protocol: "udp",
+            ports: (60000..60050)
           }
         }
         inception_server = fog_compute.servers.get(settings["inception"]["server_id"])
@@ -522,6 +565,10 @@ module Bosh::Bootstrap
         @fog_credentials.each do |key, value|
           settings[:fog_credentials][key] = value
         end
+        save_settings!
+      end
+
+      def build_cloud_properties
         setup_bosh_cloud_properties
         settings[:bosh_provider] = settings.bosh_cloud_properties.keys.first # aws, vsphere...
         save_settings!
@@ -569,7 +616,7 @@ module Bosh::Bootstrap
           props[:access_key_id] = settings.fog_credentials.aws_access_key_id
           props[:secret_access_key] = settings.fog_credentials.aws_secret_access_key
           # props[:ec2_endpoint] = "ec2.REGION.amazonaws.com" - via +choose_aws_region+
-          # props[:region] = REGION - via +choose_aws_region+            
+          # props[:region] = REGION - via +choose_aws_region+
           # props[:default_key_name] = "microbosh"  - via +create_aws_key_pair+
           # props[:ec2_private_key] = "/home/vcap/.ssh/microbosh.pem" - via +create_aws_key_pair+
           # props[:default_security_groups] = ["microbosh"], - via +create_aws_security_group+
@@ -624,6 +671,16 @@ module Bosh::Bootstrap
         end
       end
 
+      def choose_aws_vpc_or_ec2
+        if settings["use_vpc"].nil?
+          settings["use_vpc"] = begin
+            answer = hl.ask("You want to use VPC, right? ") {|q| q.default="yes"; q.validate = /(yes|no)/i }.match(/y/)
+            !!answer
+          end
+          save_settings!
+        end
+      end
+
       def choose_aws_region
         aws_regions = provider.region_labels
         default_aws_region = provider.default_region_label
@@ -633,9 +690,6 @@ module Bosh::Bootstrap
           aws_regions.each do |region|
             menu.choice(region) do
               settings["region_code"] = region
-              settings["fog_credentials"]["region"] = region
-              settings["bosh_cloud_properties"]["aws"]["region"] = region
-              settings["bosh_cloud_properties"]["aws"]["ec2_endpoint"] = "ec2.#{region}.amazonaws.com"
               save_settings!
             end
             menu.default = default_aws_region
@@ -745,18 +799,33 @@ module Bosh::Bootstrap
       def boot_aws_inception_vm
         say "" # glowing whitespace
 
+        unless settings["inception"]["ip_address"]
+          say "Provisioning IP address for inception VM..."
+          settings["inception"]["ip_address"] = acquire_ip_address
+          save_settings!
+        end
+
         public_key_path, private_key_path = local_ssh_key_paths
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
           size = "m1.small"
+          ip_address = settings["inception"]["ip_address"]
           say "Provisioning #{size} for inception VM..."
-          server = fog_compute.servers.bootstrap({
+          inception_vm_attributes = {
             :public_key_path => public_key_path,
             :private_key_path => private_key_path,
             :flavor_id => size,
             :bits => 64,
-            :username => "ubuntu"
-          })
+            :username => "ubuntu",
+            :public_ip_address => ip_address
+          }
+          if vpc?
+            raise "must create subnet before creating VPC inception VM" unless settings["subnet"] && settings["subnet"]["id"]
+            inception_vm_attributes[:subnet_id] = settings["subnet"]["id"]
+            inception_vm_attributes[:private_ip_address] = "10.0.0.5"
+          end
+          p inception_vm_attributes
+          server = provider.bootstrap(inception_vm_attributes)
           unless server
             error "Something mysteriously cloudy happened and fog could not provision a VM. Please check your limits."
           end
@@ -768,16 +837,6 @@ module Bosh::Bootstrap
         end
 
         server ||= fog_compute.servers.get(settings["inception"]["server_id"])
-
-        unless settings["inception"]["ip_address"]
-          say "Provisioning IP address for inception VM..."
-          ip_address = acquire_ip_address
-          associate_ip_address_with_server(ip_address, server)
-          host = server.dns_name
-
-          settings["inception"]["ip_address"] = ip_address
-          save_settings!
-        end
 
         unless settings["inception"]["disk_size"]
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
@@ -947,7 +1006,7 @@ module Bosh::Bootstrap
       # For AWS, it will dynamically provision an elastic IP
       # For OpenStack, it will dynamically provision a floating IP
       def acquire_ip_address
-        unless public_ip = provider.provision_public_ip_address
+        unless public_ip = provider.provision_public_ip_address(vpc: vpc?)
           say "Unable to acquire a public IP. Please check your account for capacity or service issues.".red
           exit 1
         end
@@ -975,7 +1034,7 @@ module Bosh::Bootstrap
         until disk_mounted
           begin
             # TODO catch Errno::ETIMEDOUT and re-run ssh commands
-            server.ssh(["sudo mkfs.ext4 #{device} -F"]) 
+            server.ssh(["sudo mkfs.ext4 #{device} -F"])
             server.ssh(["sudo mkdir -p /var/vcap/store"])
             server.ssh(["sudo mount #{device} /var/vcap/store"])
             disk_mounted = true
@@ -1014,6 +1073,10 @@ module Bosh::Bootstrap
 
       def aws?
         settings.fog_credentials.provider == "AWS"
+      end
+
+      def vpc?
+        settings["use_vpc"]
       end
 
       def openstack?
@@ -1068,6 +1131,12 @@ module Bosh::Bootstrap
       # a helper object for the target BOSH provider
       def provider
         @provider ||= Bosh::Providers.for_bosh_provider_name(settings.bosh_provider, fog_compute)
+      end
+
+      # The micro_bosh.yml that is uploaded to the Inception VM before deploying the
+      # MicroBOSH
+      def micro_bosh_yml
+        Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).micro_bosh_manifest
       end
 
       def cyan; "\033[36m" end

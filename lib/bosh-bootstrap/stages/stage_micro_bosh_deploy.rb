@@ -32,7 +32,6 @@ module Bosh::Bootstrap::Stages
       end
     end
 
-    private
     def stage_name
       "stage_micro_bosh_deploy"
     end

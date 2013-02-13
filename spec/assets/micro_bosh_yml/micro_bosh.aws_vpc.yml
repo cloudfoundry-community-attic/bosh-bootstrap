@@ -1,0 +1,37 @@
+---
+name: test-bosh
+env:
+  bosh:
+    password: pepper
+logging:
+  level: DEBUG
+network:
+  type: dynamic
+  vip: $MICROBOSH_IP$
+  cloud_properties:
+    subnet: $SUBNET_ID$
+resources:
+  persistent_disk: 16384
+  cloud_properties:
+    instance_type: m1.medium
+cloud:
+  plugin: aws
+  properties:
+    aws:
+      access_key_id: YYY
+      secret_access_key: XXX
+      region: us-west-2
+      ec2_endpoint: ec2.us-west-2.amazonaws.com
+      default_security_groups:
+      - test-bosh
+      default_key_name: test-bosh
+      ec2_private_key: /home/vcap/.ssh/test-bosh.pem
+apply_spec:
+  agent:
+    blobstore:
+      address: $MICROBOSH_IP$
+    nats:
+      address: $MICROBOSH_IP$
+  properties:
+    aws_registry:
+      address: $MICROBOSH_IP$
