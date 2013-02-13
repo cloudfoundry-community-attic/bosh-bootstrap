@@ -155,9 +155,13 @@ module Bosh::Bootstrap
         end
 
         unless settings[:bosh]["ip_address"]
-          say "Acquiring IP address for micro BOSH..."
-          ip_address = acquire_ip_address
-          settings[:bosh]["ip_address"] = ip_address
+          if vpc?
+            settings[:bosh]["ip_address"] = "10.0.0.6"
+          else
+            say "Acquiring IP address for micro BOSH..."
+            ip_address = acquire_ip_address
+            settings[:bosh]["ip_address"] = ip_address
+          end
         end
         unless settings[:bosh]["ip_address"]
           error "IP address not available/provided currently"
@@ -166,8 +170,8 @@ module Bosh::Bootstrap
         end
         save_settings!
 
-        if aws? && settings["use_vpc"]
-          create_vpc(settings.bosh_name)
+        if aws? && vpc?
+          create_complete_vpc(settings.bosh_name, "10.0.0.0/16", "10.0.0.0/24")
         end
 
         unless settings[:bosh_security_group]
@@ -312,12 +316,21 @@ module Bosh::Bootstrap
 
       end
 
-      def create_vpc(name)
-        unless settings["vpc"]
+      def create_complete_vpc(name, vpc_range="10.0.0.0/16", subnet_cidr_block="10.0.0.0/24")
+        with_setting "vpc" do |setting|
           say "Creating VPC '#{name}'..."
-          settings["vpc"] = {}
-          settings["vpc"]["id"] = provider.create_vpc(name, '10.10.0.0/16')
-          save_settings!
+          setting["id"] = provider.create_vpc(name, vpc_range)
+        end
+
+        vpc_id = settings["vpc"]["id"]
+        with_setting "internet_gateway" do |setting|
+          say "Creating internet gateway..."
+          setting["id"] = provider.create_internet_gateway(vpc_id)
+        end
+
+        with_setting "subnet" do |setting|
+          say "Creating subnet #{subnet_cidr_block}..."
+          setting["id"] = provider.create_subnet(vpc_id, subnet_cidr_block)
         end
       end
 
@@ -350,7 +363,7 @@ module Bosh::Bootstrap
         end
       end
 
-      def open_mosh_session()  
+      def open_mosh_session()
         ensure_mosh_installed
         ensure_inception_vm
         ensure_inception_vm_has_launched
@@ -371,9 +384,9 @@ module Bosh::Bootstrap
 
       def ensure_security_group_allows_mosh
         ports = {
-          mosh: { 
-            protocol: "udp", 
-            ports: (60000..60050) 
+          mosh: {
+            protocol: "udp",
+            ports: (60000..60050)
           }
         }
         inception_server = fog_compute.servers.get(settings["inception"]["server_id"])
@@ -786,18 +799,33 @@ module Bosh::Bootstrap
       def boot_aws_inception_vm
         say "" # glowing whitespace
 
+        unless settings["inception"]["ip_address"]
+          say "Provisioning IP address for inception VM..."
+          settings["inception"]["ip_address"] = acquire_ip_address
+          save_settings!
+        end
+
         public_key_path, private_key_path = local_ssh_key_paths
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
           size = "m1.small"
+          ip_address = settings["inception"]["ip_address"]
           say "Provisioning #{size} for inception VM..."
-          server = fog_compute.servers.bootstrap({
+          inception_vm_attributes = {
             :public_key_path => public_key_path,
             :private_key_path => private_key_path,
             :flavor_id => size,
             :bits => 64,
-            :username => "ubuntu"
-          })
+            :username => "ubuntu",
+            :public_ip_address => ip_address
+          }
+          if vpc?
+            raise "must create subnet before creating VPC inception VM" unless settings["subnet"] && settings["subnet"]["id"]
+            inception_vm_attributes[:subnet_id] = settings["subnet"]["id"]
+            inception_vm_attributes[:private_ip_address] = "10.0.0.5"
+          end
+          p inception_vm_attributes
+          server = provider.bootstrap(inception_vm_attributes)
           unless server
             error "Something mysteriously cloudy happened and fog could not provision a VM. Please check your limits."
           end
@@ -809,16 +837,6 @@ module Bosh::Bootstrap
         end
 
         server ||= fog_compute.servers.get(settings["inception"]["server_id"])
-
-        unless settings["inception"]["ip_address"]
-          say "Provisioning IP address for inception VM..."
-          ip_address = acquire_ip_address
-          associate_ip_address_with_server(ip_address, server)
-          host = server.dns_name
-
-          settings["inception"]["ip_address"] = ip_address
-          save_settings!
-        end
 
         unless settings["inception"]["disk_size"]
           disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
@@ -988,7 +1006,7 @@ module Bosh::Bootstrap
       # For AWS, it will dynamically provision an elastic IP
       # For OpenStack, it will dynamically provision a floating IP
       def acquire_ip_address
-        unless public_ip = provider.provision_public_ip_address
+        unless public_ip = provider.provision_public_ip_address(vpc: vpc?)
           say "Unable to acquire a public IP. Please check your account for capacity or service issues.".red
           exit 1
         end
@@ -1055,6 +1073,10 @@ module Bosh::Bootstrap
 
       def aws?
         settings.fog_credentials.provider == "AWS"
+      end
+
+      def vpc?
+        settings["use_vpc"]
       end
 
       def openstack?

@@ -39,8 +39,11 @@ describe "AWS deployment" do
     @fog ||= connection = Fog::Compute.new(@fog_credentials.merge(:region => "us-west-2"))
   end
 
-  def expected_manifest_content(filename, public_ip)
-    YAML.load(File.read(filename).gsub('$MICROBOSH_IP$', public_ip))
+  def expected_manifest_content(filename, public_ip, subnet_id = nil)
+    file = File.read(filename)
+    file.gsub!('$MICROBOSH_IP$', public_ip)
+    file.gsub!('$SUBNET_ID$', subnet_id) if subnet_id
+    YAML.load(file)
   end
 
   it "creates a VPC inception/microbosh with the associated resources" do
@@ -64,7 +67,51 @@ describe "AWS deployment" do
     @cmd.should_receive(:deploy_stage_6_setup_new_bosh)
     @cmd.deploy
 
+    fog.addresses.should have(1).item # assigned to inception VM
+    inception_ip_address = fog.addresses.first
+
     fog.vpcs.should have(1).item
+    vpc = fog.vpcs.first
+    vpc.cidr_block.should == "10.0.0.0/16"
+
+    fog.servers.should have(1).item
+    inception = fog.servers.first
+    p inception_ip_address
+    p inception
+    inception_ip_address.domain.should == "vpc"
+
+    # TODO - fix fog so we can test public_ip_address
+    # inception.public_ip_address.should == inception_ip_address.public_ip
+
+    # TODO - fix fog so we can test private_ip_address
+    # inception.private_ip_address.should == "10.0.0.5"
+
+    fog.security_groups.should have(2).item
+
+    fog.internet_gateways.should have(1).item
+    ig = fog.internet_gateways.first
+
+    fog.subnets.should have(1).item
+    subnet = fog.subnets.first
+    p subnet
+    subnet.vpc_id.should == vpc.id
+    subnet.cidr_block.should == "10.0.0.0/24"
+
+    # fog.route_tables.should have(1).item
+    # a IG that is assigned to the VPN
+    # a subnet (contains the inception VM; is included in micro_bosh_yml)
+
+    # TODO - fix fog so we can test private_ip_address
+    # settings["inception"]["ip_address"].should == "10.0.0.5"
+
+    inception_server = fog.servers.first
+    inception_server.dns_name.should == settings["inception"]["host"]
+
+    public_ip = settings["bosh"]["ip_address"]
+    public_ip.should == "10.0.0.6"
+
+    manifest_path = spec_asset("micro_bosh_yml/micro_bosh.aws_ec2.yml")
+    YAML.load(@cmd.micro_bosh_yml).should == expected_manifest_content(manifest_path, public_ip, subnet.subnet_id)
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do
@@ -76,10 +123,14 @@ describe "AWS deployment" do
     @cmd.should_receive(:deploy_stage_6_setup_new_bosh)
     @cmd.deploy
 
+    fog.addresses.should have(2).item
+    inception_ip_address = fog.addresses.first
+    inception_ip_address.domain.should == "standard"
+
     fog.vpcs.should have(0).item
     fog.servers.should have(1).item
     fog.security_groups.should have(2).item
-    fog.addresses.should have(2).item
+
     inception_server = fog.servers.first
     inception_server.dns_name.should == settings["inception"]["host"]
     public_ip = settings["bosh"]["ip_address"]
