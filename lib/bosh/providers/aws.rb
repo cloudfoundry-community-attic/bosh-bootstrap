@@ -42,10 +42,18 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     aws_compute_flavors.map { |fl| fl[:id] }
   end
 
+  # Provision an EC2 or VPC elastic IP addess.
+  # * VPC - provision_public_ip_address(vpc: true)
+  # * EC2 - provision_public_ip_address
   # @return [String] provisions a new public IP address in target region
   # TODO nil if none available
-  def provision_public_ip_address
-    address = fog_compute.addresses.create
+  def provision_public_ip_address(options={})
+    if options.delete(:vpc)
+      options[:domain] = "vpc"
+    else
+      options[:domain] = options.delete(:domain) || "standard"
+    end
+    address = fog_compute.addresses.create(options)
     address.public_ip
     # TODO catch error and return nil
   end
@@ -58,6 +66,18 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
   def create_vpc(name, cidr_block)
     vpc = fog_compute.vpcs.create(name: name, cidr_block: cidr_block)
     vpc.id
+  end
+
+  # Creates a VPC subnet
+  # @return [String] the subnet_id
+  def create_subnet(vpc_id, cidr_block)
+    subnet = fog_compute.subnets.create(vpc_id: vpc_id, cidr_block: cidr_block)
+    subnet.subnet_id
+  end
+
+  def create_internet_gateway(vpc_id)
+    gateway = fog_compute.internet_gateways.create(vpc_id: vpc_id)
+    gateway.id
   end
 
   # Creates or reuses an AWS security group and opens ports.
@@ -97,7 +117,7 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
         sg.authorize_port_range(port_range, {:ip_protocol => protocol, :cidr_ip => ip_range})
         puts " -> opened #{name} ports #{protocol.upcase} #{port_range.min}..#{port_range.max} from IP range #{ip_range}"
         ports_opened += 1
-      end   
+      end
     end
     puts " -> no additional ports opened" if ports_opened == 0
     true
@@ -135,7 +155,7 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
       ip["ipProtocol"] == protocol \
       && ip["ipRanges"].detect { |range| range["cidrIp"] == ip_range } \
       && ip["fromPort"] <= port_range.min \
-      && ip["toPort"] >= port_range.max 
+      && ip["toPort"] >= port_range.max
     end
   end
 
@@ -160,4 +180,43 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     # Instead, using:
     volume.server = server
   end
+
+  def bootstrap(new_attributes = {})
+    vpc = new_attributes[:subnet_id]
+
+    server = fog_compute.servers.new(new_attributes)
+
+    unless new_attributes[:key_name]
+      # first or create fog_#{credential} keypair
+      name = Fog.respond_to?(:credential) && Fog.credential || :default
+      unless server.key_pair = fog_compute.key_pairs.get("fog_#{name}")
+        server.key_pair = fog_compute.key_pairs.create(
+          :name => "fog_#{name}",
+          :public_key => server.public_key
+        )
+      end
+    end
+
+    if vpc
+      # TODO setup security group on new server
+    else
+      # make sure port 22 is open in the first security group
+      security_group = fog_compute.security_groups.get(server.groups.first)
+      authorized = security_group.ip_permissions.detect do |ip_permission|
+        ip_permission['ipRanges'].first && ip_permission['ipRanges'].first['cidrIp'] == '0.0.0.0/0' &&
+        ip_permission['fromPort'] == 22 &&
+        ip_permission['ipProtocol'] == 'tcp' &&
+        ip_permission['toPort'] == 22
+      end
+      unless authorized
+        security_group.authorize_port_range(22..22)
+      end
+    end
+
+    server.save
+    server.wait_for { ready? }
+    server.setup(:key_data => [server.private_key])
+    server
+  end
+
 end
