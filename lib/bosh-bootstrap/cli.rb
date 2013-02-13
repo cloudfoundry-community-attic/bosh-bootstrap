@@ -15,6 +15,7 @@ module Bosh::Bootstrap
     include Thor::Actions
     include Bosh::Bootstrap::Helpers::FogSetup
     include Bosh::Bootstrap::Helpers::Settings
+    include Bosh::Bootstrap::Helpers::SettingsSetter
     include FileUtils
 
     attr_reader :fog_credentials
