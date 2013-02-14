@@ -26,9 +26,11 @@ To be cute about it, the Stark & Wayne Bosh Bootstrapper aims to provide lifecyc
 
 ## Installation
 
-This bootstrapper for BOSH is distributed as a RubyGem for Ruby 1.8+.
+This bootstrapper tool is distributed as a RubyGem for Ruby 1.9+.
 
 ```
+$ ruby -v
+ruby 1.9.3p385 ...
 $ gem install bosh-bootstrap
 ```
 
