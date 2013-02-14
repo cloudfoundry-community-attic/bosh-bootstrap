@@ -97,6 +97,42 @@ describe Bosh::Providers do
           }
         ]
       end
+      it "should open ports even if they are already open for a different ip_range" do
+        default_ports = {
+           all_internal_tcp: { protocol: "tcp", ip_range: "1.1.1.1/32", ports: (0..65535) }
+        }
+        @aws_provider.create_security_group("sg6", "sg6", default_ports)
+        @aws_provider.create_security_group("sg6", "sg6", { mosh: { protocol: "tcp", ports: (15..30) } })
+        created_sg = @fog_compute.security_groups.get("sg6")
+        created_sg.ip_permissions.should == [
+          { 
+            "ipProtocol"=>"tcp",
+            "fromPort"=>0, 
+            "toPort"=>65535, 
+            "groups"=>[], 
+            "ipRanges"=>[ { "cidrIp"=>"1.1.1.1/32" } ] 
+          },
+          { 
+            "ipProtocol"=>"tcp",
+            "fromPort"=>15, 
+            "toPort"=>30, 
+            "groups"=>[], 
+            "ipRanges"=>[ { "cidrIp"=>"0.0.0.0/0" } ] 
+          }
+        ]
+      end
+      it "should open ports on the default sg" do
+        @aws_provider.create_security_group("default", "default", { mosh: { protocol: "tcp", ports: (15..30) } })
+        created_sg = @fog_compute.security_groups.get("default")
+        expected_rule = { 
+            "ipProtocol"=>"tcp",
+            "fromPort"=>15, 
+            "toPort"=>30, 
+            "groups"=>[], 
+            "ipRanges"=>[ { "cidrIp"=>"0.0.0.0/0" } ] 
+          }
+        created_sg.ip_permissions.should include expected_rule
+      end
       #AWS allows overlapping port ranges, and it makes it easier to see the separate "rules" that were added
       it "should create overlapping port ranges" do
         @aws_provider.create_security_group("sg4", "", { ssh: { protocol: "udp", ports: (10..20) } })
