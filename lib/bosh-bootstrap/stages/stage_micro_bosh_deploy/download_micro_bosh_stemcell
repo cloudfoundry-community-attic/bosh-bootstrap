@@ -8,7 +8,6 @@
 #
 # Optional:
 # * $PROVIDER - required for 'custom' $MICRO_BOSH_STEMCELL_NAME; e.g. aws, openstack
-# * $BOSH_RELEASE_REPO - defaults to https://github.com/cloudfoundry/bosh-release.git
 
 set -e # exit immediately if a simple command exits with a non-zero status
 set -u # report the usage of uninitialized variables
@@ -25,73 +24,12 @@ fi
 
 if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
-  BOSH_RELEASE_REPO=${BOSH_RELEASE_REPO:-'https://github.com/cloudfoundry/bosh-release.git'}
-  BOSH_RELEASE_DIRNAME=${BOSH_RELEASE_DIRNAME:-'bosh-release'}
-  BOSH_RELEASE_DIR=/var/vcap/store/releases/$BOSH_RELEASE_DIRNAME
-
   echo "Creating custom stemcell..."
 
   if [[ -d /var/tmp/bosh/ ]]; then
     echo "But first, cleaning out previous stemcell temporary files..."
     rm -rf /var/tmp/bosh
   fi
-
-
-  cd $(dirname $BOSH_RELEASE_DIR)
-  if [[ -d $BOSH_RELEASE_DIRNAME ]]; then
-    echo "Updating BOSH's own bosh-release for custom stemcell"
-    cd $BOSH_RELEASE_DIRNAME
-    git pull origin master
-  else
-    echo "Fetching BOSH's own bosh-release for custom stemcell"
-    git clone $BOSH_RELEASE_REPO
-    cd $BOSH_RELEASE_DIRNAME
-  fi
-
-  echo -e "Host github.com\n\tStrictHostKeyChecking no\n" >> ~/.ssh/config
-
-  echo "Rewriting all git:// & git@ to https:// to allow access if port 22 is blocked..."
-  # Snippet written by Mike Reeves <swampfoxmr@gmail.com> on bosh-users mailing list
-  # Date 2012-12-06
-  grep -rI "git[@:/]\{0,3\}github.com" * .gitmodules | awk 'BEGIN {FS=":"} { print($1) }' | while read file
-  do
-    echo "changing - $file"
-    sed -i 's/git\:\/\/github.com/https:\/\/github.com/g' $file
-    sed -i 's/git@github.com:/https:\/\/github.com\//g' $file
-  done
-
-  echo "Updating source submodules..."
-  git submodule update --init
-
-  echo "Within submodules, rewriting all git:// & git@ to https:// to allow access if port 22 is blocked..."
-  # Snippet written by Mike Reeves <swampfoxmr@gmail.com> on bosh-users mailing list
-  # Date 2012-12-06
-  grep -rI "git[@:/]\{0,3\}github.com" * .gitmodules | awk 'BEGIN {FS=":"} { print($1) }' | while read file
-  do
-    echo "changing - $file"
-    sed -i 's/git\:\/\/github.com/https:\/\/github.com/g' $file
-    sed -i 's/git@github.com:/https:\/\/github.com\//g' $file
-  done
-
-  echo "Creating bosh release (fetching any new blobs)..."
-  bosh -n create release --force --with-tarball
-
-  # dev_releases/index.yml contains the dev_releases
-  # and its last line contains the latest dev_release name
-  # For example:
-  # --- 
-  # builds: 
-  #   4800ad1226e2b673595a8646e8e11bc968ab6ab6: 
-  #     version: 119.1-dev
-  #   7e0318d711daf0a5fa2e65c0257cd3b6af2ec4e5: 
-  #     version: 119.2-dev
-  #
-  # So to get the latest dev_release name, grab the last line's 2nd token
-  # For example, above this would be "119.2-dev"
-  RELEASE_NAME="bosh-release"
-  LATEST_DEV_RELEASE_NAME=$(tail -n 1 dev_releases/index.yml | awk '{print $2}')
-  LATEST_BOSH_RELEASE_PATH=$BOSH_RELEASE_DIR/dev_releases/$RELEASE_NAME-$LATEST_DEV_RELEASE_NAME.tgz
-  MICRO_BOSH_MANIFEST_PATH=$BOSH_RELEASE_DIR/micro/$PROVIDER.yml
 
   BOSH_DIR=/var/vcap/store/repos/bosh
   cd $(dirname $BOSH_DIR)
@@ -108,7 +46,7 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
   cd $BOSH_DIR
   echo "Creating custom stemcell..."
   bundle install
-  bundle exec rake stemcell:micro[$PROVIDER,$MICRO_BOSH_MANIFEST_PATH,$LATEST_BOSH_RELEASE_PATH]
+  bundle exec rake stemcell:micro[$PROVIDER]
 
   echo "Copying to stemcells folder..."
   MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/agent-*/work/work/*.tgz | sort | tail -n 1)
