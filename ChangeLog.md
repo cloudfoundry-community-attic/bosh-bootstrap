@@ -2,7 +2,7 @@
 
 ## Next
 
-* For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added and new security group ports opened for `mosh` command.
+* For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added.
 
 Added:
 
