@@ -29,3 +29,5 @@ if defined?(RSpec)
   desc "Install dependencies and run tests"
   task :spec => %w(spec:unit spec:functional)
 end
+
+task :default => :spec
