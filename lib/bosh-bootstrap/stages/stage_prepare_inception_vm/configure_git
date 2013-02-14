@@ -25,3 +25,4 @@ fi
 cd ~vcap
 chpst -u vcap:vcap git config -f ~vcap/.gitconfig user.name "${GIT_USER_NAME}"
 chpst -u vcap:vcap git config -f ~vcap/.gitconfig user.email "${GIT_USER_EMAIL}"
+chpst -u vcap:vcap git config -f ~vcap/.gitconfig color.ui true
