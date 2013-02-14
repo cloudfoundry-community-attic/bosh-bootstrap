@@ -39,6 +39,12 @@ module Bosh::Bootstrap
       deploy_stage_6_setup_new_bosh
     end
 
+    desc "upgrade-inception", "Upgrade inception VM with latest packages, gems, security group ports"
+    def upgrade_inception
+      setup_server
+      upgrade_inception_stage_1_prepare_inception_vm
+    end
+
     # desc "delete", "Delete Micro BOSH"
     # method_option :all, :type => :boolean, :desc => "Delete all micro-boshes and inception VM [coming soon]"
     # def delete
@@ -77,7 +83,7 @@ module Bosh::Bootstrap
       Requires outgoing UDP port 60001 to the Inception VM
     DESC
     def mosh
-      open_mosh_session()
+      open_mosh_session
     end
 
     no_tasks do
@@ -203,13 +209,8 @@ module Bosh::Bootstrap
         # If successfully validate inception VM, then save those settings.
         save_settings!
 
-        if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
-          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
-        else
-          @server = Commander::LocalServer.new
-          confirm "Using this server as the inception VM"
-        end
+        setup_server
+
         unless settings["inception"]["validated"]
           unless server.run(Bosh::Bootstrap::Stages::StageValidateInceptionVm.new(settings).commands)
             error "Failed to complete Stage 3: Create/Allocate the Inception VM"
@@ -264,15 +265,20 @@ module Bosh::Bootstrap
         confirm "You are now targeting and logged in to your BOSH"
       end
 
+      def upgrade_inception_stage_1_prepare_inception_vm
+        if settings["inception"] && settings["inception"]["prepared"]
+          header "Stage 1: Upgrade Inception VM"
+          unless run_server(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
+            error "Failed to complete Stage 2: Upgrade Inception VM"
+          end
+        else
+          error "Please deploy an Inception VM first, using 'bosh-bootstrap deploy' command."
+        end
+      end
+
       def delete_stage_1_target_inception_vm
         header "Stage 1: Target inception VM to use to delete micro-bosh"
-        if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
-          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
-        else
-          @server = Commander::LocalServer.new
-          confirm "Using this server as the inception VM"
-        end
+        setup_server
       end
 
       def delete_one_stage_2_delete_micro_bosh
@@ -289,6 +295,16 @@ module Bosh::Bootstrap
 
       def delete_all_stage_3_delete_inception_vm
         
+      end
+
+      def setup_server
+        if settings["inception"]["host"]
+          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
+          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
+        else
+          @server = Commander::LocalServer.new
+          confirm "Using this server as the inception VM"
+        end
       end
 
       def run_ssh_command_or_open_tunnel(cmd)
@@ -320,7 +336,7 @@ module Bosh::Bootstrap
         end
       end
 
-      def open_mosh_session()  
+      def open_mosh_session
         ensure_mosh_installed
         ensure_inception_vm
         ensure_inception_vm_has_launched
