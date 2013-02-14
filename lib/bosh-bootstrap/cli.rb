@@ -102,7 +102,9 @@ module Bosh::Bootstrap
         confirm "Using infrastructure provider #{settings.fog_credentials.provider}"
 
         if aws?
-          choose_aws_vpc_or_ec2
+          if ENV['VPC']
+            choose_aws_vpc_or_ec2
+          end
         end
 
         unless settings[:region_code]
@@ -347,16 +349,6 @@ module Bosh::Bootstrap
         with_setting "subnet" do |setting|
           say "Creating subnet #{subnet_cidr_block}..."
           setting["id"] = provider.create_subnet(vpc_id, subnet_cidr_block)
-        end
-      end
-
-      def setup_server
-        if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
-          confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
-        else
-          @server = Commander::LocalServer.new
-          confirm "Using this server as the inception VM"
         end
       end
 
