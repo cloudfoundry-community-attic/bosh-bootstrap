@@ -45,7 +45,12 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
   cd $BOSH_DIR
   echo "Creating custom stemcell..."
+
+  # Ensure these gems are not installed for the rake task
+  gem uninstall -a -I multi_xml xml-simple rack-protection
+
   bundle install
+
   bundle exec rake stemcell:micro[$PROVIDER]
 
   echo "Copying to stemcells folder..."
