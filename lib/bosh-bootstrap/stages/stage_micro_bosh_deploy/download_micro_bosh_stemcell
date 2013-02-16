@@ -8,6 +8,7 @@
 #
 # Optional:
 # * $PROVIDER - required for 'custom' $MICRO_BOSH_STEMCELL_NAME; e.g. aws, openstack
+# * $ISO_NAME - defaults to ubuntu-10.04.4-server-amd64.iso for creating stemcell
 
 set -e # exit immediately if a simple command exits with a non-zero status
 set -u # report the usage of uninitialized variables
@@ -24,7 +25,16 @@ fi
 
 if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
+  ISO_NAME=${ISO_NAME:-ubuntu-10.04.4-server-amd64.iso}
+
   echo "Creating custom stemcell..."
+
+  cd ${STEMCELLS_DIR}
+  if [[ ! -f ${ISO_NAME} ]]; then
+    echo "Fetching base stemcell ISO to speed up stemcell creation..."
+    wget http://releases.ubuntu.com/lucid/${ISO_NAME}
+  fi
+  export UBUNTU_ISO=${STEMCELLS_DIR}/${ISO_NAME}
 
   if [[ -d /var/tmp/bosh/ ]]; then
     echo "But first, cleaning out previous stemcell temporary files..."
