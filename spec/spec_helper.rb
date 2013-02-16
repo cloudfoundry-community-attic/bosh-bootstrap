@@ -13,6 +13,10 @@ require "bosh/providers"
 require "bosh-bootstrap"
 require "bosh-bootstrap/cli"
 
+# for the #sh helper
+require "rake"
+require "rake/file_utils"
+
 def spec_asset(filename)
   File.expand_path("../assets/#{filename}", __FILE__)
 end
@@ -27,6 +31,13 @@ def setup_home_dir
   home_dir = File.expand_path("../../tmp/home", __FILE__)
   FileUtils.mkdir_p(home_dir)
   ENV['HOME'] = home_dir
+
+  private_key = File.join(home_dir, ".ssh", "id_rsa")
+  unless File.exists?(private_key)
+    puts "Creating private keypair for inception VM specs..."
+    mkdir_p(File.dirname(private_key))
+    sh "ssh-keygen -f #{home_dir}/.ssh/id_rsa -N ''"
+  end
 end
 
 RSpec.configure do |c|
