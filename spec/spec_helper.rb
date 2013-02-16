@@ -23,9 +23,15 @@ def files_match(filename, expected_filename)
   file.should == expected_file
 end
 
+def setup_home_dir
+  home_dir = File.expand_path("../../tmp/home", __FILE__)
+  FileUtils.mkdir_p(home_dir)
+  ENV['HOME'] = home_dir
+end
+
 RSpec.configure do |c|
   c.before(:each) do
-    
+    setup_home_dir
   end
 
   c.color_enabled = true
