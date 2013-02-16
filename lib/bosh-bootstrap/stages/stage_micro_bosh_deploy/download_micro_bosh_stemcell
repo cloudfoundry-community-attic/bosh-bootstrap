@@ -49,7 +49,7 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
   bundle exec rake stemcell:micro[$PROVIDER]
 
   echo "Copying to stemcells folder..."
-  MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/agent-*/work/work/*.tgz | sort | tail -n 1)
+  MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/bosh_agent-*/work/work/*.tgz | sort | tail -n 1)
   mv $MICRO_BOSH_STEMCELL_PATH /var/vcap/store/stemcells
   MICRO_BOSH_STEMCELL_NAME=$(basename $MICRO_BOSH_STEMCELL_PATH)
 
