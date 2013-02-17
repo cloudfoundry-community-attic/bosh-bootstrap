@@ -23,6 +23,8 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}X" == "X" ]]; then
   exit 1
 fi
 
+STEMCELLS_DIR=/var/vcap/store/stemcells
+
 if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
   ISO_NAME=${ISO_NAME:-ubuntu-10.04.4-server-amd64.iso}
@@ -60,17 +62,17 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
   echo "Copying to stemcells folder..."
   MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/bosh_agent-*/work/work/*.tgz | sort | tail -n 1)
-  mv $MICRO_BOSH_STEMCELL_PATH /var/vcap/store/stemcells
+  mv $MICRO_BOSH_STEMCELL_PATH $STEMCELLS_DIR
   MICRO_BOSH_STEMCELL_NAME=$(basename $MICRO_BOSH_STEMCELL_PATH)
 
   echo "Cleaning up..."
   rm $(dirname $LATEST_BOSH_RELEASE_PATH)/*.tgz
 
-elif [[ -f /var/vcap/store/stemcells/$MICRO_BOSH_STEMCELL_NAME ]]; then
+elif [[ -f $STEMCELLS_DIR/$MICRO_BOSH_STEMCELL_NAME ]]; then
   echo "Stemcell $(pwd)/$MICRO_BOSH_STEMCELL_NAME already exists."
 
 else
-  cd /var/vcap/store/stemcells
+  cd $STEMCELLS_DIR
   echo "Downloading public stemcell $MICRO_BOSH_STEMCELL_NAME"
   # set $COLUMNS manually else progressbar runs `tput cols`.to_i which causes grief
   COLUMNS=80 bosh -n download public stemcell $MICRO_BOSH_STEMCELL_NAME
