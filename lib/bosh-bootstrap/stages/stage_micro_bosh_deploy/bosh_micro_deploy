@@ -20,7 +20,7 @@ cd /var/vcap/store/microboshes/deployments/
 bosh -n micro deployment $BOSH_NAME
 
 if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
-  MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/agent-*/work/work/*.tgz | sort | tail -n 1)
+  MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/bosh_agent-*/work/work/*.tgz | sort | tail -n 1)
   echo "Custom stemcell path $MICRO_BOSH_STEMCELL_PATH"
 else
   echo "Downloaded stemcell path $MICRO_BOSH_STEMCELL_PATH"
