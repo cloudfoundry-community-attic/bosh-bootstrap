@@ -66,9 +66,6 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
   mv $MICRO_BOSH_STEMCELL_PATH $STEMCELLS_DIR
   MICRO_BOSH_STEMCELL_NAME=$(basename $MICRO_BOSH_STEMCELL_PATH)
 
-  echo "Cleaning up..."
-  rm $(dirname $LATEST_BOSH_RELEASE_PATH)/*.tgz
-
 elif [[ -f $STEMCELLS_DIR/$MICRO_BOSH_STEMCELL_NAME ]]; then
   echo "Stemcell $(pwd)/$MICRO_BOSH_STEMCELL_NAME already exists."
 
