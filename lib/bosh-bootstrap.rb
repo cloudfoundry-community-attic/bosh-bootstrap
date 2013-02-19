@@ -1,6 +1,6 @@
 # Requires Ruby language 1.9 and MRI or Rubinius
 require "redcard"
-RedCard.check :mri, :rubinius, "1.9"
+RedCard.verify :mri, :ruby, :rubinius, "1.9"
 
 module Bosh
   module Bootstrap
