@@ -20,8 +20,8 @@ if defined?(RSpec)
     end
 
     desc "Run Integration Tests"
-    functional_rspec_task = RSpec::Core::RakeTask.new(:functional) do |t|
-      t.pattern = "spec/functional/**/*_spec.rb"
+    integration_rspec_task = RSpec::Core::RakeTask.new(:integration) do |t|
+      t.pattern = "spec/integration/**/*_spec.rb"
       t.rspec_opts = %w(--format progress --color)
     end
   end
