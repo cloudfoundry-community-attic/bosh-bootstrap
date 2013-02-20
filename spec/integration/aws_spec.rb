@@ -24,11 +24,19 @@ describe "AWS deployment" do
       }
     end
   end
-  def create_manifest(options = {})
 
+  def aws_region
+    ENV['AWS_REGION'] || "us-west-2"
+  end
+
+  def fog
+    @fog ||= connection = Fog::Compute.new(fog_credentials.merge(:region => aws_region))
+  end
+
+  def create_manifest(options = {})
     settings = {
       "bosh_provider" => "aws",
-      "region_code" => "us-west-2",
+      "region_code" => aws_region,
       "bosh_name" => "test-bosh",
       "inception" => {
         "create_new" => true,
@@ -45,6 +53,7 @@ describe "AWS deployment" do
       file << settings.merge(options.stringify_keys).to_yaml
     end
   end
+
   it "creates an EC2 inception/microbosh with the associated resources" do
     create_manifest(vpc: false)
 
