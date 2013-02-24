@@ -842,7 +842,6 @@ module Bosh::Bootstrap
             inception_vm_attributes[:subnet_id] = settings["subnet"]["id"]
             inception_vm_attributes[:private_ip_address] = "10.0.0.5"
           end
-          p inception_vm_attributes
           server = provider.bootstrap(inception_vm_attributes)
           unless server
             error "Something mysteriously cloudy happened and fog could not provision a VM. Please check your limits."

@@ -76,8 +76,6 @@ describe "AWS deployment" do
 
     fog.servers.should have(1).item
     inception = fog.servers.first
-    p inception_ip_address
-    p inception
     inception_ip_address.domain.should == "vpc"
 
     # TODO - fix fog so we can test public_ip_address
@@ -93,7 +91,6 @@ describe "AWS deployment" do
 
     fog.subnets.should have(1).item
     subnet = fog.subnets.first
-    p subnet
     subnet.vpc_id.should == vpc.id
     subnet.cidr_block.should == "10.0.0.0/24"
 
