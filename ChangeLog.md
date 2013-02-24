@@ -4,6 +4,7 @@
 
 * Better idempotence for re-deploying microbosh - will delete&deploy after a failure; will deploy after a deletion.
 * For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added; and jazor/yaml_command CLIs installed
+* Forces microbosh stemcells 0.8.1 which work with public gems
 
 Added:
 

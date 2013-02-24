@@ -1110,35 +1110,45 @@ module Bosh::Bootstrap
 
       # Returns the latest micro-bosh stemcell
       # for the target provider (aws, vsphere, openstack)
+      # The name includes the version number.
       def micro_bosh_stemcell_name
-        @micro_bosh_stemcell_name ||= begin
-          stemcell_filter_tags = ['micro', provider_name]
-          if settings["micro_bosh_stemcell_type"] == "stable"
-            unless openstack?
-              # FIXME remove this if when openstack has its first stable
-              stemcell_filter_tags << "stable" # latest stable micro-bosh stemcell by default
-            end
+        @micro_bosh_stemcell_name ||= "micro-bosh-stemcell-#{provider_name}-#{known_stable_micro_bosh_stemcell_version}.tgz"
+      end
+
+      def known_stable_micro_bosh_stemcell_version
+        "0.8.1"
+      end
+
+      def latest_micro_bosh_stemcell_name
+        stemcell_filter_tags = ['micro', provider_name]
+        if settings["micro_bosh_stemcell_type"] == "stable"
+          unless openstack?
+            # FIXME remove this if when openstack has its first stable
+            stemcell_filter_tags << "stable" # latest stable micro-bosh stemcell by default
           end
-          tags = stemcell_filter_tags.join(",")
-          bosh_stemcells_cmd = "bosh public stemcells --tags #{tags}"
-          say "Locating micro-bosh stemcell, running '#{bosh_stemcells_cmd}'..."
-          #
-          # The +bosh_stemcells_cmd+ has an output that looks like:
-          # +-----------------------------------+--------------------+
-          # | Name                              | Tags               |
-          # +-----------------------------------+--------------------+
-          # | micro-bosh-stemcell-aws-0.6.4.tgz | aws, micro, stable |
-          # | micro-bosh-stemcell-aws-0.7.0.tgz | aws, micro, test   |
-          # +-----------------------------------+--------------------+
-          #
-          # So to get the latest version for the filter tags,
-          # get the Name field, reverse sort, and return the first item
-          # Effectively:
-          # `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
-          stemcell_output = `#{bosh_stemcells_cmd}`
-          say stemcell_output
-          stemcell_output.scan(/[\w.-]+\.tgz/).last
         end
+        tags = stemcell_filter_tags.join(",")
+        bosh_stemcells_cmd = "bosh public stemcells --tags #{tags}"
+        say "Locating micro-bosh stemcell, running '#{bosh_stemcells_cmd}'..."
+        #
+        # The +bosh_stemcells_cmd+ has an output that looks like:
+        # +----------------------------------------+--------------------+
+        # | Name                                   | Tags               |
+        # +----------------------------------------+--------------------+
+        # | micro-bosh-stemcell-aws-0.6.4.tgz      | aws, micro, stable |
+        # | micro-bosh-stemcell-aws-0.7.0.tgz      | aws, micro, test   |
+        # | micro-bosh-stemcell-aws-0.8.1.tgz      | aws, micro, test   |
+        # | micro-bosh-stemcell-aws-1.5.0.pre1.tgz | aws, micro         |
+        # | micro-bosh-stemcell-aws-1.5.0.pre2.tgz | aws, micro         |
+        # +----------------------------------------+--------------------+
+        #
+        # So to get the latest version for the filter tags,
+        # get the Name field, reverse sort, and return the first item
+        # Effectively:
+        # `#{bosh_stemcells_cmd} | grep micro | awk '{ print $2 }' | sort -r | head -n 1`.strip
+        stemcell_output = `#{bosh_stemcells_cmd}`
+        say stemcell_output
+        stemcell_output.scan(/[\w.-]+\.tgz/).last
       end
 
       def provider_name
