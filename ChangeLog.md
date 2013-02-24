@@ -3,6 +3,7 @@
 ## Next
 
 * For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added.
+* Forces microbosh stemcells 0.8.1 which work with public gems
 
 Added:
 
