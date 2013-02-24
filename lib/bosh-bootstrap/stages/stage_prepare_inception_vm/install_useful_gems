@@ -22,3 +22,5 @@ function install_gem() {
 
 install_gem bundler
 install_gem rake
+install_gem jazor
+install_gem yaml_command

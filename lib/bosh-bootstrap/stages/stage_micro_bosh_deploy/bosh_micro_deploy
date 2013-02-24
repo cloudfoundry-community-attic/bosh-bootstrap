@@ -26,11 +26,50 @@ else
   echo "Downloaded stemcell path $MICRO_BOSH_STEMCELL_PATH"
 fi
 
-if [[ -f bosh-deployments.yml && "$(grep $BOSH_NAME bosh-deployments.yml)" != "" ]]; then
-  echo "Performing update deploy to micro BOSH $BOSH_NAME"
-  bosh -n micro deploy $MICRO_BOSH_STEMCELL_PATH --update
+if [[ -f bosh-deployments.yml ]]; then
+  deployment=$(cat bosh-deployments.yml | yaml get instances -j | jazor "find {|inst| inst['name'] == '$BOSH_NAME' }")
 else
+  deployment=""
+fi
+
+# if $BOSH_NAME has never been deployed before, then $deployment will be empty
+# if $BOSH_NAME was previously deployed but deleted then $deployment will look like:
+#   {
+#     "id": 1,
+#     "name": "microbosh-aws-us-east-1",
+#     "uuid": "bm-096bc437-b531-4260-a57f-8ea54db2f8d2",
+#     "stemcell_cid": null,
+#     "stemcell_name": null,
+#     "vm_cid": null,
+#     "disk_cid": null
+#   }
+# if $BOSH_NAME has been deployed but it failed mid-way, then some of the _cid fields above will be set.
+
+echo ""
+echo ""
+
+if [[ "${deployment}X" == "X" ]]; then
   echo "Performing initial deploy of micro BOSH $BOSH_NAME"
-  bosh -n micro deploy $MICRO_BOSH_STEMCELL_PATH
+  bosh -n --color micro deploy $MICRO_BOSH_STEMCELL_PATH
   touch $BOSH_NAME/new_bosh_deployed # to communicate with setup_bosh_user script
+else
+  # determine if re-deploy, update, or delete&deploy
+
+  stemcell_cid=$(echo $deployment | jazor stemcell_cid)
+  vm_cid=$(echo $deployment | jazor vm_id)
+  disk_cid=$(echo $deployment | jazor disk_cid)
+
+  if [[ $stemcell_cid == "" && $vm_cid == "" && $disk_cid == "" ]]; then
+    echo "Deployment was deleted; deploying micro BOSH $BOSH_NAME again"
+    bosh -n --color micro deploy $MICRO_BOSH_STEMCELL_PATH
+    touch $BOSH_NAME/new_bosh_deployed # to communicate with setup_bosh_user script
+  elif [[ $stemcell_cid == "" || $vm_cid == "" || $disk_cid == "" ]]; then
+    echo "Deployment previously failed to completed. Deleting and deploying micro BOSH $BOSH_NAME again."
+    bosh -n --color micro delete
+    bosh -n --color micro deploy $MICRO_BOSH_STEMCELL_PATH
+    touch $BOSH_NAME/new_bosh_deployed # to communicate with setup_bosh_user script
+  else
+    echo "Performing update deploy to micro BOSH $BOSH_NAME"
+    bosh -n --color micro deploy $MICRO_BOSH_STEMCELL_PATH --update
+  fi
 fi
