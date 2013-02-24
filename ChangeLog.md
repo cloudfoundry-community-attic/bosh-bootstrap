@@ -2,7 +2,8 @@
 
 ## Next
 
-* For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added.
+* Better idempotence for re-deploying microbosh - will delete&deploy after a failure; will deploy after a deletion.
+* For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added; and jazor/yaml_command CLIs installed
 
 Added:
 
