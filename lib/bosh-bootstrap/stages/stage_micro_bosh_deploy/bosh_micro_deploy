@@ -64,7 +64,7 @@ else
     bosh -n --color micro deploy $MICRO_BOSH_STEMCELL_PATH
     touch $BOSH_NAME/new_bosh_deployed # to communicate with setup_bosh_user script
   elif [[ $stemcell_cid == "" || $vm_cid == "" || $disk_cid == "" ]]; then
-    echo "Deployment previously failed to completed. Deleting and deploying micro BOSH $BOSH_NAME again."
+    echo "Deployment previously failed to complete. Deleting and deploying micro BOSH $BOSH_NAME again."
     bosh -n --color micro delete
     bosh -n --color micro deploy $MICRO_BOSH_STEMCELL_PATH
     touch $BOSH_NAME/new_bosh_deployed # to communicate with setup_bosh_user script
