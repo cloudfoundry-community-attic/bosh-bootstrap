@@ -1050,14 +1050,26 @@ module Bosh::Bootstrap
 
         # Format and mount the volume
         say "Mounting persistent disk as volume on inception VM..."
-        disk_mounted = false
-        until disk_mounted
+        run_ssh_command_until_successful server, "sudo mkfs.ext4 #{device} -F"
+        run_ssh_command_until_successful server, "sudo mkdir -p /var/vcap/store"
+        run_ssh_command_until_successful server, "sudo mount #{device} /var/vcap/store"
+      end
+
+      def run_ssh_command_until_successful(server, cmd)
+        completed = false
+        until completed
           begin
-            # TODO catch Errno::ETIMEDOUT and re-run ssh commands
-            server.ssh(["sudo mkfs.ext4 #{device} -F"])
-            server.ssh(["sudo mkdir -p /var/vcap/store"])
-            server.ssh(["sudo mount #{device} /var/vcap/store"])
-            disk_mounted = true
+            say "Running on inception VM: #{cmd}"
+            result = server.ssh([cmd]).first
+            if result.status == 1
+              result.display_stdout
+              result.display_stderr
+              sleep 1
+              say "trying again..."
+              next
+            else
+            end
+            completed = true
           rescue Errno::ETIMEDOUT => e
             say "Timeout error/warning mounting volume, retrying...", yellow
           end
