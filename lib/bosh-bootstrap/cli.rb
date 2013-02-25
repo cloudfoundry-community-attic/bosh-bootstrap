@@ -41,7 +41,10 @@ module Bosh::Bootstrap
     end
 
     desc "upgrade-inception", "Upgrade inception VM with latest packages, gems, security group ports"
+    method_option :"edge-deployer", :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
     def upgrade_inception
+      load_deploy_options # from method_options above
+
       setup_server
       upgrade_inception_stage_1_prepare_inception_vm
     end
