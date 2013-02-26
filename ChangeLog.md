@@ -1,11 +1,13 @@
 # Change Log
 
+`bosh-bootstrap` is a command line tool that you can run on your laptop and automatically get a microbosh (and an inception VM) deployed on either AWS or OpenStack.
+
 ## v0.7
 
 Notable:
 
 * For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added; and jazor/yaml_command CLIs installed
-* Forces microbosh stemcells 0.8.1 which work with public gems (latest public stemcell does not work with public gems)
+* Forces use of microbosh stemcell 0.8.1 which work with public gems (latest public stemcell does not work with public gems)
 
 Added:
 
