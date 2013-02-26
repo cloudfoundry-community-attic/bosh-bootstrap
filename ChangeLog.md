@@ -1,14 +1,31 @@
 # Change Log
 
-## Next
+## v0.7
 
-* Better idempotence for re-deploying microbosh - will delete&deploy after a failure; will deploy after a deletion.
+Notable:
+
 * For existing users: please run "deploy --upgrade-deps" as new inception package (runit) added; and jazor/yaml_command CLIs installed
-* Forces microbosh stemcells 0.8.1 which work with public gems
+* Forces microbosh stemcells 0.8.1 which work with public gems (latest public stemcell does not work with public gems)
 
 Added:
 
 * `mosh` command - connect to Inception VM on trains over flaky internet connections (use instead of `ssh` or `tmux` command) [thx @mrdavidlang]
+* `upgrade-inception` command - to perform an upgrade of the Inception VM without triggering a re-deploy of microbosh.
+
+Changes:
+
+* Inception VM now installs rubygems 2.0.0 & bundler 1.3.0
+* Better idempotence for re-deploying microbosh - will delete&deploy after a failure; will deploy after a deletion.
+* Downloads ubuntu 10.04 ISO to speed up custom stemcell builds
+* Using redcard to ensure ruby 1.9 only
+* `manifest.yml` stores the name of the stemcell created from a custom stemcell build; no longer re-creates stemcell each time
+* git color is enabled on inception VM
+
+Work in progress:
+
+* AWS VPC support was begin by the core BOSH team; though work has stopped sadly.
+* Growing number of specs mostly using Fog.mock! mode; tests being run on travis
+
 
 ## v0.6
 
