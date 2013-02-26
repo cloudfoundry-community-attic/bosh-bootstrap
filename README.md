@@ -44,7 +44,7 @@ $ gem install bosh-bootstrap
 The first time you use `bosh-bootstrap` it will create everything necessary. The example output below includes user prompts.
 
 ```
-$ bosh-bootstrap deploy --latest-stemcell
+$ bosh-bootstrap deploy
 
 Stage 1: Choose infrastructure
 
