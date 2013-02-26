@@ -33,6 +33,7 @@ This bootstrapper tool is distributed as a RubyGem for Ruby 1.9+.
 ```
 $ ruby -v
 ruby 1.9.3p385 ...
+$ gem install net-ssh -v 2.2.2
 $ gem install bosh-bootstrap
 ```
 
