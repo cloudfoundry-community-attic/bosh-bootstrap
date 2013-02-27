@@ -188,7 +188,7 @@ A running BOSH, whether it is running on a single server or a cluster of servers
 * PostgreSQL
 * Redis
 
-When you deploy a BOSH using the BOSH Deployer (`bosh micro deploy`) or indirectly via the BOSH Bootstrapper, you are actually deploying a BOSH release that describes a BOSH called [bosh-release](https://github.com/cloudfoundry/bosh-release). The processes listed above are called "jobs" and you can see the full list of jobs inside a BOSH within the [jobs/ directory](https://github.com/cloudfoundry/bosh-release/jobs) of `bosh-release`.
+When you deploy a BOSH using the BOSH Deployer (`bosh micro deploy`) or indirectly via the BOSH Bootstrapper, you are actually deploying a BOSH release that describes a BOSH called [bosh-release](https://github.com/cloudfoundry/bosh/tree/master/release). The processes listed above are called "jobs" and you can see the full list of jobs inside a BOSH within the [jobs/ directory](https://github.com/cloudfoundry/bosh/tree/master/release/jobs) of the `bosh` repository.
 
 But you don't yet have a BOSH to deploy another BOSH.
 
@@ -209,7 +209,7 @@ $ bosh public stemcells --tag micro
 $ bosh download public stemcell micro-bosh-stemcell-aws-0.6.4.tgz
 ```
 
-The CloudFoundry BOSH team will release new public stemcells overtime. The BOSH Deployer allows you to upgrade to newer stemcells as easily as it is to deploy a Micro BOSH initially.
+The CloudFoundry BOSH team will release new public stemcells over time. The BOSH Deployer allows you to upgrade to newer stemcells as easily as it is to deploy a Micro BOSH initially.
 
 ```
 $ bosh micro deploy micro-bosh-stemcell-aws-0.6.4.tgz
