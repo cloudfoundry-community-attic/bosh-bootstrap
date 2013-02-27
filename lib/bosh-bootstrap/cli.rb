@@ -721,7 +721,7 @@ module Bosh::Bootstrap
       end
 
       def prompt_openstack_region
-        default_region = settings.fog_credentials.openstack_region
+        default_region = settings["fog_credentials"] && settings["fog_credentials"]["openstack_region"]
         region = hl.ask("OpenStack Region (optional): ") { |q| q.default = default_region }
         settings[:region_code] = region.strip == "" ? nil : region
         return false unless settings[:region_code]
