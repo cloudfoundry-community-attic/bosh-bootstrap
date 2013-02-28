@@ -453,6 +453,9 @@ module Bosh::Bootstrap
         settings["git"] ||= {}
         settings["git"]["name"] ||= `git config user.name`.strip
         settings["git"]["email"] ||= `git config user.email`.strip
+        if settings["git"]["name"].empty? || settings["git"]["email"].empty?
+          error "Cannot find your git identity. Please set git user.name and user.email before proceeding"
+        end
 
         settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
 
@@ -1127,7 +1130,8 @@ module Bosh::Bootstrap
       # for the target provider (aws, vsphere, openstack)
       # The name includes the version number.
       def micro_bosh_stemcell_name
-        @micro_bosh_stemcell_name ||= "micro-bosh-stemcell-#{provider_name}-#{known_stable_micro_bosh_stemcell_version}.tgz"
+        hypersivor = openstack? ? "-kvm" : ""
+        @micro_bosh_stemcell_name ||= "micro-bosh-stemcell-#{provider_name}#{hypersivor}-#{known_stable_micro_bosh_stemcell_version}.tgz"
       end
 
       def known_stable_micro_bosh_stemcell_version
@@ -1147,15 +1151,19 @@ module Bosh::Bootstrap
         say "Locating micro-bosh stemcell, running '#{bosh_stemcells_cmd}'..."
         #
         # The +bosh_stemcells_cmd+ has an output that looks like:
-        # +----------------------------------------+--------------------+
-        # | Name                                   | Tags               |
-        # +----------------------------------------+--------------------+
-        # | micro-bosh-stemcell-aws-0.6.4.tgz      | aws, micro, stable |
-        # | micro-bosh-stemcell-aws-0.7.0.tgz      | aws, micro, test   |
-        # | micro-bosh-stemcell-aws-0.8.1.tgz      | aws, micro, test   |
-        # | micro-bosh-stemcell-aws-1.5.0.pre1.tgz | aws, micro         |
-        # | micro-bosh-stemcell-aws-1.5.0.pre2.tgz | aws, micro         |
-        # +----------------------------------------+--------------------+
+        # +--------------------------------------------------+-----------------------------+
+        # | Name                                             | Tags                        |
+        # +--------------------------------------------------+-----------------------------+
+        # | micro-bosh-stemcell-aws-0.6.4.tgz                | aws, micro, stable          |
+        # | micro-bosh-stemcell-aws-0.7.0.tgz                | aws, micro, test            |
+        # | micro-bosh-stemcell-aws-0.8.1.tgz                | aws, micro, test            |
+        # | micro-bosh-stemcell-aws-1.5.0.pre1.tgz           | aws, micro                  |
+        # | micro-bosh-stemcell-aws-1.5.0.pre2.tgz           | aws, micro                  |
+        # | micro-bosh-stemcell-openstack-0.7.0.tgz          | openstack, micro, test      |
+        # | micro-bosh-stemcell-openstack-kvm-0.8.1.tgz      | openstack, kvm, micro, test |
+        # | micro-bosh-stemcell-openstack-kvm-1.5.0.pre1.tgz | openstack, kvm, micro       |
+        # | micro-bosh-stemcell-openstack-kvm-1.5.0.pre2.tgz | openstack, kvm, micro       |
+        # +--------------------------------------------------+-----------------------------+
         #
         # So to get the latest version for the filter tags,
         # get the Name field, reverse sort, and return the first item

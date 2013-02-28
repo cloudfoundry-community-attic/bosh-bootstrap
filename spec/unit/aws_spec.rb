@@ -28,6 +28,8 @@ describe "AWS deployment" do
     setting "fog_credentials", @fog_credentials.stringify_keys
     setting "bosh.salted_password", "pepper"
     setting "bosh.persistent_disk", 16384
+    setting "git.name", "Dr Nic Williams"
+    setting "git.email", "drnicwilliams@gmail.com"
   end
 
   # used by +SettingsSetter+ to access the settings
