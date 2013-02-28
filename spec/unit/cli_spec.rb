@@ -109,8 +109,18 @@ describe Bosh::Bootstrap do
     # get the Name field, reverse sort, and return the first item
     it "should return the latest stable stemcell by default for AWS" do
       @cmd.settings["bosh_provider"] = "aws"
+      @cmd.settings["fog_credentials"] = {}
+      @cmd.settings["fog_credentials"]["provider"] = "aws"
       @cmd.should_receive(:known_stable_micro_bosh_stemcell_version).and_return("0.8.1")
       @cmd.micro_bosh_stemcell_name.should == "micro-bosh-stemcell-aws-0.8.1.tgz"
+    end
+
+    it "should return the latest stable stemcell by default for OpenStack" do
+      @cmd.settings["bosh_provider"] = "openstack"
+      @cmd.settings["fog_credentials"] = {}
+      @cmd.settings["fog_credentials"]["provider"] = "OpenStack"
+      @cmd.should_receive(:known_stable_micro_bosh_stemcell_version).and_return("0.8.1")
+      @cmd.micro_bosh_stemcell_name.should == "micro-bosh-stemcell-openstack-kvm-0.8.1.tgz"
     end
   end
 
