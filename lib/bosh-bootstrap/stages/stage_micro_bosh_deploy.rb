@@ -115,9 +115,9 @@ module Bosh::Bootstrap::Stages
         end
       end
 
-      manifest.to_yaml.gsub(/\s![^ ]+$/, '')
+      manifest.to_yaml.gsub(/\s+!\S+/, '')
 
-      # /![^ ]+\s/ removes object notation from the YAML which appears to cause problems when being interpretted by the
+      # /\s+!\S+/ removes object notation from the YAML which appears to cause problems when being interpretted by the
       # Ruby running on the inception vm. A before and after example would look like;
       #
       #   properties: !map:Settingslogic
