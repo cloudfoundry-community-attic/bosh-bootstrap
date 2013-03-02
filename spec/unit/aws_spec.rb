@@ -9,7 +9,7 @@ describe "AWS deployment" do
   before do
     Fog.mock!
     Fog::Mock.reset
-    ENV['MANIFEST'] = File.expand_path("../../../tmp/test-manifest.yml", __FILE__)
+    ENV['MANIFEST'] = File.join(ENV['HOME'], "manifest.yml")
     rm_rf(ENV['MANIFEST'])
     @cmd = Bosh::Bootstrap::Cli.new
     @fog_credentials = {
@@ -18,8 +18,9 @@ describe "AWS deployment" do
       :aws_access_key_id        => 'YYY'
     }
 
+    @region = "us-west-2"
     setting "bosh_provider", "aws"
-    setting "region_code", "us-west-2"
+    setting "region_code", @region
     setting "bosh_name", "test-bosh"
     setting "inception.create_new", true
     setting "bosh_username", "testuser"
@@ -38,7 +39,7 @@ describe "AWS deployment" do
   end
 
   def fog
-    @fog ||= connection = Fog::Compute.new(@fog_credentials.merge(:region => "us-west-2"))
+    @fog ||= connection = Fog::Compute.new(@fog_credentials.merge(:region => @region))
   end
 
   def expected_manifest_content(filename, public_ip, subnet_id = nil)
