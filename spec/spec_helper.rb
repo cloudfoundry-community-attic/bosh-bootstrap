@@ -29,6 +29,7 @@ end
 
 def setup_home_dir
   home_dir = File.expand_path("../../tmp/home", __FILE__)
+  FileUtils.rm_rf(home_dir)
   FileUtils.mkdir_p(home_dir)
   ENV['HOME'] = home_dir
 
