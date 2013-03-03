@@ -362,7 +362,7 @@ module Bosh::Bootstrap
         username = 'vcap'
         host = settings.inception[:host]
         _, private_key_path = local_ssh_key_paths
-        result = system Escape.shell_command(['ssh', "-i", "#{private_key_path}", "#{username}@#{host}", cmd].compact)
+        result = system Escape.shell_command(['ssh', "-i", "#{private_key_path}", "#{username}@#{host}", cmd].flatten.compact)
         exit result
       end
 

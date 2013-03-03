@@ -19,19 +19,20 @@ describe Bosh::Bootstrap do
     before do
       @cmd.settings["inception"] = {}
       @cmd.settings["inception"]["host"] = "5.5.5.5"
+      @private_key_path = File.join(ENV['HOME'], ".ssh", "id_rsa")
     end
 
     describe "normal" do
       it "launches ssh session" do
         @cmd.should_receive(:exit)
         @cmd.should_receive(:system).
-          with("ssh vcap@5.5.5.5")
+          with("ssh -i #{@private_key_path} vcap@5.5.5.5")
         @cmd.ssh
       end
       it "runs ssh command" do
         @cmd.should_receive(:exit)
         @cmd.should_receive(:system).
-          with("ssh vcap@5.5.5.5 'some command'")
+          with("ssh -i #{@private_key_path} vcap@5.5.5.5 'some command'")
         @cmd.ssh("some command")
       end
     end
@@ -40,7 +41,7 @@ describe Bosh::Bootstrap do
       it "launches ssh session" do
         @cmd.should_receive(:exit)
         @cmd.should_receive(:system).
-          with("ssh vcap@5.5.5.5 -t 'tmux attach || tmux new-session'")
+          with("ssh -i #{@private_key_path} vcap@5.5.5.5 -t 'tmux attach || tmux new-session'")
         @cmd.tmux
       end
     end
