@@ -187,7 +187,7 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     server = fog_compute.servers.new(new_attributes)
 
     unless new_attributes[:key_name]
-      # first or create fog_#{credential} keypair
+      # first or create fog_#{credential} key_pair
       name = Fog.respond_to?(:credential) && Fog.credential || :default
       unless server.key_pair = fog_compute.key_pairs.get("fog_#{name}")
         server.key_pair = fog_compute.key_pairs.create(
