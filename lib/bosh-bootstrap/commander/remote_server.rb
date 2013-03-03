@@ -77,11 +77,7 @@ class Bosh::Bootstrap::Commander::RemoteServer
       file << contents
       file.flush
       logfile.puts "uploading #{remote_path} to Inception VM"
-<<<<<<< HEAD
-      Net::SCP.upload!(host, upload_as_user, file.path, remote_path, ssh: { keys: keys_array })
-=======
       Net::SCP.upload!(host, upload_as_user, file.path, remote_path, ssh: { keys: private_keys })
->>>>>>> Using inception VM private key for remote server command
     end
     true
   rescue StandardError => e

@@ -23,7 +23,6 @@ module Bosh::Bootstrap
 
     desc "deploy", "Bootstrap Micro BOSH, and optionally an Inception VM"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
-    method_option :"private-key", :type => :string, :desc => "Local passphrase-less private key path"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
     method_option :"edge-deployer", :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
     method_option :"stable-stemcell", :type => :boolean, :desc => "Use recent stable microbosh stemcell"
@@ -364,10 +363,9 @@ module Bosh::Bootstrap
         ensure_inception_vm_has_launched
         recreate_local_ssh_keys_for_inception_vm
 
-        username = 'vcap'
-        host = settings.inception[:host]
-        _, private_key_path = local_ssh_key_paths
-        result = system Escape.shell_command(['ssh', "-i", "#{private_key_path}", "#{username}@#{host}", cmd].flatten.compact)
+        username = "vcap"
+        host = settings["inception"]["host"]
+        result = system Escape.shell_command(["ssh", "-i", inception_vm_private_key_path, "#{username}@#{host}", cmd].flatten.compact)
         exit result
       end
 
@@ -477,21 +475,6 @@ module Bosh::Bootstrap
         # once a stemcell is downloaded or created; these fields above should
         # be uploaded with values such as:
         #  -> settings["micro_bosh_stemcell_name"] = "micro-bosh-stemcell-aws-0.8.1.tgz"
-
-        if options["private-key"]
-          private_key_path = File.expand_path(options["private-key"])
-          unless File.exists?(private_key_path)
-            error "Cannot find a file at #{private_key_path}"
-          end
-          public_key_path = "#{private_key_path}.pub"
-          unless File.exists?(public_key_path)
-            error "Cannot find a file at #{public_key_path}"
-          end
-
-          settings["local"] ||= {}
-          settings["local"]["private_key_path"] = private_key_path
-          settings["local"]["public_key_path"] = public_key_path
-        end
 
         if options["upgrade-deps"]
           settings["upgrade_deps"] = options["upgrade-deps"]
