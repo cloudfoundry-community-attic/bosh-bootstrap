@@ -26,6 +26,7 @@ describe Bosh::Bootstrap do
       setting "inception.host", "5.5.5.5"
       setting "inception.key_pair.private_key", "PRIVATE"
       setting "inception.key_pair.public_key", "PUBLIC"
+      @private_key_path = File.join(ENV['HOME'], ".ssh", "inception")
     end
 
     describe "normal" do
