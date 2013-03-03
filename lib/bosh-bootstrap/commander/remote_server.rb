@@ -77,11 +77,17 @@ class Bosh::Bootstrap::Commander::RemoteServer
       file << contents
       file.flush
       logfile.puts "uploading #{remote_path} to Inception VM"
+<<<<<<< HEAD
       Net::SCP.upload!(host, upload_as_user, file.path, remote_path, ssh: { keys: keys_array })
+=======
+      Net::SCP.upload!(host, upload_as_user, file.path, remote_path, ssh: { keys: private_keys })
+>>>>>>> Using inception VM private key for remote server command
     end
     true
   rescue StandardError => e
+    logfile.puts "ERROR running upload_file(#{command.class}, '#{remote_path}', ...)"
     logfile.puts e.message
+    logfile.puts e.backtrace
     false
   end
 
@@ -102,7 +108,7 @@ class Bosh::Bootstrap::Commander::RemoteServer
       "bash -lc 'sudo /usr/bin/env PATH=$PATH #{remote_path}'"
     ]
     script_output = ""
-    results = Fog::SSH.new(host, username, keys: keys_array).run(commands) do |stdout, stderr|
+    results = Fog::SSH.new(host, username, keys: private_keys).run(commands) do |stdout, stderr|
       [stdout, stderr].flatten.each do |data|
         logfile << data
         script_output << data
@@ -113,17 +119,17 @@ class Bosh::Bootstrap::Commander::RemoteServer
     [script_output, result_success]
   end
 
-  # Produce the :keys option for Net::SSH
-  def keys_array
-    # path to local private key being used
-    [private_key_path]
-  end
-
   def run_remote_command(command, username)
-    Net::SSH.start(host, username, keys: keys_array) do |ssh|
+    Net::SSH.start(host, username, keys: private_keys) do |ssh|
       ssh.exec!("bash -lc '#{command}'") do |channel, stream, data|
         logfile << data
       end
     end
   end
+
+  # path to local private key being used
+  def private_keys
+    [private_key_path]
+  end
+
 end
