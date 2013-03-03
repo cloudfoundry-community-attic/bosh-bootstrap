@@ -49,7 +49,7 @@ describe "AWS deployment" do
     YAML.load(file)
   end
 
-  it "creates a VPC inception/microbosh with the associated resources" do
+  xit "creates a VPC inception/microbosh with the associated resources" do
     # create a VPC
     # create a BOSH subnet 10.10.0.0/24
     # create BOSH security group
@@ -122,10 +122,27 @@ describe "AWS deployment" do
     @cmd.stub(:sleep)
     @cmd.should_receive(:deploy_stage_6_setup_new_bosh)
     @cmd.deploy
+    @settings = nil # reload settings file
 
     fog.addresses.should have(2).item
     inception_ip_address = fog.addresses.first
     inception_ip_address.domain.should == "standard"
+
+    inception_kp = fog.key_pairs.find { |kp| kp.name == "inception" }
+    inception_kp.should_not be_nil
+
+    inception_kp = fog.key_pairs.find { |kp| kp.name == "fog_default" }
+    inception_kp.should be_nil
+
+    fog.key_pairs.should have(2).item
+
+    settings["inception"].should_not be_nil
+    p settings["inception"]
+    settings["inception"]["key_pair"].should_not be_nil
+    settings["inception"]["key_pair"]["name"].should_not be_nil
+    settings["inception"]["key_pair"]["private_key"].should_not be_nil
+    settings["inception"]["local_private_key_path"].should == File.join(ENV['HOME'], ".ssh", "inception")
+    File.should_not be_world_readable(settings["inception"]["local_private_key_path"])
 
     fog.vpcs.should have(0).item
     fog.servers.should have(1).item

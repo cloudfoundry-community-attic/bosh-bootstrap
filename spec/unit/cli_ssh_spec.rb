@@ -8,18 +8,24 @@ require File.expand_path("../../spec_helper", __FILE__)
 # * mosh
 describe Bosh::Bootstrap do
   include FileUtils
+  include Bosh::Bootstrap::Helpers::SettingsSetter
 
   before do
-    ENV['MANIFEST'] = File.expand_path("../../../tmp/test-manifest.yml", __FILE__)
+    ENV['MANIFEST'] = File.join(ENV['HOME'], "manifest.yml")
     rm_rf(ENV['MANIFEST'])
     @cmd = Bosh::Bootstrap::Cli.new
   end
 
+  # used by +SettingsSetter+ to access the settings
+  def settings
+    @cmd.settings
+  end
+
   describe "ssh" do
     before do
-      @cmd.settings["inception"] = {}
-      @cmd.settings["inception"]["host"] = "5.5.5.5"
-      @private_key_path = File.join(ENV['HOME'], ".ssh", "id_rsa")
+      setting "inception.host", "5.5.5.5"
+      setting "inception.key_pair.private_key", "PRIVATE"
+      setting "inception.key_pair.public_key", "PUBLIC"
     end
 
     describe "normal" do

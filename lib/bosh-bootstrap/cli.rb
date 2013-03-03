@@ -234,6 +234,9 @@ module Bosh::Bootstrap
         save_settings!
 
         if settings["inception"]["create_new"] && !settings["inception"]["host"]
+          unless settings["inception"]["key_pair"]
+            create_inception_key_pair
+          end
           aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
         end
         # If successfully validate inception VM, then save those settings.
@@ -329,7 +332,8 @@ module Bosh::Bootstrap
 
       def setup_server
         if settings["inception"]["host"]
-          @server = Commander::RemoteServer.new(settings.inception.host, settings.local.private_key_path)
+          private_key_path = settings["inception"]["local_private_key_path"]
+          @server = Commander::RemoteServer.new(settings.inception.host, private_key_path)
           confirm "Using inception VM #{settings.inception.username}@#{settings.inception.host}"
         else
           @server = Commander::LocalServer.new
@@ -358,6 +362,7 @@ module Bosh::Bootstrap
       def run_ssh_command_or_open_tunnel(cmd)
         ensure_inception_vm
         ensure_inception_vm_has_launched
+        recreate_local_ssh_keys_for_inception_vm
 
         username = 'vcap'
         host = settings.inception[:host]
@@ -382,6 +387,7 @@ module Bosh::Bootstrap
         ensure_mosh_installed
         ensure_inception_vm
         ensure_inception_vm_has_launched
+        recreate_local_ssh_keys_for_inception_vm
         ensure_security_group_allows_mosh
 
         username = 'vcap'
@@ -806,6 +812,47 @@ module Bosh::Bootstrap
         end
       end
 
+      # Creates a key pair with the provider for the inception VM.
+      # Stores the private & public key in settings manifest.
+      #
+      # If provider already has a key pair of the same name, it re-creates it.
+      #
+      # Adds settings:
+      # * inception.key_pair.name
+      # * inception.key_pair.public_key
+      # * inception.key_pair.private_key
+      # * inception.key_pair.fingerprint
+      def create_inception_key_pair
+        say "Creating ssh key pair for Inception VM..."
+        create_key_pair_store_in_settings("inception")
+      end
+
+      # Creates a key pair with the provider.
+      # Stores the private & public key in settings manifest.
+      #
+      # If provider already has a key pair of the same name, it re-creates it.
+      #
+      # Adds settings:
+      # * <settings_key>.key_pair.name        # defaults to settings_key value
+      # * <settings_key>.key_pair.public_key
+      # * <settings_key>.key_pair.private_key
+      # * <settings_key>.key_pair.fingerprint
+      def create_key_pair_store_in_settings(settings_key, default_key_pair_name = settings_key)
+        settings[settings_key] ||= {}
+        settings[settings_key]["key_pair"] ||= {}
+        key_pair_settings = settings[settings_key]["key_pair"]
+        key_pair_settings["name"] ||= default_key_pair_name
+        key_pair_name = key_pair_settings["name"]
+
+        provider.delete_key_pair_if_exists(key_pair_name)
+        fog_key_pair = provider.create_key_pair(key_pair_name)
+
+        key_pair_settings["private_key"] = fog_key_pair.private_key
+        key_pair_settings["public_key"]  = fog_key_pair.public_key
+        key_pair_settings["fingerprint"] = fog_key_pair.fingerprint
+        save_settings!
+      end
+
       # Provisions an AWS m1.small VM as the inception VM
       # Updates settings.inception.host/username
       #
@@ -815,6 +862,8 @@ module Bosh::Bootstrap
       #
       # Assumes that local CLI user has public/private keys at ~/.ssh/id_rsa.pub
       def boot_aws_inception_vm
+        recreate_local_ssh_keys_for_inception_vm
+
         say "" # glowing whitespace
 
         unless settings["inception"]["ip_address"]
@@ -823,15 +872,14 @@ module Bosh::Bootstrap
           save_settings!
         end
 
-        public_key_path, private_key_path = local_ssh_key_paths
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
           size = "m1.small"
           ip_address = settings["inception"]["ip_address"]
+          key_name = settings["inception"]["key_pair"]["name"]
           say "Provisioning #{size} for inception VM..."
           inception_vm_attributes = {
-            :public_key_path => public_key_path,
-            :private_key_path => private_key_path,
+            :key_name => key_name,
             :flavor_id => size,
             :bits => 64,
             :username => "ubuntu",
@@ -847,7 +895,7 @@ module Bosh::Bootstrap
             error "Something mysteriously cloudy happened and fog could not provision a VM. Please check your limits."
           end
 
-          settings["inception"] = {}
+          settings["inception"].delete("create_new")
           settings["inception"]["server_id"] = server.id
           settings["inception"]["username"] = username
           save_settings!
@@ -888,21 +936,9 @@ module Bosh::Bootstrap
       #
       # Assumes that local CLI user has public/private keys at ~/.ssh/id_rsa.pub
       def boot_openstack_inception_vm
+        recreate_local_ssh_keys_for_inception_vm
+
         say "" # glowing whitespace
-
-        public_key_path, private_key_path = local_ssh_key_paths
-
-        # make sure we've a fog key pair
-        key_pair_name = Fog.respond_to?(:credential) && Fog.credential || :default
-        unless key_pair = fog_compute.key_pairs.get("fog_#{key_pair_name}")
-          say "creating key pair fog_#{key_pair_name}..."
-          public_key = File.open(public_key_path, 'rb') { |f| f.read }
-          key_pair = fog_compute.key_pairs.create(
-            :name => "fog_#{key_pair_name}",
-            :public_key => public_key
-          )
-        end
-        confirm "Using key pair #{key_pair.name} for Inception VM"
 
         unless settings["inception"] && settings["inception"]["server_id"]
           username = "ubuntu"
@@ -951,12 +987,12 @@ module Bosh::Bootstrap
           say ""
           confirm "Using image #{inception_image.name} for Inception VM"
 
+          key_name = settings["inception"]["key_pair"]["name"]
+
           # Boot OpenStack server
           server = fog_compute.servers.create(
             :name => "Inception VM",
-            :key_name => key_pair.name,
-            :public_key_path => public_key_path,
-            :private_key_path => private_key_path,
+            :key_name => key_name,
             :flavor_ref => inception_flavor.id,
             :image_ref => inception_image.id,
             :username => username
@@ -1074,30 +1110,32 @@ module Bosh::Bootstrap
       end
 
       def display_inception_ssh_access
-        _, private_key_path = local_ssh_key_paths
-        say "SSH access: ssh -i #{private_key_path} #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
+        say "SSH access: ssh -i #{inception_vm_private_key_path} #{settings["inception"]["username"]}@#{settings["inception"]["host"]}"
       end
 
       def run_server(server_commands)
         server.run(server_commands)
       end
 
-      # Discover/create local passphrase-less SSH keys to allow
-      # communication with Inception VM
-      #
-      # Returns [public_key_path, private_key_path]
-      def local_ssh_key_paths
-        unless settings["local"] && settings["local"]["private_key_path"]
-          settings["local"] = {}
-          public_key_path = File.expand_path("~/.ssh/id_rsa.pub")
-          private_key_path = File.expand_path("~/.ssh/id_rsa")
-          raise "Please create public keys at ~/.ssh/id_rsa.pub or use --private-key flag" unless File.exists?(public_key_path)
-
-          settings["local"]["public_key_path"] = public_key_path
-          settings["local"]["private_key_path"] = private_key_path
+      def inception_vm_private_key_path
+        unless settings["inception"] && settings["inception"]["local_private_key_path"]
+          settings["inception"] ||= {}
+          settings["inception"]["local_private_key_path"] = File.join(ENV['HOME'], ".ssh", "inception")
           save_settings!
         end
-        [settings.local.public_key_path, settings.local.private_key_path]
+        settings["inception"]["local_private_key_path"]
+      end
+
+      # The keys for the inception VM originate from the provider and are cached in
+      # the manifest. The private key is stored locally; the public key is placed
+      # on the inception VM.
+      def recreate_local_ssh_keys_for_inception_vm
+        unless settings["inception"] && (key_pair = settings["inception"]["key_pair"])
+          raise "please run create_inception_key_pair first"
+        end
+        mkdir_p(File.dirname(inception_vm_private_key_path))
+        File.open(inception_vm_private_key_path, "w") { |file| file << key_pair["private_key"] }
+        File.chmod(0600, inception_vm_private_key_path)
       end
 
       def aws?
