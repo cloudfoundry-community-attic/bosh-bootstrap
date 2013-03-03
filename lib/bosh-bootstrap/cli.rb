@@ -880,6 +880,7 @@ module Bosh::Bootstrap
           say "Provisioning #{size} for inception VM..."
           inception_vm_attributes = {
             :key_name => key_name,
+            :private_key_path => inception_vm_private_key_path,
             :flavor_id => size,
             :bits => 64,
             :username => "ubuntu",
@@ -1134,6 +1135,7 @@ module Bosh::Bootstrap
           raise "please run create_inception_key_pair first"
         end
         mkdir_p(File.dirname(inception_vm_private_key_path))
+        File.chmod(0700, File.dirname(inception_vm_private_key_path))
         File.open(inception_vm_private_key_path, "w") { |file| file << key_pair["private_key"] }
         File.chmod(0600, inception_vm_private_key_path)
       end
