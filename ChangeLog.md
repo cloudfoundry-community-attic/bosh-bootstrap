@@ -28,6 +28,13 @@ Work in progress:
 * AWS VPC support was begin by the core BOSH team; though work has stopped sadly.
 * Growing number of specs mostly using Fog.mock! mode; tests being run on travis
 
+### v0.7.1
+
+* Make "deploy --private-key" option work [thx @dpw]
+* Add hypervisor for OpenStack stemcells [thx @frodenas]
+* Don't fail if `settings.fog_credentials.openstack_region` doesn't exist
+* Fix README for changed location of bosh-release [thx @scottfrederick]
+* No need to show  --latest-stemcell in README tutorial
 
 ## v0.6
 
