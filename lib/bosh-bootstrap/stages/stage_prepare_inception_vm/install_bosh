@@ -33,7 +33,7 @@ if [[ "${INSTALL_BOSH_FROM_SOURCE}X" != "X" ]]; then
 
   cd /var/vcap/store/repos/bosh
   bundle --deployment
-  bundle exec rake all:install
+  bundle --binstubs=/usr/local/sbin
 
 else
   install_gem bosh_deployer
