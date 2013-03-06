@@ -1,3 +1,3 @@
 #Tutorials
 
-[bosh-bootstrap on OpenStack](create-a-bosh/creating-a-bosh-overview.md)
+[bosh-bootstrap on OpenStack](docs/devstack-openstack-tutorial.md)
