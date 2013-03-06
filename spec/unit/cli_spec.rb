@@ -7,8 +7,6 @@ describe Bosh::Bootstrap do
   include Bosh::Bootstrap::Helpers::SettingsSetter
 
   before do
-    ENV['MANIFEST'] = File.expand_path("../../../tmp/test-manifest.yml", __FILE__)
-    rm_rf(ENV['MANIFEST'])
     @cmd = Bosh::Bootstrap::Cli.new
     setting "git.name", "Dr Nic Williams"
     setting "git.email", "drnicwilliams@gmail.com"

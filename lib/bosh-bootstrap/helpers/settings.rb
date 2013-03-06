@@ -28,9 +28,28 @@ module Bosh::Bootstrap::Helpers::Settings
     @settings = nil # force to reload & recreate helper methods
   end
 
-  def settings_path
-    manifest_path = ENV["MANIFEST"] || "~/.bosh_bootstrap/manifest.yml"
-    File.expand_path(manifest_path)
+  # the base directory for holding the manifest settings file
+  # and private keys
+  #
+  # Defaults to ~/.bosh_bootstrap; and can be overridden with either:
+  # * $SETTINGS - to a folder (supported method)
+  # * $MANIFEST - to a folder (unsupported)
+  # * $MANIFEST - to a specific file; but uses its parent dir (unsupported, backwards compatibility)
+  def settings_dir
+    @settings_dir ||= begin
+      settings_dir = ENV["SETTINGS"] if ENV["SETTINGS"]
+      settings_dir ||= ENV["MANIFEST"] if ENV["MANIFEST"]
+      settings_dir = File.dirname(settings_dir) if settings_dir && File.file?(settings_dir)
+      settings_dir ||= "~/.bosh_bootstrap"
+      File.expand_path(settings_dir)
+    end
   end
 
+  def settings_path
+    File.join(settings_dir, "manifest.yml")
+  end
+
+  def settings_ssh_dir
+    File.join(settings_dir, "ssh")
+  end
 end

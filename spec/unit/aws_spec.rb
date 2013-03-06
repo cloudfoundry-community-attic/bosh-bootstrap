@@ -9,8 +9,6 @@ describe "AWS deployment" do
   before do
     Fog.mock!
     Fog::Mock.reset
-    ENV['MANIFEST'] = File.join(ENV['HOME'], "manifest.yml")
-    rm_rf(ENV['MANIFEST'])
     @cmd = Bosh::Bootstrap::Cli.new
     @fog_credentials = {
       :provider                 => 'AWS',
@@ -141,7 +139,7 @@ describe "AWS deployment" do
     settings["inception"]["key_pair"].should_not be_nil
     settings["inception"]["key_pair"]["name"].should_not be_nil
     settings["inception"]["key_pair"]["private_key"].should_not be_nil
-    settings["inception"]["local_private_key_path"].should == File.join(ENV['HOME'], ".ssh", "inception")
+    settings["inception"]["local_private_key_path"].should == File.join(ENV['HOME'], ".bosh_bootstrap", "ssh", "inception")
     File.should_not be_world_readable(settings["inception"]["local_private_key_path"])
 
     fog.vpcs.should have(0).item

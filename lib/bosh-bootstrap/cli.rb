@@ -842,8 +842,6 @@ module Bosh::Bootstrap
       # NOTE: if any stage fails, when the CLI is re-run
       # and "create new server" is selected again, the process should
       # complete
-      #
-      # Assumes that local CLI user has public/private keys at ~/.ssh/id_rsa.pub
       def boot_aws_inception_vm
         recreate_local_ssh_keys_for_inception_vm
 
@@ -917,8 +915,6 @@ module Bosh::Bootstrap
       # NOTE: if any stage fails, when the CLI is re-run
       # and "create new server" is selected again, the process should
       # complete
-      #
-      # Assumes that local CLI user has public/private keys at ~/.ssh/id_rsa.pub
       def boot_openstack_inception_vm
         recreate_local_ssh_keys_for_inception_vm
 
@@ -1104,7 +1100,7 @@ module Bosh::Bootstrap
       def inception_vm_private_key_path
         unless settings["inception"] && settings["inception"]["local_private_key_path"]
           settings["inception"] ||= {}
-          settings["inception"]["local_private_key_path"] = File.join(ENV['HOME'], ".ssh", "inception")
+          settings["inception"]["local_private_key_path"] = File.join(settings_ssh_dir, "inception")
           save_settings!
         end
         settings["inception"]["local_private_key_path"]

@@ -11,8 +11,6 @@ describe Bosh::Bootstrap do
   include Bosh::Bootstrap::Helpers::SettingsSetter
 
   before do
-    ENV['MANIFEST'] = File.join(ENV['HOME'], "manifest.yml")
-    rm_rf(ENV['MANIFEST'])
     @cmd = Bosh::Bootstrap::Cli.new
   end
 
@@ -26,7 +24,7 @@ describe Bosh::Bootstrap do
       setting "inception.host", "5.5.5.5"
       setting "inception.key_pair.private_key", "PRIVATE"
       setting "inception.key_pair.public_key", "PUBLIC"
-      @private_key_path = File.join(ENV['HOME'], ".ssh", "inception")
+      @private_key_path = File.join(ENV['HOME'], ".bosh_bootstrap", "ssh", "inception")
     end
 
     describe "normal" do
