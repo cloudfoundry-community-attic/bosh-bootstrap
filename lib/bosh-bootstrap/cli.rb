@@ -781,7 +781,8 @@ module Bosh::Bootstrap
       # * inception.security_group
       def create_security_group_for_inception_vm(security_group_name)
         ports = {
-          ssh_access: 22
+          ssh_access: 22,
+          ping: { protocol: "icmp", ports: (7..7) } 
         }
 
         provider.create_security_group(security_group_name, "inception-vm", ports)
