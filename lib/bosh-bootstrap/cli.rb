@@ -29,6 +29,7 @@ module Bosh::Bootstrap
     method_option :"latest-stemcell", :type => :boolean, :desc => "Use latest microbosh stemcell; possibly not tagged stable [default]"
     method_option :"edge-stemcell", :type => :boolean, :desc => "Create custom stemcell from BOSH git source"
     def deploy
+      migrate_old_settings
       load_deploy_options # from method_options above
 
       deploy_stage_1_choose_infrastructure_provider
@@ -1110,6 +1111,8 @@ module Bosh::Bootstrap
       # the manifest. The private key is stored locally; the public key is placed
       # on the inception VM.
       def recreate_local_ssh_keys_for_inception_vm
+        migrate_old_settings
+
         unless settings["inception"] && (key_pair = settings["inception"]["key_pair"])
           raise "please run create_inception_key_pair first"
         end
@@ -1117,6 +1120,31 @@ module Bosh::Bootstrap
         File.chmod(0700, File.dirname(inception_vm_private_key_path))
         File.open(inception_vm_private_key_path, "w") { |file| file << key_pair["private_key"] }
         File.chmod(0600, inception_vm_private_key_path)
+      end
+
+      def migrate_old_settings
+        migrate_old_ssh_keys
+      end
+
+      # Migrate this old data
+      #   local:
+      #     public_key_path: /Users/drnic/.ssh/id_rsa.pub
+      #     private_key_path: /Users/drnic/.ssh/id_rsa
+      # into new format:
+      #   inception:
+      #     local_private_key_path: ~/.bosh_bootstrap/ssh/inception (copy of settings.local.private_key_path)
+      #     key_pair:
+      #       name: <name of provider key_pair used when provisioning inception VM>
+      #       private_key: <contents of settings.local.private_key_path file>
+      #       public_key: <contents of settings.local.public_key_path file>
+      def migrate_old_ssh_keys
+        if settings["local"] && settings["local"]["private_key_path"]
+          inception_vm_private_key_path # to setup the path in settings
+          settings["inception"]["key_pair"] ||= {}
+          settings["inception"]["key_pair"]["name"] = "fog_default"
+          settings["inception"]["key_pair"]["public_key"] = File.read(settings["local"]["public_key_path"])
+          settings["inception"]["key_pair"]["public_key"] = File.read(settings["local"]["public_key_path"])
+        end
       end
 
       def aws?
