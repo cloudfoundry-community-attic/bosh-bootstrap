@@ -19,9 +19,9 @@ Hardware (Minimum)
 
 Software
 
-OS - Ubuntu 12.04 Server
-VM Image - Ubuntu 10.04 Server
-IaaS - OpenStack (DevStack in this case)
+1. OS - Ubuntu 12.04 Server
+2. VM Image - Ubuntu 10.04 Server
+3. IaaS - OpenStack (DevStack in this case)
 
 -----------
 Preparation
