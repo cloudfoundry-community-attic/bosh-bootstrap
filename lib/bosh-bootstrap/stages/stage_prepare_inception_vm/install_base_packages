@@ -13,6 +13,6 @@ apt-get install build-essential libsqlite3-dev curl rsync git-core \
   tmux mosh \
   libmysqlclient-dev libxml2-dev libxslt-dev libpq-dev libsqlite3-dev \
   runit \
-  genisoimage whois \
+  genisoimage mkpasswd \
   debootstrap kpartx qemu-kvm \
   vim -y
