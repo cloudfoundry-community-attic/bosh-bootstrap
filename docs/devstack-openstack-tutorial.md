@@ -170,9 +170,9 @@ c) In case, the Inception VM fails to connect to internet or bosh-bootstrap is u
 
 #####Finishing bootstrap
 
-  i If everything goes fine, you can see the list of VMs created by bosh-bootstrap. Also you can ssh into the inception VM by "./bosh-bootstrap ssh". Check BOSH status and so on.
+i) If everything goes fine, you can see the list of VMs created by bosh-bootstrap. Also you can ssh into the inception VM by "./bosh-bootstrap ssh". Check BOSH status and so on.
  
- ii You can see the list of commands by executing "./bosh-bootstrap help"
+ii) You can see the list of commands by executing "./bosh-bootstrap help"
 
-iii In case, you face any issue please raise a ticket. 
+iii) In case, you face any issue please raise a ticket. 
 
