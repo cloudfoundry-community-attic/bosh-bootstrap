@@ -92,9 +92,9 @@ We are done preparing the IaaS(OpenStack) part. Now lets move up the stack.
 
 ##Play with bosh-bootstrap
 
-#####Download from git (Or you can use "gem install bosh-bootstrap")
+#####Download Gem
 ```
-git clone https://github.com/StarkAndWayne/bosh-bootstrap.git
+gem install bosh-bootstrap
 ```
 #####bosh-bootstrap is designed to boot instance with 32GB inception VM and 16GB for BOSH server.
 For testing/development purpose, we will scale down the requirements(for devstack) to 3GB and 2GB respectively. Or change as per your requirements
@@ -138,13 +138,9 @@ to
 ```
 
 #####Start bootstrapping
-If you downloaded bosh-bootstrap gem, then execute "bosh-bootstrap deploy" directly, otherwise
+Deploy
 ```
-cd bosh-bootstrap
-   
-bundle install
-
-cd bin && ./bosh-bootstrap deploy
+bosh-bootstrap deploy
 ```
 [Answer few questions asked by bosh-bootstrap in the initial stages and then, sit back and relax (hopefully!)]
 
@@ -162,13 +158,13 @@ Stage 6: Setup bosh
 
 a) If the process fails in between due to some reason, you can restart the bootstrapping after correcting the error, bootstrapping will continue from the point where it failed instead of from the beginning.
 
-b) If for some reason you want to start the process from the beginning, delete ".bosh-boostrap/manifest.yml" file.
+b) If for some reason you want to start the process from the beginning, delete "~/.bosh-boostrap/manifest.yml" file.
 
 c) In case, the Inception VM fails to connect to internet or bosh-bootstrap is unable to mount volume to the instance, then the most probable reason is due to floating ip.Then
 ```  
 Disassociate floating IP from the OpenStack dashboard.
   
-Edit ".bosh-bootstrap/manifest.yml" file and change the public IP to fixed IP of the instance.
+Edit "~/.bosh-bootstrap/manifest.yml" file and change the public IP to fixed IP of the instance.
   
 Redeploy bosh-bootstrap
 ```
@@ -176,7 +172,7 @@ Redeploy bosh-bootstrap
 
 i) If everything goes fine, you can see the list of VMs created by bosh-bootstrap. Also you can ssh into the inception VM by "./bosh-bootstrap ssh". Check BOSH status and so on.
  
-ii) You can see the list of commands by executing "./bosh-bootstrap help"
+ii) You can see the list of commands by executing "bosh-bootstrap help"
 
-iii) In case, you face any issue please raise a ticket. 
+iii) In case, you face any issue please raise a [ticket](https://github.com/StarkAndWayne/bosh-bootstrap/issues). 
 
