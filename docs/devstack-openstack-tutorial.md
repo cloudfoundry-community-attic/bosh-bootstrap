@@ -1,4 +1,5 @@
 Deploy bosh-bootstrap on OpenStack (Using DevStack)
+--------------------------------------------------
 
 
 This tutorial is intended for developers/testers without prior experience with OpenStack. However, it is also useful for OpenStack users as it provides interesting insights into this highly popular project.
@@ -8,6 +9,7 @@ It is mainly designed to run bosh-bootstrap with minimum hardware requirements.
 However, this tutorial still holds good for production scale OpenStack setup as there is hardly anything you have to do on your own,whatever the underlying IaaS is :) ]
 
 Prerequisities
+--------------
 
 Hardware (Minimum)
 
@@ -22,13 +24,14 @@ Software
 3. IaaS - OpenStack (DevStack in this case)
 
 Preparation
+-----------
 
 
-1. Download devstack
+1 Download devstack
 
 git clone https://github.com/openstack-dev/devstack.git
 
-2. Modify end-points in devstack/files/keystone_data.sh
+2 Modify end-points in devstack/files/keystone_data.sh
 
 Change
 
