@@ -1,5 +1,3 @@
-sample
-
 Deploy bosh-bootstrap on OpenStack (Using DevStack)
 ===================================================
 
@@ -147,7 +145,7 @@ i) cd bosh-bootstrap
 ii) cd bin
    ./bosh-bootstrap deploy
 
-[Answer few questions asked by bosh-bootstrap in the initial stages and then, sit back and relax (hopefully!)
+[Answer few questions asked by bosh-bootstrap in the initial stages and then, sit back and relax (hopefully!)]
 
 <-------------------------------------------->
 Stage 1: Choose infrastructure
