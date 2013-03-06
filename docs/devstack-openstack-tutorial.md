@@ -142,7 +142,7 @@ Deploy
 ```
 bosh-bootstrap deploy
 ```
-[Answer few questions asked by bosh-bootstrap in the initial stages and then, sit back and relax (hopefully!)]
+Answer few questions asked by bosh-bootstrap in the initial stages and then, sit back and relax (hopefully!)
 
 ```
 Stage 1: Choose infrastructure
@@ -156,9 +156,9 @@ Stage 6: Setup bosh
 
 ######Notes:
 
-a) If the process fails in between due to some reason, you can restart the bootstrapping after correcting the error, bootstrapping will continue from the point where it failed instead of from the beginning.
+a) If the process fails in between due to some reason, you can restart bootstrapping after correcting the error, bootstrapping will continue from the point where it failed instead of from the beginning.
 
-b) If for some reason you want to start the process from the beginning, delete "~/.bosh-boostrap/manifest.yml" file.
+b) If you want to start the process from the beginning, delete "~/.bosh-boostrap/manifest.yml" file.
 
 c) In case, the Inception VM fails to connect to internet or bosh-bootstrap is unable to mount volume to the instance, then the most probable reason is due to floating ip.Then
 ```  
