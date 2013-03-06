@@ -234,6 +234,10 @@ module Bosh::Bootstrap
         save_settings!
 
         if settings["inception"]["create_new"] && !settings["inception"]["host"]
+          unless settings[:inception][:security_group]
+            create_security_group_for_inception_vm("#{settings.bosh_name}-inception-vm")
+          end
+
           aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
         end
         # If successfully validate inception VM, then save those settings.
@@ -771,6 +775,22 @@ module Bosh::Bootstrap
         save_settings!
       end
 
+      # Creates a security group for the inception VM allowing SSH access
+      #
+      # Adds settings:
+      # * inception.security_group
+      def create_security_group_for_inception_vm(security_group_name)
+        ports = {
+          ssh_access: 22
+        }
+
+        provider.create_security_group(security_group_name, "inception-vm", ports)
+
+        settings["inception"] ||= {}
+        settings["inception"]["security_group"] = security_group_name
+        save_settings!
+      end
+
       # Creates a key pair, and stores the private key in settings manifest.
       # Also sets up the bosh_cloud_properties for the remote server
       # to have the .pem key installed.
@@ -830,6 +850,7 @@ module Bosh::Bootstrap
           ip_address = settings["inception"]["ip_address"]
           say "Provisioning #{size} for inception VM..."
           inception_vm_attributes = {
+            :groups => [settings["inception"]["security_group"]],
             :public_key_path => public_key_path,
             :private_key_path => private_key_path,
             :flavor_id => size,
