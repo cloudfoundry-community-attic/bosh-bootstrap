@@ -23,7 +23,6 @@ Software
 2. VM Image - Ubuntu 10.04 Server
 3. IaaS - OpenStack (DevStack in this case)
 
------------
 Preparation
 -----------
 
