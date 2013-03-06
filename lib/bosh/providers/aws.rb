@@ -187,14 +187,10 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     server = fog_compute.servers.new(new_attributes)
 
     unless new_attributes[:key_name]
-      # first or create fog_#{credential} keypair
-      name = Fog.respond_to?(:credential) && Fog.credential || :default
-      unless server.key_pair = fog_compute.key_pairs.get("fog_#{name}")
-        server.key_pair = fog_compute.key_pairs.create(
-          :name => "fog_#{name}",
-          :public_key => server.public_key
-        )
-      end
+      raise "please provide :key_name attribute"
+    end
+    unless private_key_path = new_attributes.delete(:private_key_path)
+      raise "please provide :private_key_path attribute"
     end
 
     if vpc
@@ -215,7 +211,7 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
 
     server.save
     server.wait_for { ready? }
-    server.setup(:key_data => [server.private_key])
+    server.setup(:keys => [private_key_path])
     server
   end
 
