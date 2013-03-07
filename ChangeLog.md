@@ -2,7 +2,7 @@
 
 `bosh-bootstrap` is a command line tool that you can run on your laptop and automatically get a microbosh (and an inception VM) deployed on either AWS or OpenStack.
 
-## v0.8
+## v0.8 (& v0.8.1)
 
 * SSH keys used to access inception VM are now generated and stored within the `~/.bosh_bootstrap/ssh` folder. This fixes many issues that many people were having (their keys had passphrases, their fog_default keypair was old). It also allows a manifest file to be shared between people as it contains the private key contents, and the private key file will be recreated if it is missing.
 * existing inception VMs' manifest.yml will be upgraded automatically and a backup file created (just in case)
