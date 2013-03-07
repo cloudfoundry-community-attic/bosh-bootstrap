@@ -59,6 +59,7 @@ describe Bosh::Bootstrap do
 
     it "stage 4 - prepare inception VM" do
       testing_stage(4)
+      @cmd.should_receive(:recreate_local_ssh_keys_for_inception_vm)
       setting "inception.username", "ubuntu"
       setting "bosh.password", "UNSALTED"
       @cmd.should_receive(:run_server).and_return(true)
@@ -67,6 +68,7 @@ describe Bosh::Bootstrap do
 
     it "stage 5 - download stemcell and deploy microbosh" do
       testing_stage(5)
+      @cmd.should_receive(:recreate_local_ssh_keys_for_inception_vm)
       setting "bosh_provider", "aws"
       setting "micro_bosh_stemcell_name", "micro-bosh-stemcell-aws-0.8.1.tgz"
       setting "bosh_username", "drnic"
