@@ -5,6 +5,8 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+set -e # exit immediately if a simple command exits with a non-zero status
+
 apt-get install python-software-properties
 add-apt-repository ppa:keithw/mosh
 
