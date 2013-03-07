@@ -6,7 +6,7 @@
 
 * SSH keys used to access inception VM are now generated and stored within the `~/.bosh_bootstrap/ssh` folder. This fixes many issues that many people were having (their keys had passphrases, their fog_default keypair was old). It also allows a manifest file to be shared between people as it contains the private key contents, and the private key file will be recreated if it is missing.
 * existing inception VMs' manifest.yml will be upgraded automatically and a backup file created (just in case)
-* tightening of net-ssh & net-scp gems to ensure the bosh-bootstrap gem can be installed
+* tightening of net-ssh & net-scp gems to ensure the bosh-bootstrap gem can be installed [thx @mmb]
 
 ## v0.7
 
