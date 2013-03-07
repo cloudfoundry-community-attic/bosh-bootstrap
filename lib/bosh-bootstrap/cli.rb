@@ -29,6 +29,7 @@ module Bosh::Bootstrap
     method_option :"latest-stemcell", :type => :boolean, :desc => "Use latest microbosh stemcell; possibly not tagged stable [default]"
     method_option :"edge-stemcell", :type => :boolean, :desc => "Create custom stemcell from BOSH git source"
     def deploy
+      migrate_old_settings
       load_deploy_options # from method_options above
 
       deploy_stage_1_choose_infrastructure_provider
@@ -42,6 +43,7 @@ module Bosh::Bootstrap
     desc "upgrade-inception", "Upgrade inception VM with latest packages, gems, security group ports"
     method_option :"edge-deployer", :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
     def upgrade_inception
+      migrate_old_settings
       load_deploy_options # from method_options above
 
       setup_server
@@ -68,6 +70,7 @@ module Bosh::Bootstrap
       opened.
     DESC
     def ssh(cmd=nil)
+      migrate_old_settings
       run_ssh_command_or_open_tunnel(cmd)
     end
 
@@ -77,6 +80,7 @@ module Bosh::Bootstrap
       giving you persistance across disconnects.
     DESC
     def tmux
+      migrate_old_settings
       run_ssh_command_or_open_tunnel(["-t", "tmux attach || tmux new-session"])
     end
 
@@ -86,6 +90,7 @@ module Bosh::Bootstrap
       Requires outgoing UDP port 60001 to the Inception VM
     DESC
     def mosh
+      migrate_old_settings
       open_mosh_session
     end
 
@@ -236,6 +241,7 @@ module Bosh::Bootstrap
           unless settings["inception"]["key_pair"]
             create_inception_key_pair
           end
+          recreate_local_ssh_keys_for_inception_vm
           aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
         end
         # If successfully validate inception VM, then save those settings.
@@ -256,6 +262,8 @@ module Bosh::Bootstrap
       def deploy_stage_4_prepare_inception_vm
         unless settings["inception"] && settings["inception"]["prepared"] && !settings["upgrade_deps"]
           header "Stage 4: Preparing the Inception VM"
+          recreate_local_ssh_keys_for_inception_vm
+
           unless run_server(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
             error "Failed to complete Stage 4: Preparing the Inception VM"
           end
@@ -271,6 +279,8 @@ module Bosh::Bootstrap
 
       def deploy_stage_5_deploy_micro_bosh
         header "Stage 5: Deploying micro BOSH"
+        recreate_local_ssh_keys_for_inception_vm
+
         unless run_server(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
           error "Failed to complete Stage 5: Deploying micro BOSH"
         end
@@ -843,8 +853,6 @@ module Bosh::Bootstrap
       # and "create new server" is selected again, the process should
       # complete
       def boot_aws_inception_vm
-        recreate_local_ssh_keys_for_inception_vm
-
         say "" # glowing whitespace
 
         unless settings["inception"]["ip_address"]
@@ -916,8 +924,6 @@ module Bosh::Bootstrap
       # and "create new server" is selected again, the process should
       # complete
       def boot_openstack_inception_vm
-        recreate_local_ssh_keys_for_inception_vm
-
         say "" # glowing whitespace
 
         unless settings["inception"] && settings["inception"]["server_id"]
@@ -1113,10 +1119,14 @@ module Bosh::Bootstrap
         unless settings["inception"] && (key_pair = settings["inception"]["key_pair"])
           raise "please run create_inception_key_pair first"
         end
-        mkdir_p(File.dirname(inception_vm_private_key_path))
-        File.chmod(0700, File.dirname(inception_vm_private_key_path))
-        File.open(inception_vm_private_key_path, "w") { |file| file << key_pair["private_key"] }
-        File.chmod(0600, inception_vm_private_key_path)
+        private_key_contents = key_pair["private_key"]
+        unless File.exist?(inception_vm_private_key_path) && File.read(inception_vm_private_key_path) == private_key_contents
+          say "Creating missing inception VM private key..."
+          mkdir_p(File.dirname(inception_vm_private_key_path))
+          File.chmod(0700, File.dirname(inception_vm_private_key_path))
+          File.open(inception_vm_private_key_path, "w") { |file| file << private_key_contents }
+          File.chmod(0600, inception_vm_private_key_path)
+        end
       end
 
       def aws?
