@@ -58,4 +58,41 @@ module Bosh::Bootstrap::Helpers::Settings
     FileUtils.cp_r(settings_path, backup_path)
   end
 
+  def migrate_old_settings
+    if migrate_old_ssh_keys?
+      say "Upgrading settings manifest file:"
+      backup_current_settings_file
+    end
+    migrate_old_ssh_keys
+  end
+
+  # Do we need to migrate old ssh keys to new settings format?
+  def migrate_old_ssh_keys?
+    settings["local"] && settings["local"]["private_key_path"]
+  end
+
+  # Migrate this old data
+  #   local:
+  #     public_key_path: /Users/drnic/.ssh/id_rsa.pub
+  #     private_key_path: /Users/drnic/.ssh/id_rsa
+  # into new format:
+  #   inception:
+  #     local_private_key_path: ~/.bosh_bootstrap/ssh/inception (copy of settings.local.private_key_path)
+  #     key_pair:
+  #       name: <name of provider key_pair used when provisioning inception VM>
+  #       private_key: <contents of settings.local.private_key_path file>
+  #       public_key: <contents of settings.local.public_key_path file>
+  def migrate_old_ssh_keys
+    if migrate_old_ssh_keys?
+      say "-> migrating to cache private key for inception VM..."
+      inception_vm_private_key_path # to setup the path in settings
+      settings["inception"]["key_pair"] ||= {}
+      settings["inception"]["key_pair"]["name"] = "fog_default"
+      settings["inception"]["key_pair"]["private_key"] = File.read(settings["local"]["private_key_path"]).strip
+      settings["inception"]["key_pair"]["public_key"] = File.read(settings["local"]["public_key_path"]).strip
+      settings.delete("local")
+      save_settings!
+    end
+  end
+
 end
