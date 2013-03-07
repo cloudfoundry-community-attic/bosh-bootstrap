@@ -52,4 +52,10 @@ module Bosh::Bootstrap::Helpers::Settings
   def settings_ssh_dir
     File.join(settings_dir, "ssh")
   end
+
+  def backup_current_settings_file
+    backup_path = "#{settings_path}.bak"
+    FileUtils.cp_r(settings_path, backup_path)
+  end
+
 end
