@@ -8,6 +8,10 @@
 * existing inception VMs' manifest.yml will be upgraded automatically and a backup file created (just in case)
 * tightening of net-ssh & net-scp gems to ensure the bosh-bootstrap gem can be installed [thx @mmb]
 
+### v0.8.2
+
+* preinstall net-ssh/net-scp/fog on inception VM before installing `bosh_deployer` to fix in ability to install `bosh_deployer` 1.4.1 due to latest fog 1.10.0 release
+
 ## v0.7
 
 Notable:
