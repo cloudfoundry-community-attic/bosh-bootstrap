@@ -1139,11 +1139,14 @@ module Bosh::Bootstrap
       #       public_key: <contents of settings.local.public_key_path file>
       def migrate_old_ssh_keys
         if settings["local"] && settings["local"]["private_key_path"]
+          say "Upgrading settings manifest file..."
           inception_vm_private_key_path # to setup the path in settings
           settings["inception"]["key_pair"] ||= {}
           settings["inception"]["key_pair"]["name"] = "fog_default"
-          settings["inception"]["key_pair"]["public_key"] = File.read(settings["local"]["public_key_path"])
-          settings["inception"]["key_pair"]["public_key"] = File.read(settings["local"]["public_key_path"])
+          settings["inception"]["key_pair"]["private_key"] = File.read(settings["local"]["private_key_path"]).strip
+          settings["inception"]["key_pair"]["public_key"] = File.read(settings["local"]["public_key_path"]).strip
+          settings["_local"] = settings.delete("local")
+          save_settings!
         end
       end
 
