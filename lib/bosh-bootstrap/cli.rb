@@ -621,9 +621,9 @@ module Bosh::Bootstrap
           menu.choice("OpenStack") do
             creds[:provider] = "OpenStack"
             creds[:openstack_username] = hl.ask("Username: ")
-            creds[:openstack_api_key] = hl.ask("API key: ")
+            creds[:openstack_api_key] = hl.ask("Password: ")
             creds[:openstack_tenant] = hl.ask("Tenant: ")
-            creds[:openstack_auth_url] = hl.ask("Authorization URL: ")
+            creds[:openstack_auth_url] = hl.ask("Authorization Token URL: ")
           end
         end
         @fog_credentials = creds
