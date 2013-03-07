@@ -241,6 +241,7 @@ module Bosh::Bootstrap
           unless settings["inception"]["key_pair"]
             create_inception_key_pair
           end
+          recreate_local_ssh_keys_for_inception_vm
           aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
         end
         # If successfully validate inception VM, then save those settings.
@@ -261,6 +262,8 @@ module Bosh::Bootstrap
       def deploy_stage_4_prepare_inception_vm
         unless settings["inception"] && settings["inception"]["prepared"] && !settings["upgrade_deps"]
           header "Stage 4: Preparing the Inception VM"
+          recreate_local_ssh_keys_for_inception_vm
+
           unless run_server(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
             error "Failed to complete Stage 4: Preparing the Inception VM"
           end
@@ -276,6 +279,8 @@ module Bosh::Bootstrap
 
       def deploy_stage_5_deploy_micro_bosh
         header "Stage 5: Deploying micro BOSH"
+        recreate_local_ssh_keys_for_inception_vm
+
         unless run_server(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
           error "Failed to complete Stage 5: Deploying micro BOSH"
         end
@@ -848,8 +853,6 @@ module Bosh::Bootstrap
       # and "create new server" is selected again, the process should
       # complete
       def boot_aws_inception_vm
-        recreate_local_ssh_keys_for_inception_vm
-
         say "" # glowing whitespace
 
         unless settings["inception"]["ip_address"]
@@ -921,8 +924,6 @@ module Bosh::Bootstrap
       # and "create new server" is selected again, the process should
       # complete
       def boot_openstack_inception_vm
-        recreate_local_ssh_keys_for_inception_vm
-
         say "" # glowing whitespace
 
         unless settings["inception"] && settings["inception"]["server_id"]
@@ -1115,15 +1116,17 @@ module Bosh::Bootstrap
       # the manifest. The private key is stored locally; the public key is placed
       # on the inception VM.
       def recreate_local_ssh_keys_for_inception_vm
-        migrate_old_settings
-
         unless settings["inception"] && (key_pair = settings["inception"]["key_pair"])
           raise "please run create_inception_key_pair first"
         end
-        mkdir_p(File.dirname(inception_vm_private_key_path))
-        File.chmod(0700, File.dirname(inception_vm_private_key_path))
-        File.open(inception_vm_private_key_path, "w") { |file| file << key_pair["private_key"] }
-        File.chmod(0600, inception_vm_private_key_path)
+        private_key_contents = key_pair["private_key"]
+        unless File.exist?(inception_vm_private_key_path) && File.read(inception_vm_private_key_path) == private_key_contents
+          say "Creating missing inception VM private key..."
+          mkdir_p(File.dirname(inception_vm_private_key_path))
+          File.chmod(0700, File.dirname(inception_vm_private_key_path))
+          File.open(inception_vm_private_key_path, "w") { |file| file << private_key_contents }
+          File.chmod(0600, inception_vm_private_key_path)
+        end
       end
 
       def migrate_old_settings
