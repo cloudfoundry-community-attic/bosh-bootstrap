@@ -43,6 +43,7 @@ module Bosh::Bootstrap
     desc "upgrade-inception", "Upgrade inception VM with latest packages, gems, security group ports"
     method_option :"edge-deployer", :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
     def upgrade_inception
+      migrate_old_settings
       load_deploy_options # from method_options above
 
       setup_server
@@ -69,6 +70,7 @@ module Bosh::Bootstrap
       opened.
     DESC
     def ssh(cmd=nil)
+      migrate_old_settings
       run_ssh_command_or_open_tunnel(cmd)
     end
 
@@ -78,6 +80,7 @@ module Bosh::Bootstrap
       giving you persistance across disconnects.
     DESC
     def tmux
+      migrate_old_settings
       run_ssh_command_or_open_tunnel(["-t", "tmux attach || tmux new-session"])
     end
 
@@ -87,6 +90,7 @@ module Bosh::Bootstrap
       Requires outgoing UDP port 60001 to the Inception VM
     DESC
     def mosh
+      migrate_old_settings
       open_mosh_session
     end
 
