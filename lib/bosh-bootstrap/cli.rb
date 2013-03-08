@@ -98,13 +98,6 @@ module Bosh::Bootstrap
       DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
 
       def deploy_stage_1_choose_infrastructure_provider
-        settings["git"] ||= {}
-        settings["git"]["name"] ||= `git config user.name`.strip
-        settings["git"]["email"] ||= `git config user.email`.strip
-        if settings["git"]["name"].empty? || settings["git"]["email"].empty?
-          error "Checking for git identity....Cannot find your git identity. Please set git user.name and user.email before deploying"
-        end
-        
         header "Stage 1: Choose infrastructure"
         unless settings[:fog_credentials]
           choose_fog_provider
@@ -465,12 +458,7 @@ module Bosh::Bootstrap
       def load_deploy_options
         settings["fog_path"] = File.expand_path(options[:fog] || "~/.fog")
 
-        settings["git"] ||= {}
-        settings["git"]["name"] ||= `git config user.name`.strip
-        settings["git"]["email"] ||= `git config user.email`.strip
-        if settings["git"]["name"].empty? || settings["git"]["email"].empty?
-          error "Cannot find your git identity. Please set git user.name and user.email before proceeding"
-        end
+        prompt_git_user_information
 
         settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
 
@@ -499,6 +487,18 @@ module Bosh::Bootstrap
           settings.delete("upgrade_deps")
         end
         save_settings!
+      end
+
+      def prompt_git_user_information
+        settings["git"] ||= {}
+        settings["git"]["name"] ||= `git config user.name`.strip
+        while settings["git"]["name"].empty?
+          settings["git"]["name"] = hl.ask("What is your name? (to setup git on inception VM) ")
+        end
+        settings["git"]["email"] ||= `git config user.email`.strip
+        while settings["git"]["email"].empty?
+          settings["git"]["email"] = hl.ask("What is your email? (to setup git on inception VM) ")
+        end
       end
 
       # Displays a prompt for known IaaS that are configured
