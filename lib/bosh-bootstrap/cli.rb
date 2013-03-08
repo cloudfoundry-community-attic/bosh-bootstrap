@@ -1149,15 +1149,21 @@ module Bosh::Bootstrap
       end
 
       def prompt_for_bosh_credentials
-        prompt = hl
-        cpassword = "xxx"
         say "Please enter a user/password for the BOSH that will be created."
+        prompt = hl
+        password_confirmation = nil
         settings[:bosh_username] = prompt.ask("BOSH username: ") { |q| q.default = `whoami`.strip }
-        while settings[:bosh_password] != cpassword
+        while password_confirmation.nil? || settings[:bosh_password] == "" || settings[:bosh_password] != password_confirmation
           settings[:bosh_password] = prompt.ask("BOSH password: ") { |q| q.echo = "x" }
-          cpassword = prompt.ask("Confirm BOSH password: ") { |q| q.echo = "x" }
-          break if settings[:bosh_password] == cpassword
-          say "Password do not match. Try Again"
+          if settings[:bosh_password] == ""
+            say "Please enter a password"
+            next
+          end
+          password_confirmation = prompt.ask("Confirm BOSH password: ") { |q| q.echo = "x" }
+          unless settings[:bosh_password] == password_confirmation
+            say "Password do not match. Try Again"
+            password_confirmation = nil
+          end
         end
 
         save_settings!
