@@ -19,6 +19,7 @@ module Bosh::Bootstrap::Stages
           "GIT_USER_EMAIL" => settings["git"]["email"])
         server.install "ruby 1.9.3", script("install_ruby", "UPGRADE" => settings[:upgrade_deps])
         server.install "useful ruby gems", script("install_useful_gems", "UPGRADE" => settings[:upgrade_deps])
+        server.install "hub", script("install_hub")
         server.install "bosh", script("install_bosh",
           "UPGRADE" => settings[:upgrade_deps],
           "INSTALL_BOSH_FROM_SOURCE" => settings["bosh_git_source"] || "")
