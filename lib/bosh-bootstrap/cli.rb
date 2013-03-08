@@ -94,6 +94,13 @@ module Bosh::Bootstrap
       DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
 
       def deploy_stage_1_choose_infrastructure_provider
+        settings["git"] ||= {}
+        settings["git"]["name"] ||= `git config user.name`.strip
+        settings["git"]["email"] ||= `git config user.email`.strip
+        if settings["git"]["name"].empty? || settings["git"]["email"].empty?
+          error "Checking for git identity....Cannot find your git identity. Please set git user.name and user.email before deploying"
+        end
+
         header "Stage 1: Choose infrastructure"
         unless settings[:fog_credentials]
           choose_fog_provider
