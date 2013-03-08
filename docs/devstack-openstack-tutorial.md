@@ -101,17 +101,8 @@ For testing/development purpose, we will scale down the requirements(for devstac
 ```
 vi bosh-bootstrap/lib/bosh-bootstrap/cli.rb
 ```
+
 Change
-```
-no_tasks do
-      DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
-```
-to
-```
-no_tasks do
-      DEFAULT_INCEPTION_VOLUME_SIZE = 3 # Gb
-```
-Also, change
 ```
  unless settings[:bosh]
           say "Defaulting to 16Gb persistent disk for BOSH"
@@ -135,6 +126,11 @@ to
           settings[:bosh][:persistent_disk] = 2048
           save_settings!
         end
+```
+Run
+
+```
+INCEPTION_VOLUME_SIZE=3 bosh-bootstrap deploy
 ```
 
 #####Start bootstrapping
