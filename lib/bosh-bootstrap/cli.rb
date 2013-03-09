@@ -238,7 +238,7 @@ module Bosh::Bootstrap
         save_settings!
 
         if settings["inception"]["create_new"] && !settings["inception"]["host"]
-          unless settings[:inception][:security_group]
+          unless settings["inception"]["security_group"]
             create_security_group_for_inception_vm("#{settings.bosh_name}-inception-vm")
           end 
 	  unless settings["inception"]["key_pair"]
@@ -383,13 +383,13 @@ module Bosh::Bootstrap
       end
 
       def ensure_inception_vm
-        unless settings[:inception]
+        unless settings["inception"]
           say "No inception VM being used", :yellow
           exit 0
         end
       end
       def ensure_inception_vm_has_launched
-        unless settings.inception[:host]
+        unless settings.inception["host"]
           exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
         end
       end
