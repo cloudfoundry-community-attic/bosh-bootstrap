@@ -61,6 +61,20 @@ describe Bosh::Providers do
           }
         ]
       end
+      it "should open a range of ICMP ports" do
+        ports = { ping: { protocol: "icmp", ports: (3..4) } }
+        @aws_provider.create_security_group("sg-range-icmp-name", "sg-range-icmp-name", ports)
+        created_sg = @fog_compute.security_groups.get("sg-range-icmp-name")
+        created_sg.ip_permissions.should == [
+          { 
+            "ipProtocol"=>"icmp",
+            "fromPort"=>3, 
+            "toPort"=>4, 
+            "groups"=>[], 
+            "ipRanges"=>[ { "cidrIp"=>"0.0.0.0/0" } ] 
+          }
+        ]
+      end
       it "should open not open ports if they are already open" do
         @aws_provider.create_security_group("sg2", "", { ssh: { protocol: "udp", ports: (60000..600050) } })
         @aws_provider.create_security_group("sg2", "", { ssh: { protocol: "udp", ports: (60010..600040) } })
