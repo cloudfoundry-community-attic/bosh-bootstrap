@@ -7,8 +7,6 @@ describe Bosh::Bootstrap do
   include Bosh::Bootstrap::Helpers::SettingsSetter
 
   before do
-    ENV['MANIFEST'] = File.expand_path("../../../tmp/test-manifest.yml", __FILE__)
-    rm_rf(ENV['MANIFEST'])
     @cmd = Bosh::Bootstrap::Cli.new
     setting "git.name", "Dr Nic Williams"
     setting "git.email", "drnicwilliams@gmail.com"
@@ -48,16 +46,20 @@ describe Bosh::Bootstrap do
       @cmd.deploy
     end
 
-    it "stage 3 - create inception VM"
-    #  do
-    #   testing_stage(3)
-    #   setting "fog_credentials.provider", "AWS"
-    #   @cmd.should_receive(:run_server).and_return(true)
-    #   @cmd.deploy
-    # end
+    it "stage 3 - create inception VM" do
+      testing_stage(3)
+      setting "inception.username", "ubuntu"
+      setting "inception.key_pair.private_key", "INCEPTION_PRIVATE_KEY"
+      setting "inception.key_pair.public_key", "INCEPTION_PUBLIC_KEY"
+      setting "inception.key_pair.name", "inception"
+      setting "fog_credentials.provider", "AWS"
+      @cmd.should_receive(:run_server).and_return(true)
+      @cmd.deploy
+    end
 
     it "stage 4 - prepare inception VM" do
       testing_stage(4)
+      @cmd.should_receive(:recreate_local_ssh_keys_for_inception_vm)
       setting "inception.username", "ubuntu"
       setting "bosh.password", "UNSALTED"
       @cmd.should_receive(:run_server).and_return(true)
@@ -66,6 +68,7 @@ describe Bosh::Bootstrap do
 
     it "stage 5 - download stemcell and deploy microbosh" do
       testing_stage(5)
+      @cmd.should_receive(:recreate_local_ssh_keys_for_inception_vm)
       setting "bosh_provider", "aws"
       setting "micro_bosh_stemcell_name", "micro-bosh-stemcell-aws-0.8.1.tgz"
       setting "bosh_username", "drnic"

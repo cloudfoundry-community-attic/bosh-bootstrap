@@ -12,4 +12,10 @@ class Bosh::Providers::BaseProvider
   def create_key_pair(key_pair_name)
     fog_compute.key_pairs.create(:name => key_pair_name)
   end
+
+  def delete_key_pair_if_exists(key_pair_name)
+    if fog_key_pair = fog_compute.key_pairs.get(key_pair_name)
+      fog_key_pair.destroy
+    end
+  end
 end

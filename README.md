@@ -22,9 +22,7 @@ It is now very simple to bootstrap a micro BOSH from a single, local CLI. The bo
 
 To be cute about it, the Stark & Wayne Bosh Bootstrapper aims to provide lifecycle management for the BOSH lifecycle manager. Zing! See the "Deep dive into deploy command" section below for greater understanding why the Stark & Wayne Bosh Bootstrapper is very useful.
 
-[![Build Status](https://travis-ci.org/StarkAndWayne/bosh-bootstrap.png?branch=master)](https://travis-ci.org/StarkAndWayne/bosh-bootstrap)
-
-[![Code Climate](https://codeclimate.com/github/StarkAndWayne/bosh-bootstrap.png)](https://codeclimate.com/github/StarkAndWayne/bosh-bootstrap)
+[![Gem Version](https://badge.fury.io/rb/bosh-bootstrap.png)](http://badge.fury.io/rb/bosh-bootstrap) [![Build Status](https://travis-ci.org/StarkAndWayne/bosh-bootstrap.png?branch=master)](https://travis-ci.org/StarkAndWayne/bosh-bootstrap) [![Code Climate](https://codeclimate.com/github/StarkAndWayne/bosh-bootstrap.png)](https://codeclimate.com/github/StarkAndWayne/bosh-bootstrap)
 
 ## Installation
 
@@ -33,7 +31,6 @@ This bootstrapper tool is distributed as a RubyGem for Ruby 1.9+.
 ```
 $ ruby -v
 ruby 1.9.3p385 ...
-$ gem install net-ssh -v 2.2.2
 $ gem install bosh-bootstrap
 ```
 

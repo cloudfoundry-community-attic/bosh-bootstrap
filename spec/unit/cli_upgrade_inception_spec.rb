@@ -13,8 +13,6 @@ describe Bosh::Bootstrap do
   end
 
   before do
-    ENV['MANIFEST'] = File.expand_path("../../../tmp/test-manifest.yml", __FILE__)
-    rm_rf(ENV['MANIFEST'])
     @cmd = Bosh::Bootstrap::Cli.new
   end
 

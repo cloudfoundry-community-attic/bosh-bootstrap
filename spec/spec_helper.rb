@@ -29,15 +29,9 @@ end
 
 def setup_home_dir
   home_dir = File.expand_path("../../tmp/home", __FILE__)
+  FileUtils.rm_rf(home_dir)
   FileUtils.mkdir_p(home_dir)
   ENV['HOME'] = home_dir
-
-  private_key = File.join(home_dir, ".ssh", "id_rsa")
-  unless File.exists?(private_key)
-    puts "Creating private keypair for inception VM specs..."
-    mkdir_p(File.dirname(private_key))
-    sh "ssh-keygen -f #{home_dir}/.ssh/id_rsa -N ''"
-  end
 end
 
 RSpec.configure do |c|
