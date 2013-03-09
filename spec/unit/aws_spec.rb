@@ -104,6 +104,7 @@ describe "AWS deployment" do
 
     inception_server = fog.servers.first
     inception_server.dns_name.should == settings["inception"]["host"]
+    inception_server.groups.should == [settings["inception"]["security_group"]]
 
     public_ip = settings["bosh"]["ip_address"]
     public_ip.should == "10.0.0.6"
@@ -148,6 +149,8 @@ describe "AWS deployment" do
 
     inception_server = fog.servers.first
     inception_server.dns_name.should == settings["inception"]["host"]
+    inception_server.groups.should == [settings["inception"]["security_group"]]
+    
     public_ip = settings["bosh"]["ip_address"]
     manifest_path = spec_asset("micro_bosh_yml/micro_bosh.aws_ec2.yml")
     YAML.load(@cmd.micro_bosh_yml).should == expected_manifest_content(manifest_path, public_ip)

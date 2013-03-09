@@ -238,13 +238,12 @@ module Bosh::Bootstrap
         save_settings!
 
         if settings["inception"]["create_new"] && !settings["inception"]["host"]
-          unless settings["inception"]["security_group"]
-            create_security_group_for_inception_vm("#{settings.bosh_name}-inception-vm")
-          end 
-	  unless settings["inception"]["key_pair"]
+          unless settings["inception"]["key_pair"]
             create_inception_key_pair
           end
           recreate_local_ssh_keys_for_inception_vm
+          create_security_group_for_inception_vm
+          
           aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
         end
         # If successfully validate inception VM, then save those settings.
@@ -784,11 +783,15 @@ module Bosh::Bootstrap
       #
       # Adds settings:
       # * inception.security_group
-      def create_security_group_for_inception_vm(security_group_name)
+      def create_security_group_for_inception_vm
+        
+        return if settings["inception"]["security_group"] 
+
         ports = {
           ssh_access: 22,
           ping: { protocol: "icmp", ports: (-1..-1) } 
         }
+        security_group_name = "#{settings.bosh_name}-inception-vm"
 
         provider.create_security_group(security_group_name, "inception-vm", ports)
 
