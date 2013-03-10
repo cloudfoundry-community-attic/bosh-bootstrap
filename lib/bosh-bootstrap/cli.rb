@@ -242,6 +242,8 @@ module Bosh::Bootstrap
             create_inception_key_pair
           end
           recreate_local_ssh_keys_for_inception_vm
+          create_security_group_for_inception_vm
+          
           aws? ? boot_aws_inception_vm : boot_openstack_inception_vm
         end
         # If successfully validate inception VM, then save those settings.
@@ -380,13 +382,13 @@ module Bosh::Bootstrap
       end
 
       def ensure_inception_vm
-        unless settings[:inception]
+        unless settings["inception"]
           say "No inception VM being used", :yellow
           exit 0
         end
       end
       def ensure_inception_vm_has_launched
-        unless settings.inception[:host]
+        unless settings.inception["host"]
           exit "Inception VM has not finished launching; run to complete: #{self.class.banner_base} deploy"
         end
       end
@@ -777,6 +779,27 @@ module Bosh::Bootstrap
         save_settings!
       end
 
+      # Creates a security group for the inception VM allowing SSH access & ICMP traffic
+      #
+      # Adds settings:
+      # * inception.security_group
+      def create_security_group_for_inception_vm
+        
+        return if settings["inception"]["security_group"] 
+
+        ports = {
+          ssh_access: 22,
+          ping: { protocol: "icmp", ports: (-1..-1) } 
+        }
+        security_group_name = "#{settings.bosh_name}-inception-vm"
+
+        provider.create_security_group(security_group_name, "inception-vm", ports)
+
+        settings["inception"] ||= {}
+        settings["inception"]["security_group"] = security_group_name
+        save_settings!
+      end
+
       # Creates a key pair, and stores the private key in settings manifest.
       # Also sets up the bosh_cloud_properties for the remote server
       # to have the .pem key installed.
@@ -875,6 +898,7 @@ module Bosh::Bootstrap
           key_name = settings["inception"]["key_pair"]["name"]
           say "Provisioning #{size} for inception VM..."
           inception_vm_attributes = {
+            :groups => [settings["inception"]["security_group"]],
             :key_name => key_name,
             :private_key_path => inception_vm_private_key_path,
             :flavor_id => size,
