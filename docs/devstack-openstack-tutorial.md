@@ -151,37 +151,8 @@ For testing/development purpose, we will scale down the requirements(for devstac
 
 ```
 
-vi bosh-bootstrap/lib/bosh-bootstrap/cli.rb
+export BOSH_VOLUME_SIZE=2 OR export MICROBOSH_VOLUME_SIZE=2 OR export MICRO_BOSH_VOLUME_SIZE=2
 
-```
-
-Change
-
-```
-
- unless settings[:bosh]
-          say "Defaulting to 16Gb persistent disk for BOSH"
-          password = settings.bosh_password # FIXME dual use of password?
-          settings[:bosh] = {}
-          settings[:bosh][:password] = password
-          settings[:bosh][:persistent_disk] = 16384
-          save_settings!
-        end
-
-```
-
-to
-
-```
-
- unless settings[:bosh]
-          say "Defaulting to 2Gb persistent disk for BOSH"
-          password = settings.bosh_password # FIXME dual use of password?
-          settings[:bosh] = {}
-          settings[:bosh][:password] = password
-          settings[:bosh][:persistent_disk] = 2048
-          save_settings!
-        end
 ```
 
 Run
