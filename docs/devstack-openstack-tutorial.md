@@ -118,7 +118,9 @@ $ nova flavor-create m1.bosh 6 2048 20 2 --ephemeral 20 --rxtx-factor 1 --is-pub
 
 #####Also, install ruby 1.9.3. Use rvm or any other method.
 
-#####Generate keypair
+#####Generate keypair (OPTIONAL)
+######Note : 
+As of 0.8+ bosh-bootstrap deploy uses openstack/aws to create a dedicated keypair and its stored in ~/.bosh_bootstrap/ssh/inception
 
 ```
 
@@ -205,7 +207,7 @@ Redeploy bosh-bootstrap
 
 #####Finishing bootstrap
 
-i) If everything goes fine, you can see the list of VMs created by bosh-bootstrap. Also you can ssh into the inception VM by "./bosh-bootstrap ssh". Check BOSH status and so on.
+i) If everything goes fine, you can see the list of VMs created by bosh-bootstrap. Also you can ssh into the inception VM by "bosh-bootstrap ssh". Check BOSH status and so on.
  
 ii) You can see the list of commands by executing "bosh-bootstrap help"
 
