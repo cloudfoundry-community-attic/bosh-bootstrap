@@ -761,13 +761,11 @@ module Bosh::Bootstrap
           nats_server: 4222,
           message_bus: 6868,
           blobstore: 25250,
-          bosh_director: 25555
+          bosh_director: 25555,
+          bosh_registry: 25777
         }
-        if aws?
-          ports[:aws_registry] = 25777
-        elsif openstack?
-          ports[:openstack_registry] = 25889
-        end
+        # TODO: New stemcells to be released will use 25777, so this can be deleted
+        ports[:openstack_registry] = 25889 if openstack?
 
         provider.create_security_group(security_group_name, "microbosh", ports)
 
