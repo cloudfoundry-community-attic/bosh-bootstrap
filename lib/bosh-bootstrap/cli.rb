@@ -761,13 +761,11 @@ module Bosh::Bootstrap
           nats_server: 4222,
           message_bus: 6868,
           blobstore: 25250,
-          bosh_director: 25555
+          bosh_director: 25555,
+          bosh_registry: 25777
         }
-        if aws?
-          ports[:aws_registry] = 25777
-        elsif openstack?
-          ports[:openstack_registry] = 25889
-        end
+        # TODO: New stemcells to be released will use 25777, so this can be deleted
+        ports[:openstack_registry] = 25889 if openstack?
 
         provider.create_security_group(security_group_name, "microbosh", ports)
 
@@ -1010,15 +1008,18 @@ module Bosh::Bootstrap
           server = fog_compute.servers.create(
             :name => "Inception VM",
             :key_name => key_name,
+            :private_key_path => inception_vm_private_key_path,
             :flavor_ref => inception_flavor.id,
             :image_ref => inception_image.id,
+            :security_groups => [settings["inception"]["security_group"]],
             :username => username
           )
+          server.wait_for { ready? }
           unless server
             error "Something mysteriously cloudy happened and fog could not provision a VM. Please check your limits."
           end
-          server.wait_for { ready? }
 
+          settings["inception"].delete("create_new")
           settings["inception"]["server_id"] = server.id
           settings["inception"]["username"] = username
           save_settings!
@@ -1039,11 +1040,8 @@ module Bosh::Bootstrap
         unless server.public_ip_address
           server.addresses["public"] = [settings["inception"]["ip_address"]]
         end
-        unless server.public_key_path
-          server.public_key_path = public_key_path
-        end
         unless server.private_key_path
-          server.private_key_path = private_key_path
+          server.private_key_path = inception_vm_private_key_path
         end
         server.username = settings["inception"]["username"]
         Fog.wait_for(60) { server.sshable? }

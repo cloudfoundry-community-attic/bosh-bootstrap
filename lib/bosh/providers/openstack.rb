@@ -37,10 +37,11 @@ class Bosh::Providers::OpenStack < Bosh::Providers::BaseProvider
     end
     ip_permissions = sg.rules
     ports_opened = 0
-    ports.each do |name, port|
-      unless port_open?(ip_permissions, port)
-        sg.create_security_group_rule(port, port)
-        puts " -> opened #{name} port #{port}"
+    ports.each do |name, port_defn|
+      (protocol, port_range, ip_range) = extract_port_definition(port_defn)
+      unless port_open?(ip_permissions, port_range, protocol, ip_range)
+        sg.create_security_group_rule(port_range.min, port_range.max, protocol, ip_range)
+        puts " -> opened #{name} ports #{protocol.upcase} #{port_range.min}..#{port_range.max} from IP range #{ip_range}"
         ports_opened += 1
       end
     end
@@ -48,8 +49,13 @@ class Bosh::Providers::OpenStack < Bosh::Providers::BaseProvider
     true
   end
 
-  def port_open?(ip_permissions, port)
-    ip_permissions && ip_permissions.find {|ip| ip["from_port"] <= port && ip["to_port"] >= port }
+  def port_open?(ip_permissions, port_range, protocol, ip_range)
+    ip_permissions && ip_permissions.find do |ip|
+      ip["ip_protocol"] == protocol \
+      && ip["ip_range"].detect { |range| range["cidr"] == ip_range } \
+      && ip["from_port"] <= port_range.min \
+      && ip["to_port"] >= port_range.max
+    end
   end
 
   def find_server_device(server, device)
