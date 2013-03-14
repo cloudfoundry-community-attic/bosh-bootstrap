@@ -8,13 +8,17 @@ fi
 set -e # exit immediately if a simple command exits with a non-zero status
 
 apt-get install python-software-properties
-add-apt-repository ppa:keithw/mosh
+add-apt-repository -y ppa:keithw/mosh
 
 apt-get update
 apt-get install build-essential libsqlite3-dev curl rsync git-core \
   tmux mosh \
   libmysqlclient-dev libxml2-dev libxslt-dev libpq-dev libsqlite3-dev \
   runit \
-  genisoimage mkpasswd \
+  genisoimage \
   debootstrap kpartx qemu-kvm \
   vim -y
+
+if [ "$(lsb_release --release --short)" == '10.04' ]; then
+	apt-get install mkpasswd -y
+fi
