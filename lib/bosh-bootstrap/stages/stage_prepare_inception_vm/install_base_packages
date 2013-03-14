@@ -21,4 +21,6 @@ apt-get install build-essential libsqlite3-dev curl rsync git-core \
 
 if [ "$(lsb_release --release --short)" == '10.04' ]; then
 	apt-get install mkpasswd -y
+else
+	apt-get install whois -y
 fi
