@@ -56,7 +56,7 @@ else
   # determine if re-deploy, update, or delete&deploy
 
   stemcell_cid=$(echo $deployment | jazor stemcell_cid)
-  vm_cid=$(echo $deployment | jazor vm_id)
+  vm_cid=$(echo $deployment | jazor vm_cid)
   disk_cid=$(echo $deployment | jazor disk_cid)
 
   if [[ $stemcell_cid == "" && $vm_cid == "" && $disk_cid == "" ]]; then
