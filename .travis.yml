@@ -5,6 +5,12 @@ rvm:
   - 1.9.3
   # - rbx-19mode
   # - ruby-head - generates "Cannot find Syck parser for YAML"
+notifications:
+  email:
+    recipients:
+      - drnicwilliams@gmail.com
+    on_success: change
+    on_failure: always
 env:
   matrix:
     - SUITE=unit
