@@ -188,4 +188,44 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     server
   end
 
+  def servers_with_sg(sg_name)
+    inception_sg = fog_compute.security_groups.find {|sg| sg.name == sg_name }
+    if inception_sg
+      fog_compute.servers.select {|s| s.security_group_ids.include? inception_sg.group_id }
+    else
+      $stderr.puts "no security group #{sg_name} was found"
+      []
+    end
+  end
+
+  def delete_security_group_and_servers(sg_name)
+    sg = fog_compute.security_groups.find {|sg| sg.name == sg_name }
+    if sg
+      fog_compute.servers.select {|s| s.security_group_ids.include? sg.group_id }.each do |server|
+        puts "Destroying server #{server}..."
+        server.destroy
+      end
+      begin
+        puts "Destroying security group #{sg}..."
+        sg.destroy
+      rescue Fog::Compute::AWS::Error => e
+        $stderr.puts e
+      end
+    end
+  end
+
+  def delete_key_pair(kp_name)
+    if kp = fog_compute.key_pairs.find {|kp| kp.name == kp_name}
+      puts "Deleting key pair #{kp}..."
+      kp.destroy
+    end
+  end
+
+  # Destroy all IP addresses that aren't bound to a server
+  def cleanup_unused_ip_addresses
+    fog_compute.addresses.each do |a|
+      puts "Deleting IP address #{a.public_ip}..."
+      a.destroy unless a.server
+    end
+  end
 end

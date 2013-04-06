@@ -13,11 +13,12 @@ describe "AWS deployment" do
     @cmd = nil
     @fog = nil
     @bosh_name = "test-bosh-#{aws_region}-#{Random.rand(100000)}"
-    destroy_test_constructs
+    create_manifest
+    destroy_test_constructs(bosh_name)
   end
 
   after do
-    destroy_test_constructs unless keep_after_test?
+    destroy_test_constructs(bosh_name) unless keep_after_test?
   end
 
   def fog_credentials
@@ -51,6 +52,10 @@ describe "AWS deployment" do
     @cmd ||= Bosh::Bootstrap::Cli.new
   end
 
+  def provider
+    cmd.provider
+  end
+
   # used by +SettingsSetter+ to access the settings
   def settings
     cmd.settings
@@ -72,52 +77,16 @@ describe "AWS deployment" do
     cmd.save_settings!
   end
 
-  def destroy_test_constructs
+  def destroy_test_constructs(bosh_name)
     puts "Destroying everything created by previous tests..."
     # destroy servers using inception-vm SG
-    delete_security_group_and_servers("#{bosh_name}-inception-vm")
-    delete_security_group_and_servers(bosh_name)
-
-    if kp = fog.key_pairs.find {|kp| kp.name == bosh_name}
-      puts "Deleting key pair #{kp}..."
-      kp.destroy
-    end
+    provider.delete_security_group_and_servers("#{bosh_name}-inception-vm")
+    provider.delete_security_group_and_servers(bosh_name)
 
     # TODO delete "inception" key pair? Why isn't it named for the bosh/inception VM?
+    provider.delete_key_pair(bosh_name)
 
-    # fog.vpcs.each { |v| v.destroy } - must delete dependencies first
-
-    # destroy all IP addresses that aren't bound to a server
-    fog.addresses.each do |a|
-      puts "Deleting IP address #{a}..."
-      a.destroy unless a.server
-    end
-  end
-
-  def delete_security_group_and_servers(sg_name)
-    sg = fog.security_groups.find {|sg| sg.name == sg_name }
-    if sg
-      fog.servers.select {|s| s.security_group_ids.include? sg.group_id }.each do |server|
-        puts "Destroying server #{server}..."
-        server.destroy
-      end
-      begin
-        puts "Destroying security group #{sg}..."
-        sg.destroy
-      rescue Fog::Compute::AWS::Error => e
-        $stderr.puts e
-      end
-    end
-  end
-
-  def servers_with_sg(sg_name)
-    inception_sg = fog.security_groups.find {|sg| sg.name == sg_name }
-    if inception_sg
-      fog.servers.select {|s| s.security_group_ids.include? inception_sg.group_id }
-    else
-      $stderr.puts "no security group #{sg_name} was found"
-      []
-    end
+    provider.cleanup_unused_ip_addresses
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do
