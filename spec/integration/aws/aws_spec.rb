@@ -68,15 +68,8 @@ describe "AWS deployment" do
   def destroy_test_constructs
     puts "Destroying everything created by previous tests..."
     # destroy servers using inception-vm SG
-    inception_sg = fog.security_groups.find {|sg| sg.name == "#{bosh_name}-inception-vm" }
-    if inception_sg
-      fog.servers.select {|s| s.security_group_ids.include? inception_sg.group_id }.each do |server|
-        server.destroy
-      end
-
-      inception_sg.destroy
-    end
-
+    delete_security_group_and_servers("#{bosh_name}-inception-vm")
+    delete_security_group_and_servers(bosh_name)
 
     if kp = fog.key_pairs.find {|kp| kp.name == bosh_name}
       kp.destroy
@@ -86,6 +79,20 @@ describe "AWS deployment" do
 
     # destroy all IP addresses that aren't bound to a server
     fog.addresses.each {|a| a.destroy unless a.server }
+  end
+
+  def delete_security_group_and_servers(sg_name)
+    inception_sg = fog.security_groups.find {|sg| sg.name == sg_name }
+    if inception_sg
+      fog.servers.select {|s| s.security_group_ids.include? inception_sg.group_id }.each do |server|
+        server.destroy
+      end
+      begin
+        inception_sg.destroy
+      rescue Fog::Compute::AWS::Error => e
+        $stderr.puts e
+      end
+    end
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do
