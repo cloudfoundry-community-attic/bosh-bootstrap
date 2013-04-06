@@ -2,7 +2,7 @@ language: ruby
 script: bundle exec rake spec
 rvm:
   - 1.9.3
-  - rbx-19mode
+  # - rbx-19mode
   # - ruby-head - generates "Cannot find Syck parser for YAML"
 env:
   global:
