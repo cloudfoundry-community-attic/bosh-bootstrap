@@ -72,6 +72,7 @@ describe "AWS deployment" do
     delete_security_group_and_servers(bosh_name)
 
     if kp = fog.key_pairs.find {|kp| kp.name == bosh_name}
+      puts "Deleting key pair #{kp}..."
       kp.destroy
     end
 
@@ -80,17 +81,22 @@ describe "AWS deployment" do
     # fog.vpcs.each { |v| v.destroy } - must delete dependencies first
 
     # destroy all IP addresses that aren't bound to a server
-    fog.addresses.each {|a| a.destroy unless a.server }
+    fog.addresses.each do |a|
+      puts "Deleting IP address #{a}..."
+      a.destroy unless a.server
+    end
   end
 
   def delete_security_group_and_servers(sg_name)
-    inception_sg = fog.security_groups.find {|sg| sg.name == sg_name }
-    if inception_sg
-      fog.servers.select {|s| s.security_group_ids.include? inception_sg.group_id }.each do |server|
+    sg = fog.security_groups.find {|sg| sg.name == sg_name }
+    if sg
+      fog.servers.select {|s| s.security_group_ids.include? sg.group_id }.each do |server|
+        puts "Destroying server #{server}..."
         server.destroy
       end
       begin
-        inception_sg.destroy
+        puts "Destroying security group #{sg}..."
+        sg.destroy
       rescue Fog::Compute::AWS::Error => e
         $stderr.puts e
       end
