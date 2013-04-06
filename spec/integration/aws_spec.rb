@@ -14,7 +14,7 @@ describe "AWS deployment" do
     @fog_credentials ||= begin
       access_key = ENV['AWS_ACCESS_KEY_ID']
       secret_key = ENV["AWS_SECRET_ACCESS_KEY"]
-      unless access_key & secret_key
+      unless access_key && secret_key
         raise "Please provided $AWS_ACCESS_KEY_ID and $AWS_SECRET_ACCESS_KEY"
       end
       credentials = {
