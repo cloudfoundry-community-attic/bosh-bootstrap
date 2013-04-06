@@ -77,6 +77,8 @@ describe "AWS deployment" do
 
     # TODO delete "inception" key pair? Why isn't it named for the bosh/inception VM?
 
+    fog.vpcs.each { |v| v.destroy }
+
     # destroy all IP addresses that aren't bound to a server
     fog.addresses.each {|a| a.destroy unless a.server }
   end
