@@ -97,6 +97,16 @@ describe "AWS deployment" do
     end
   end
 
+  def servers_with_sg(sg_name)
+    inception_sg = fog.security_groups.find {|sg| sg.name == sg_name }
+    if inception_sg
+      fog.servers.select {|s| s.security_group_ids.include? inception_sg.group_id }
+    else
+      $stderr.puts "no security group #{sg_name} was found"
+      []
+    end
+  end
+
   it "creates an EC2 inception/microbosh with the associated resources" do
     create_manifest("vpc" => false)
 
@@ -105,12 +115,16 @@ describe "AWS deployment" do
     YAML.load_file(manifest_file)["vpc"].should == false
 
     cmd.deploy
-    
+
     fog.addresses.should have(2).item
     inception_ip_address = fog.addresses.first
     inception_ip_address.domain.should == "standard"
-    
-    fog.servers.should have(2).item
+
+    inception_vms = servers_with_sg("#{bosh_name}-inception-vm")
+    inception_vms.size.should == 1
+
+    micrboshes = servers_with_sg(bosh_name)
+    micrboshes.size.should == 1
   end
 
 end
