@@ -8,6 +8,8 @@ describe "AWS deployment" do
 
   before do
     setup_home_dir
+    @cmd = nil
+    @fog = nil
   end
 
   def fog_credentials
@@ -33,35 +35,39 @@ describe "AWS deployment" do
     @fog ||= connection = Fog::Compute.new(fog_credentials.merge(:region => aws_region))
   end
 
+  def cmd
+    @cmd ||= Bosh::Bootstrap::Cli.new
+  end
+
+  # used by +SettingsSetter+ to access the settings
+  def settings
+    cmd.settings
+  end
+
   def create_manifest(options = {})
-    settings = {
-      "bosh_provider" => "aws",
-      "region_code" => aws_region,
-      "bosh_name" => "test-bosh",
-      "inception" => {
-        "create_new" => true,
-      },
-      "bosh_username" => "testuser",
-      "bosh_password" => "testpass",
-      "bosh.password" => "testpass",
-      "fog_credentials" => fog_credentials.stringify_keys,
-      "bosh.salted_password" => "pepper",
-      "bosh.persistent_disk" => 16384
-    }
-    mkdir_p(home_file(".bosh_bootstrap"))
-    File.open(home_file(".bosh_bootstrap", "manifest.yml"), "w") do |file|
-      file << settings.merge(options.stringify_keys).to_yaml
-    end
+    setting "bosh_provider", "aws"
+    setting "region_code", aws_region
+    setting "bosh_name", "test-bosh"
+    setting "inception.create_new", true
+    setting "bosh_username", "testuser"
+    setting "bosh_password", "testpass"
+    setting "fog_credentials", fog_credentials.stringify_keys
+    setting "bosh.salted_password", "pepper"
+    setting "bosh.persistent_disk", 16384
+    setting "git.name", "Dr Nic Williams"
+    setting "git.email", "drnicwilliams@gmail.com"
+    options.each { |key, value| setting(key, value) }
+    cmd.save_settings!
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do
-    create_manifest(vpc: false)
+    create_manifest("vpc" => false)
 
     manifest_file = home_file(".bosh_bootstrap", "manifest.yml")
     File.should be_exists(manifest_file)
     YAML.load_file(manifest_file)["vpc"].should == false
 
-    @cmd.deploy
+    cmd.deploy
     
     fog.addresses.should have(2).item
     inception_ip_address = fog.addresses.first
