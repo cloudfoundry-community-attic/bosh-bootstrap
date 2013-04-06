@@ -96,6 +96,7 @@ module Bosh::Bootstrap
 
     no_tasks do
       DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
+      DEFAULT_MICROBOSH_VOLUME_SIZE = 16 # Gb
 
       def deploy_stage_1_choose_infrastructure_provider
         header "Stage 1: Choose infrastructure"
@@ -161,13 +162,17 @@ module Bosh::Bootstrap
         confirm "Micro BOSH instance type will be #{settings[:bosh_resources_cloud_properties]["instance_type"]}"
 
         unless settings[:bosh]
-          say "Defaulting to 16Gb persistent disk for BOSH"
           password        = settings.bosh_password # FIXME dual use of password?
           settings[:bosh] = {}
           settings[:bosh][:password] = password
-          settings[:bosh][:persistent_disk] = 16384
+          if openstack?
+            settings[:bosh][:persistent_disk] = prompt_for_disk_space("Micro BOSH VM", DEFAULT_MICROBOSH_VOLUME_SIZE) * 1024
+          else
+            settings[:bosh][:persistent_disk] = DEFAULT_MICROBOSH_VOLUME_SIZE * 1024
+          end
           save_settings!
         end
+        confirm "Micro BOSH persistent disk size will be #{settings.bosh.persistent_disk} Mb"
 
         unless settings[:bosh]["ip_address"]
           if vpc?
@@ -1047,7 +1052,7 @@ module Bosh::Bootstrap
         Fog.wait_for(60) { server.sshable? }
 
         unless settings["inception"]["disk_size"]
-          disk_size = DEFAULT_INCEPTION_VOLUME_SIZE # Gb
+          disk_size = prompt_for_disk_space("Inception VM", DEFAULT_INCEPTION_VOLUME_SIZE)
           device = "/dev/vdc"
           provision_and_mount_volume(server, disk_size, device)
 
@@ -1084,6 +1089,13 @@ module Bosh::Bootstrap
       def associate_ip_address_with_server(ip_address, server)
         provider.associate_ip_address_with_server(ip_address, server)
         server.reload
+      end
+
+      def prompt_for_disk_space(disk_for, default_size = nil)
+        hl.ask("Size of disk for #{disk_for} (in Gb): ", Integer) do |q|
+          q.default = default_size if default_size
+          q.in = 1..1024
+        end
       end
 
       # Provision a volume for a specific device (unless already provisioned)
