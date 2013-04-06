@@ -34,6 +34,12 @@ def setup_home_dir
   ENV['HOME'] = home_dir
 end
 
+# returns the file path to a file
+# in the fake $HOME folder
+def home_file(*path)
+  File.join(ENV['HOME'], *path)
+end
+
 RSpec.configure do |c|
   c.before(:each) do
     setup_home_dir
