@@ -16,6 +16,10 @@ describe "AWS deployment" do
     destroy_test_constructs
   end
 
+  after do
+    destroy_test_constructs unless keep_after_test?
+  end
+
   def fog_credentials
     @fog_credentials ||= begin
       access_key = ENV['AWS_ACCESS_KEY_ID']
@@ -29,6 +33,10 @@ describe "AWS deployment" do
         :aws_secret_access_key    => secret_key
       }
     end
+  end
+
+  def keep_after_test?
+    ENV['KEEP_AFTER_TEST']
   end
 
   def aws_region
@@ -46,10 +54,6 @@ describe "AWS deployment" do
   # used by +SettingsSetter+ to access the settings
   def settings
     cmd.settings
-  end
-
-  def bosh_name
-    "test-bosh"
   end
 
   def create_manifest(options = {})
