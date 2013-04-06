@@ -6,10 +6,13 @@ describe "AWS deployment" do
   include FileUtils
   include Bosh::Bootstrap::Helpers::SettingsSetter
 
+  attr_reader :bosh_name
+
   before do
     setup_home_dir
     @cmd = nil
     @fog = nil
+    @bosh_name = "test-bosh-#{aws_region}-#{Random.rand(100000)}"
     destroy_test_constructs
   end
 
