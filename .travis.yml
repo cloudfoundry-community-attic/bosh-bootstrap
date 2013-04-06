@@ -1,6 +1,6 @@
 language: ruby
 script: bundle exec rake spec:$SUITE
-bundler_args: "--local --without development"
+bundler_args: "--local"
 rvm:
   - 1.9.3
   # - rbx-19mode
