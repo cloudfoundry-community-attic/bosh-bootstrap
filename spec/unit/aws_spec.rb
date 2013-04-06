@@ -23,7 +23,6 @@ describe "AWS deployment" do
     setting "inception.create_new", true
     setting "bosh_username", "testuser"
     setting "bosh_password", "testpass"
-    setting "bosh.password", "testpass"
     setting "fog_credentials", @fog_credentials.stringify_keys
     setting "bosh.salted_password", "pepper"
     setting "bosh.persistent_disk", 16384
