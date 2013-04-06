@@ -61,18 +61,16 @@ describe "AWS deployment" do
     File.should be_exists(manifest_file)
     YAML.load_file(manifest_file)["vpc"].should == false
 
-    # @cmd.deploy
-    #
-    #
-    #
-    # fog.addresses.should have(2).item
-    # inception_ip_address = fog.addresses.first
-    # inception_ip_address.domain.should == "standard"
-    #
-    # fog.vpcs.should have(0).item
-    # fog.servers.should have(2).item
-    # fog.security_groups.should have(2).item
-    # fog.keypairs.should have(2).item
+    @cmd.deploy
+    
+    fog.addresses.should have(2).item
+    inception_ip_address = fog.addresses.first
+    inception_ip_address.domain.should == "standard"
+    
+    fog.vpcs.should have(0).item
+    fog.servers.should have(2).item
+    fog.security_groups.should have(2).item
+    fog.keypairs.should have(2).item
   end
 
 end
