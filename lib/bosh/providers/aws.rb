@@ -202,11 +202,11 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     sg = fog_compute.security_groups.find {|sg| sg.name == sg_name }
     if sg
       fog_compute.servers.select {|s| s.security_group_ids.include? sg.group_id }.each do |server|
-        puts "Destroying server #{server}..."
+        puts "Destroying server #{server.id}..."
         server.destroy
       end
       begin
-        puts "Destroying security group #{sg}..."
+        puts "Destroying security group #{sg.name}..."
         sg.destroy
       rescue Fog::Compute::AWS::Error => e
         $stderr.puts e
@@ -216,7 +216,7 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
 
   def delete_key_pair(kp_name)
     if kp = fog_compute.key_pairs.find {|kp| kp.name == kp_name}
-      puts "Deleting key pair #{kp}..."
+      puts "Deleting key pair #{kp.name}..."
       kp.destroy
     end
   end
