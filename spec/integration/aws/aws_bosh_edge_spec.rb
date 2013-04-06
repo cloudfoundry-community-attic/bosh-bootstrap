@@ -2,7 +2,7 @@ require File.expand_path("../../../spec_helper", __FILE__)
 
 require "active_support/core_ext/hash/keys"
 
-describe "AWS deployment using gems and publish stemcells" do
+describe "AWS deployment using Bosh edge from source" do
   include FileUtils
   include Bosh::Bootstrap::Helpers::SettingsSetter
 
@@ -12,7 +12,7 @@ describe "AWS deployment using gems and publish stemcells" do
     setup_home_dir
     @cmd = nil
     @fog = nil
-    @bosh_name = "aws_basic-#{aws_region}-#{Random.rand(100000)}"
+    @bosh_name = "aws_bosh_edge-#{aws_region}-#{Random.rand(100000)}"
     create_manifest
     destroy_test_constructs(bosh_name)
   end
@@ -90,7 +90,11 @@ describe "AWS deployment using gems and publish stemcells" do
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do
-    create_manifest
+    create_manifest(
+      "bosh_git_source" => true,
+      "micro_bosh_stemcell_type" => "custom",
+      "micro_bosh_stemcell_name" => "custom"
+    )
 
     manifest_file = home_file(".bosh_bootstrap", "manifest.yml")
     File.should be_exists(manifest_file)
