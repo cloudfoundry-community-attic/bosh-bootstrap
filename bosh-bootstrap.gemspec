@@ -36,7 +36,4 @@ EOS
   gem.add_development_dependency "rake"
   gem.add_development_dependency "rspec"
   gem.add_development_dependency "activesupport", ">= 3.0.0"
-  gem.add_development_dependency "awesome_print"
-  gem.add_development_dependency "rb-fsevent", "~> 0.9.1"
-  gem.add_development_dependency "guard-rspec"
 end
