@@ -19,11 +19,16 @@ if defined?(RSpec)
       t.rspec_opts = %w(--format progress --color)
     end
 
-    desc "Run Integration Tests"
-    integration_rspec_task = RSpec::Core::RakeTask.new(:integration) do |t|
-      t.pattern = "spec/integration/**/*_spec.rb"
-      t.rspec_opts = %w(--format progress --color)
+    namespace :integration do
+      desc "Run AWS Integration Tests"
+      integration_rspec_task = RSpec::Core::RakeTask.new(:aws) do |t|
+        t.pattern = "spec/integration/aws/**/*_spec.rb"
+        t.rspec_opts = %w(--format progress --color)
+      end
     end
+
+    desc "Run all Integration Tests"
+    task :integration => %w[spec:integration:aws]
   end
 
   desc "Install dependencies and run tests"
