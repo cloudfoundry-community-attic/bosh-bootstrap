@@ -10,6 +10,7 @@ describe "AWS deployment" do
     setup_home_dir
     @cmd = nil
     @fog = nil
+    destroy_test_constructs
   end
 
   def fog_credentials
@@ -44,10 +45,14 @@ describe "AWS deployment" do
     cmd.settings
   end
 
+  def bosh_name
+    "test-bosh"
+  end
+
   def create_manifest(options = {})
     setting "bosh_provider", "aws"
     setting "region_code", aws_region
-    setting "bosh_name", "test-bosh"
+    setting "bosh_name", bosh_name
     setting "inception.create_new", true
     setting "bosh_username", "testuser"
     setting "bosh_password", "testpass"
@@ -58,6 +63,29 @@ describe "AWS deployment" do
     setting "git.email", "drnicwilliams@gmail.com"
     options.each { |key, value| setting(key, value) }
     cmd.save_settings!
+  end
+
+  def destroy_test_constructs
+    puts "Destroying everything created by previous tests..."
+    # destroy servers using inception-vm SG
+    inception_sg = fog.security_groups.find {|sg| sg.name == "#{bosh_name}-inception-vm" }
+    if inception_sg
+      fog.servers.select {|s| s.security_group_ids.include? inception_sg.group_id }.each do |server|
+        server.destroy
+      end
+
+      inception_sg.destroy
+    end
+
+
+    if kp = fog.key_pairs.find {|kp| kp.name == bosh_name}
+      kp.destroy
+    end
+
+    # TODO delete "inception" key pair? Why isn't it named for the bosh/inception VM?
+
+    # destroy all IP addresses that aren't bound to a server
+    fog.addresses.each {|a| a.destroy unless a.server }
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do
