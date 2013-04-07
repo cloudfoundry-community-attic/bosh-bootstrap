@@ -8,8 +8,13 @@ fi
 set -e # exit immediately if a simple command exits with a non-zero status
 
 cd /var/vcap/store/repos
-git clone git://github.com/defunkt/hub.git
-cd hub
+if [[ ! -d hub ]]; then
+  git clone git://github.com/defunkt/hub.git
+  cd hub
+else
+  cd hub
+  git pull origin master
+fi
 rake install prefix=/usr/local
 
 if [[ $(grep "hub alias -s" /home/vcap/.bashrc) == "" ]]; then
