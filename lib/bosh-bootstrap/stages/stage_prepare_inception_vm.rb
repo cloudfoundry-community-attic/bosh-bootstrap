@@ -11,25 +11,20 @@ module Bosh::Bootstrap::Stages
         # using inception VM username login, create a vcap user with same authorizations
         server.create "vcap user", script("create_vcap_user",
           "ORIGUSER" => settings.inception.username),
-          :user => settings.inception.username
+          ssh_username: settings.inception.username, run_as_root: true
         # install base Ubuntu packages used for bosh micro deployer
-        server.install "base packages", script("install_base_packages")
+        server.install "base packages", script("install_base_packages"), run_as_root: true
         server.configure "git", script("configure_git",
           "GIT_USER_NAME" => settings["git"]["name"],
           "GIT_USER_EMAIL" => settings["git"]["email"])
-        server.install "ruby 1.9.3", script("install_ruby", "UPGRADE" => settings[:upgrade_deps])
+        server.install "ruby 1.9.3", script("install_ruby", "UPGRADE" => settings[:upgrade_deps]),
+          run_as_root: true
         server.install "useful ruby gems", script("install_useful_gems", "UPGRADE" => settings[:upgrade_deps])
         server.install "hub", script("install_hub")
         server.install "bosh", script("install_bosh",
           "UPGRADE" => settings[:upgrade_deps],
           "INSTALL_BOSH_FROM_SOURCE" => settings["bosh_git_source"] || "")
         server.install "bosh plugins", script("install_bosh_plugins", "UPGRADE" => settings[:upgrade_deps])
-
-        # use inception VM to generate a salted password (local machine may not have mkpasswd)
-        unless settings["bosh"]["salted_password"]
-          server.capture_value "salted password", script("convert_salted_password", "PASSWORD" => settings.bosh.password),
-            :settings => settings, :save_output_to_settings_key => "bosh.salted_password"
-        end
 
         server.validate "bosh deployer", script("validate_bosh_deployer")
       end

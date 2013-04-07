@@ -5,12 +5,12 @@ class Bosh::Bootstrap::Commander::RemoteServer
 
   attr_reader :host
   attr_reader :private_key_path
-  attr_reader :default_username
+  attr_reader :default_ssh_username
   attr_reader :logfile
 
   def initialize(host, private_key_path, logfile=STDERR)
     @host, @private_key_path, @logfile = host, private_key_path, logfile
-    @default_username = "vcap" # unless overridden by a Command (before vcap exists)
+    @default_ssh_username = "vcap" # unless overridden by a Command (before vcap exists)
   end
 
   # Execute the +Command+ objects, in sequential order
@@ -42,13 +42,14 @@ class Bosh::Bootstrap::Commander::RemoteServer
   # Stores the last line of stripped STDOUT/STDERR into a settings field, 
   #   if :settings & :save_output_to_settings_key => "x.y.z" provided
   def run_script(command, script, options={})
-    run_as_user  = options[:user] || default_username
+    ssh_username = options[:ssh_username] || default_ssh_username
+    run_as_root  = options[:run_as_root]
     settings     = options[:settings]
     settings_key = options[:save_output_to_settings_key]
 
     remote_path = remote_tmp_script_path(command)
-    upload_file(command, remote_path, script, run_as_user)
-    output, status = run_remote_script(remote_path, run_as_user)
+    upload_file(command, remote_path, script, ssh_username)
+    output, status = run_remote_script(remote_path, ssh_username, run_as_root)
     output =~ /^(.*)\Z/
     last_line = $1
     # store output into a settings field, if requested
@@ -70,8 +71,8 @@ class Bosh::Bootstrap::Commander::RemoteServer
   end
 
   # Upload a file (put a file into the remote server's filesystem)
-  def upload_file(command, remote_path, contents, upload_as_user=nil)
-    upload_as_user ||= default_username
+  def upload_file(command, remote_path, contents, ssh_username=nil)
+    upload_as_user = ssh_username || default_ssh_username
     run_remote_command("mkdir -p #{File.dirname(remote_path)}", upload_as_user)
     Tempfile.open("remote_script") do |file|
       file << contents
@@ -98,13 +99,14 @@ class Bosh::Bootstrap::Commander::RemoteServer
   # * status (true = success)
   #
   # TODO catch exceptions http://learnonthejob.blogspot.com/2010/08/exception-handling-for-netssh.html
-  def run_remote_script(remote_path, username)
+  def run_remote_script(remote_path, ssh_username, run_as_root)
+    sudo = run_as_root ? "sudo " : ""
     commands = [
       "chmod +x #{remote_path}",
-      "bash -lc 'sudo /usr/bin/env PATH=$PATH #{remote_path}'"
+      "bash -lc '#{sudo}/usr/bin/env PATH=$PATH #{remote_path}'"
     ]
     script_output = ""
-    results = Fog::SSH.new(host, username, keys: private_keys).run(commands) do |stdout, stderr|
+    results = Fog::SSH.new(host, ssh_username, keys: private_keys).run(commands) do |stdout, stderr|
       [stdout, stderr].flatten.each do |data|
         logfile << data
         script_output << data

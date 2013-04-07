@@ -13,11 +13,6 @@
 set -e # exit immediately if a simple command exits with a non-zero status
 set -u # report the usage of uninitialized variables
 
-if [[ $EUID -ne 0 ]]; then
-  echo "ERROR: This script must be run as root" 1>&2
-  exit 1
-fi
-
 if [[ "${MICRO_BOSH_STEMCELL_NAME}X" == "X" ]]; then
   echo 'INTERNAL ERROR: Missing $MICRO_BOSH_STEMCELL_NAME environment variable'
   exit 1

@@ -16,7 +16,8 @@ module Bosh::Bootstrap::Stages
         server.download "micro-bosh stemcell", script("download_micro_bosh_stemcell",
                       "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name,
                       "PROVIDER" => settings.bosh_provider),
-                      :settings => settings, :save_output_to_settings_key => "micro_bosh_stemcell_name"
+                      :settings => settings,
+                      :save_output_to_settings_key => "micro_bosh_stemcell_name"
         server.upload_file \
                       "/var/vcap/store/microboshes/deployments/#{settings.bosh_name}/micro_bosh.yml",
                       micro_bosh_manifest

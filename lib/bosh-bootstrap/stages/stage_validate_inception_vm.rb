@@ -8,7 +8,7 @@ module Bosh::Bootstrap::Stages
 
     def commands
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
-        server.validate "ubuntu", script("validate_ubuntu"), :user => settings.inception.username
+        server.validate "ubuntu", script("validate_ubuntu"), ssh_username: settings.inception.username
       end
     end
 
