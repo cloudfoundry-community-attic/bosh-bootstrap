@@ -471,6 +471,10 @@ module Bosh::Bootstrap
         prompt_git_user_information
 
         if options[:"edge-prebuilt"] || settings.delete("edge-prebuilt")
+          if settings["bosh_provider"] && settings["bosh_provider"] != "aws"
+            error "--edge-prebuilt only available for AWS"
+          end
+          settings["bosh_provider"] = "aws"
           settings["bosh_gems_source"] = "https://s3.amazonaws.com/bosh-jenkins-gems/"
           settings["micro_bosh_stemcell_type"] = "ami"
           settings["micro_bosh_stemcell_name"] = latest_prebuilt_microbosh_ami
