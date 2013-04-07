@@ -154,4 +154,23 @@ describe "AWS deployment" do
     manifest_path = spec_asset("micro_bosh_yml/micro_bosh.aws_ec2.yml")
     YAML.load(@cmd.micro_bosh_yml).should == expected_manifest_content(manifest_path, public_ip)
   end
+
+  it "uses pre-built gems and AMIs for us-east-1 created from jenkins" do
+    @cmd.should_receive(:provision_and_mount_volume)
+    @cmd.stub(:run_server).and_return(true)
+    @cmd.stub(:sleep)
+    @cmd.should_receive(:deploy_stage_6_setup_new_bosh)
+    @cmd.should_receive(:latest_prebuilt_microbosh_ami).and_return("ami-123456")
+    @cmd.should_receive(:latest_prebuilt_bosh_ami).and_return("ami-987654")
+    @cmd.deploy
+
+    settings["bosh_gems_source"].should == "https://s3.amazonaws.com/bosh-jenkins-gems/"
+    settings["micro_bosh_stemcell_type"].should == "ami"
+    settings["micro_bosh_stemcell_name"].should == "ami-123456"
+    settings["bosh_stemcell_name"].should == "last_successful_bosh-stemcell_light.tgz"
+
+    public_ip = settings["bosh"]["ip_address"]
+    manifest_path = spec_asset("micro_bosh_yml/micro_bosh.aws_ec2.yml")
+    YAML.load(@cmd.micro_bosh_yml).should == expected_manifest_content(manifest_path, public_ip)
+  end
 end
