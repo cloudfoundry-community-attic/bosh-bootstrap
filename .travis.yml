@@ -2,9 +2,9 @@ language: ruby
 script: bundle exec rake spec:$SUITE
 bundler_args: "--local"
 rvm:
-  - 1.9.3
+  - ruby-1.9.3
   # - rbx-19mode
-  # - ruby-head - generates "Cannot find Syck parser for YAML"
+  # - ruby-2.0.0 - generates "Cannot find Syck parser for YAML"
 notifications:
   email:
     recipients:
@@ -18,3 +18,9 @@ env:
     - SUITE=integration:aws:bosh_edge
   global:
     - secure: "OS3pnXOAVRP0QPDl/Nn/0iBPZbrnn9irFYwEbMJ2fGPsV00u4IYDwoIN5Gzb\nX+cXyiPZB0jdQlbiCMaQEYjYig3fgnDhiLj/MnxkVYtILm+0uPSrX2Zf7jvR\nmxCT5jfTSZoPXQeNi9h8rEqvaqKv4z930xp/Z0QNoZLPWdwY5wk="
+matrix:
+  allow_failures:
+    - env:
+      matrix:
+        - SUITE=integration:aws:bosh_edge
+        
