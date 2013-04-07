@@ -12,7 +12,7 @@ describe "AWS deployment using gems and publish stemcells" do
     setup_home_dir
     @cmd = nil
     @fog = nil
-    @bosh_name = "aws_basic-#{aws_region}-#{Random.rand(100000)}"
+    @bosh_name = "aws-basic-#{aws_region}-#{Random.rand(100000)}"
     create_manifest
     destroy_test_constructs(bosh_name)
   end
