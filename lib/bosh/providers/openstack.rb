@@ -72,4 +72,8 @@ class Bosh::Providers::OpenStack < Bosh::Providers::BaseProvider
     volume.attach(server.id, device)
     volume.wait_for { volume.status == 'in-use' }
   end
+
+  def delete_security_group_and_servers(sg_name)
+    raise "not implemented yet"
+  end
 end
