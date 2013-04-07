@@ -15,7 +15,7 @@ describe "AWS deployment using gems and AMIs from private jenkins server" do
 
   # Jenkins AMIs are produced for us-east-1
   def aws_region
-    ENV['AWS_REGION'] || "us-east-1"
+    "us-east-1"
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do
