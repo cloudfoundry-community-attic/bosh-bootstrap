@@ -39,8 +39,9 @@ module Bosh::Bootstrap
       deploy_stage_2_bosh_configuration
       deploy_stage_3_create_allocate_inception_vm
       deploy_stage_4_prepare_inception_vm
-      deploy_stage_5_deploy_micro_bosh
-      deploy_stage_6_setup_new_bosh
+      deploy_stage_5_salted_password
+      deploy_stage_6_deploy_micro_bosh
+      deploy_stage_7_setup_new_bosh
     end
 
     desc "upgrade-inception", "Upgrade inception VM with latest packages, gems, security group ports"
@@ -277,9 +278,6 @@ module Bosh::Bootstrap
           unless run_server(Bosh::Bootstrap::Stages::StagePrepareInceptionVm.new(settings).commands)
             error "Failed to complete Stage 4: Preparing the Inception VM"
           end
-          # Settings are updated by this stage
-          # it generates a salted password from settings.bosh.password
-          # and stores it in settings.bosh.salted_password
           settings["inception"]["prepared"] = true
           save_settings!
         else
@@ -287,23 +285,41 @@ module Bosh::Bootstrap
         end
       end
 
-      def deploy_stage_5_deploy_micro_bosh
-        header "Stage 5: Deploying micro BOSH"
+      def deploy_stage_5_salted_password
+        unless settings["bosh"] && settings["bosh"]["salted_password"]
+          header "Stage 5: Generate salted password"
+          recreate_local_ssh_keys_for_inception_vm
+
+          unless run_server(Bosh::Bootstrap::Stages::SaltedPassword.new(settings).commands)
+            error "Failed to complete Stage 5: Generate salted password"
+          end
+          save_settings!
+        else
+          header "Stage 5: Generate salted password", skipping: "Already generated salted password"
+        end
+      end
+
+      def deploy_stage_6_deploy_micro_bosh
+        header "Stage 6: Deploying micro BOSH"
         recreate_local_ssh_keys_for_inception_vm
 
         unless run_server(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
-          error "Failed to complete Stage 5: Deploying micro BOSH"
+          error "Failed to complete Stage 6: Deploying micro BOSH"
         end
+        # Settings are updated by this stage
+        # it generates a salted password from settings.bosh.password
+        # and stores it in settings.bosh.salted_password
+        save_settings!
 
         confirm "Successfully built micro BOSH"
       end
 
-      def deploy_stage_6_setup_new_bosh
+      def deploy_stage_7_setup_new_bosh
         # TODO change to a polling test of director being available
         say "Pausing to wait for BOSH Director..."
         sleep 5
 
-        header "Stage 6: Setup bosh"
+        header "Stage 7: Setup bosh"
         unless run_server(Bosh::Bootstrap::Stages::SetupNewBosh.new(settings).commands)
           error "Failed to complete Stage 6: Setup bosh"
         end
