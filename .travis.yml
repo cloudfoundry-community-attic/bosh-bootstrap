@@ -22,5 +22,6 @@ matrix:
   allow_failures:
     - env:
       matrix:
+        - SUITE=integration:aws:basic
         - SUITE=integration:aws:bosh_edge
         
