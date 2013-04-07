@@ -479,24 +479,24 @@ module Bosh::Bootstrap
           settings["micro_bosh_stemcell_type"] = "ami"
           settings["micro_bosh_stemcell_name"] = latest_prebuilt_microbosh_ami
           settings["bosh_stemcell_url"] = latest_prebuilt_stemcell_url
-        end
+        else
+          settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
 
-        settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
-
-        # determine which micro-bosh stemcell to download/create
-        if options[:"stable-stemcell"]
-          settings["micro_bosh_stemcell_type"] = "stable"
-          settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
-        elsif options[:"latest-stemcell"]
-          settings["micro_bosh_stemcell_type"] = "latest"
-          settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
-        elsif options[:"edge-stemcell"]
-          settings["micro_bosh_stemcell_type"] = "custom"
-          settings["micro_bosh_stemcell_name"] = "custom"
+          # determine which micro-bosh stemcell to download/create
+          if options[:"stable-stemcell"]
+            settings["micro_bosh_stemcell_type"] = "stable"
+            settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
+          elsif options[:"latest-stemcell"]
+            settings["micro_bosh_stemcell_type"] = "latest"
+            settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
+          elsif options[:"edge-stemcell"]
+            settings["micro_bosh_stemcell_type"] = "custom"
+            settings["micro_bosh_stemcell_name"] = "custom"
+          end
+          # may have already been set from previous deploy run
+          # default to "latest" for both AWS and OpenStack at the moment (no useful stable stemcells)
+          settings["micro_bosh_stemcell_type"] ||= "latest"
         end
-        # may have already been set from previous deploy run
-        # default to "latest" for both AWS and OpenStack at the moment (no useful stable stemcells)
-        settings["micro_bosh_stemcell_type"] ||= "latest"
 
         # once a stemcell is downloaded or created; these fields above should
         # be uploaded with values such as:
