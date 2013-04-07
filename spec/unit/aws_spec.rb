@@ -135,7 +135,6 @@ describe "AWS deployment" do
     fog.key_pairs.should have(2).item
 
     settings["inception"].should_not be_nil
-    p settings["inception"]
     settings["inception"]["key_pair"].should_not be_nil
     settings["inception"]["key_pair"]["name"].should_not be_nil
     settings["inception"]["key_pair"]["private_key"].should_not be_nil
@@ -162,6 +161,8 @@ describe "AWS deployment" do
     @cmd.should_receive(:deploy_stage_6_setup_new_bosh)
     @cmd.should_receive(:latest_prebuilt_microbosh_ami).and_return("ami-123456")
     @cmd.should_receive(:latest_prebuilt_bosh_ami).and_return("ami-987654")
+
+    setting "edge-prebuilt", true
     @cmd.deploy
 
     settings["bosh_gems_source"].should == "https://s3.amazonaws.com/bosh-jenkins-gems/"

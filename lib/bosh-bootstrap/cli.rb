@@ -28,6 +28,7 @@ module Bosh::Bootstrap
     method_option :"stable-stemcell", :type => :boolean, :desc => "Use recent stable microbosh stemcell"
     method_option :"latest-stemcell", :type => :boolean, :desc => "Use latest microbosh stemcell; possibly not tagged stable [default]"
     method_option :"edge-stemcell", :type => :boolean, :desc => "Create custom stemcell from BOSH git source"
+    method_option :"edge-prebuilt", :type => :boolean, :desc => "Use AWS us-east-1 gems & prebuilt AMIs"
     def deploy
       migrate_old_settings
       load_deploy_options # from method_options above
