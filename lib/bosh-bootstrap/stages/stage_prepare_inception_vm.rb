@@ -19,14 +19,19 @@ module Bosh::Bootstrap::Stages
           "GIT_USER_EMAIL" => settings["git"]["email"])
         server.install "ruby 1.9.3", script("install_ruby", "UPGRADE" => settings[:upgrade_deps]),
           run_as_root: true
-        server.install "useful ruby gems", script("install_useful_gems", "UPGRADE" => settings[:upgrade_deps])
-        server.install "hub", script("install_hub")
+        server.install "useful ruby gems", script("install_useful_gems", "UPGRADE" => settings[:upgrade_deps]),
+          run_as_root: true
+        server.install "hub", script("install_hub"),
+          run_as_root: true
         server.install "bosh", script("install_bosh",
           "UPGRADE" => settings[:upgrade_deps],
-          "INSTALL_BOSH_FROM_SOURCE" => settings["bosh_git_source"] || "")
-        server.install "bosh plugins", script("install_bosh_plugins", "UPGRADE" => settings[:upgrade_deps])
+          "INSTALL_BOSH_FROM_SOURCE" => settings["bosh_git_source"] || "",
+          "BOSH_RUBYGEM_SOURCE" => settings["bosh_rubygems_source"] || ""),
+          run_as_root: true
+        server.install "bosh plugins", script("install_bosh_plugins", "UPGRADE" => settings[:upgrade_deps]),
+          run_as_root: true
 
-        server.validate "bosh deployer", script("validate_bosh_deployer")
+        server.validate "bosh deployer", script("validate_bosh_deployer"), run_as_root: true
       end
     end
 
