@@ -154,7 +154,32 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     volume.server = server
   end
 
+  # Ubuntu 12.10 64bit (EBS)
+  def image_id(region)
+    # http://cloud-images.ubuntu.com/quantal/current/
+    image_id = case region.to_s
+    when 'ap-northeast-1'
+      'ami-ccf270cd'
+    when 'ap-southeast-1'
+      'ami-16e8a444'
+    when 'ap-southeast-2'
+      'ami-5af36360'
+    when 'eu-west-1'
+      'ami-789c890c'
+    when 'sa-east-1'
+      'ami-35b36928'
+    when 'us-east-1'
+      'ami-1c80e475'
+    when 'us-west-1'
+      'ami-28567a6d'
+    when 'us-west-2'
+      'ami-5822b668'
+    end
+    image_id || raise("Please add Ubuntu 12.10 64bit (EBS) AMI image id to aws.rb#image_id method for region '#{region}'")
+  end
+
   def bootstrap(new_attributes = {})
+    new_attributes[:image_id] ||= image_id(fog_compute.region)
     vpc = new_attributes[:subnet_id]
 
     server = fog_compute.servers.new(new_attributes)
