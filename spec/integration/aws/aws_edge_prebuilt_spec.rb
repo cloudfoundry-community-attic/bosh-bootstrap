@@ -31,7 +31,9 @@ describe "AWS deployment using gems and AMIs from private jenkins server" do
 
     inception_vms = provider.servers_with_sg("#{bosh_name}-inception-vm")
     inception_vms.size.should == 1
+
     # TODO inception VM is not getting its IP address bound correctly
+    # https://github.com/StarkAndWayne/bosh-bootstrap/issues/174
     # public_ips.include?(inception_vms.first.public_ip_address).should be_true
 
     micrboshes = provider.servers_with_sg(bosh_name)
