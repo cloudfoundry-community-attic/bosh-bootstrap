@@ -4,11 +4,6 @@
 
 set -e # exit immediately if a simple command exits with a non-zero status
 
-if [[ $EUID -ne 0 ]]; then
-  echo "ERROR: This script must be run as root" 1>&2
-  exit 1
-fi
-
 echo "Testing for 'bosh micro deploy' command..."
 
 bosh_output=$(bosh --no-color help micro)

@@ -13,23 +13,18 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-DISTRIB_CODENAME=lucid
+RUBY_VERSION=ruby-1.9.3
 
 if [[ "$(which ruby)" == "" || "${UPGRADE}X" != "X" || ! ("$(ruby -v)" =~ "ruby 1.9.3") ]]; then
-  echo "Adding the Unboxed APT repository..."
-  echo "deb http://apt.unboxedconsulting.com/ $DISTRIB_CODENAME main" > /etc/apt/sources.list.d/unboxed.list
-  
-  echo -e "\n Retrieving the PGP keys for the repository..."
-  wget -O - http://apt.unboxedconsulting.com/release.asc | apt-key add -
-
-  echo "Resynchronizing the package index files from their sources..."
-  apt-get update
-
-  echo -e "Installing Ruby 1.9.3...\n"
-  apt-get -y install ubxd-ruby1.9.3
-
-  echo -e "Upgrading to latest Rubygems..."
-  gem update --system
+  curl -L https://get.rvm.io | bash -s head --autolibs=3 --ruby=$RUBY_VERSION
+  source /etc/profile.d/rvm.sh
 else
-  echo Ruby 1.9.3 already installed
+  echo $RUBY_VERSION already installed
+fi
+
+sudo usermod -a -G rvm vcap
+
+if [[ $(grep 'rvm $RUBY_VERSION --default' ~vcap/.profile) == "" ]]; then
+  echo "setting rvm default for ~vcap user"
+  echo "rvm $RUBY_VERSION --default" >> ~vcap/.profile
 fi

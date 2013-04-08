@@ -24,17 +24,8 @@ module Bosh::Bootstrap::Stages
         server.install "hub", script("install_hub"),
           run_as_root: true
         server.upload_file "/var/vcap/store/inception/Gemfile", gemfile
-        server.install "bosh", script("install_bosh"),
-          run_as_root: true
-        # server.install "bosh", script("install_bosh_by_gem_install",
-        #   "UPGRADE" => settings[:upgrade_deps],
-        #   "INSTALL_BOSH_FROM_SOURCE" => settings["bosh_git_source"] || "",
-        #   "BOSH_RUBYGEM_SOURCE" => settings["bosh_rubygems_source"] || ""),
-        #   run_as_root: true
-        # server.install "bosh plugins", script("install_bosh_plugins", "UPGRADE" => settings[:upgrade_deps]),
-        #   run_as_root: true
-
-        server.validate "bosh deployer", script("validate_bosh_deployer"), run_as_root: true
+        server.install "bosh", script("install_bosh")
+        server.validate "bosh deployer", script("validate_bosh_deployer")
       end
     end
 
