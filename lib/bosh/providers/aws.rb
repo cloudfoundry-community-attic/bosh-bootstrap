@@ -154,8 +154,8 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     volume.server = server
   end
 
-  # Ubuntu 12.10 64bit (EBS)
-  def image_id(region)
+  # Ubuntu 12.10 64bit (EBS) - Quantal
+  def quantal_image_id(region)
     # http://cloud-images.ubuntu.com/quantal/current/
     image_id = case region.to_s
     when 'ap-northeast-1'
@@ -179,7 +179,9 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
   end
 
   def bootstrap(new_attributes = {})
-    new_attributes[:image_id] ||= image_id(fog_compute.region)
+    if new_attributes.delete(:quantal)
+      new_attributes[:image_id] ||= quantal_image_id(fog_compute.region)
+    end
     vpc = new_attributes[:subnet_id]
 
     server = fog_compute.servers.new(new_attributes)
