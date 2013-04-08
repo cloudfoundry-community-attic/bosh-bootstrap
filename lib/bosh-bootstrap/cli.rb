@@ -494,7 +494,6 @@ module Bosh::Bootstrap
           settings["bosh_rubygems_source"] = "https://s3.amazonaws.com/bosh-jenkins-gems/"
           settings["micro_bosh_stemcell_type"] = "ami"
           settings["micro_bosh_stemcell_name"] = latest_prebuilt_microbosh_ami
-          settings["bosh_stemcell_url"] = latest_prebuilt_stemcell_url
         else
           settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
 
@@ -1249,10 +1248,6 @@ module Bosh::Bootstrap
         Net::HTTP.get("#{AWS_JENKINS_BUCKET}.s3.amazonaws.com", "/last_successful_micro-bosh-stemcell_ami").strip
       end
 
-      def latest_prebuilt_stemcell_url
-        "http://#{AWS_JENKINS_BUCKET}.s3.amazonaws.com/last_successful_bosh-stemcell_light.tgz"
-      end
-      
       def latest_micro_bosh_stemcell_name
         stemcell_filter_tags = ['micro', provider_name]
         if settings["micro_bosh_stemcell_type"] == "stable"
