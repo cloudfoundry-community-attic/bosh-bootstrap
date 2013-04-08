@@ -10,7 +10,7 @@ describe "AWS deployment using gems and AMIs from private jenkins server" do
 
   attr_reader :bosh_name
 
-  before { prepare_aws("bosh-from-jenkins", aws_region) }
+  before { prepare_aws("edge-prebuilt", aws_region) }
   # after { destroy_test_constructs(bosh_name) unless keep_after_test? }
 
   # Jenkins AMIs are produced for us-east-1
