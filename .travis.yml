@@ -16,11 +16,10 @@ env:
     - SUITE=unit
     # - SUITE=integration:aws:basic
     - SUITE=integration:aws:edge_prebuilt
-    # - SUITE=integration:aws:bosh_edge
+    - SUITE=integration:aws:bosh_edge
   global:
     - secure: "OS3pnXOAVRP0QPDl/Nn/0iBPZbrnn9irFYwEbMJ2fGPsV00u4IYDwoIN5Gzb\nX+cXyiPZB0jdQlbiCMaQEYjYig3fgnDhiLj/MnxkVYtILm+0uPSrX2Zf7jvR\nmxCT5jfTSZoPXQeNi9h8rEqvaqKv4z930xp/Z0QNoZLPWdwY5wk="
 matrix:
   allow_failures:
     - env: SUITE=integration:aws:basic
-    - env: SUITE=integration:aws:bosh_edge
         

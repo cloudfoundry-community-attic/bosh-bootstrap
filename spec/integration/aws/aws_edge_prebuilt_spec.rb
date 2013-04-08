@@ -39,6 +39,8 @@ describe "AWS deployment using gems and AMIs from private jenkins server" do
     micrboshes = provider.servers_with_sg(bosh_name)
     micrboshes.size.should == 1
     public_ips.include?(micrboshes.first.public_ip_address).should be_true
+
+    # TODO - no files in /var/vcap/store/stemcells (since it used AMI)
   end
 
 end

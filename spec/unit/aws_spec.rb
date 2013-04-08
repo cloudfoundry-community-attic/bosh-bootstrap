@@ -164,7 +164,6 @@ describe "AWS deployment" do
     setting "edge-prebuilt", true
     @cmd.deploy
 
-    settings["bosh_rubygems_source"].should == "https://s3.amazonaws.com/bosh-jenkins-gems/"
     settings["micro_bosh_stemcell_type"].should == "ami"
     settings["micro_bosh_stemcell_name"].should == "ami-123456"
     settings["bosh_stemcell_url"].should == "http://bosh-jenkins-artifacts.s3.amazonaws.com/last_successful_bosh-stemcell_light.tgz"

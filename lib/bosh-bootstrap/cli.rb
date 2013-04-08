@@ -24,13 +24,10 @@ module Bosh::Bootstrap
     attr_reader :server
 
     desc "deploy", "Bootstrap Micro BOSH, and optionally an Inception VM"
+    method_option :"edge-prebuilt", :type => :boolean, :desc => "Use AWS us-east-1 gems & prebuilt AMIs"
+    method_option :"edge", :type => :boolean, :desc => "Use pre-built gems; create microbosh from source [temporary default]"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
-    method_option :"edge-deployer", :type => :boolean, :desc => "Install bosh deployer from git instead of rubygems"
-    method_option :"stable-stemcell", :type => :boolean, :desc => "Use recent stable microbosh stemcell"
-    method_option :"latest-stemcell", :type => :boolean, :desc => "Use latest microbosh stemcell; possibly not tagged stable [default]"
-    method_option :"edge-stemcell", :type => :boolean, :desc => "Create custom stemcell from BOSH git source"
-    method_option :"edge-prebuilt", :type => :boolean, :desc => "Use AWS us-east-1 gems & prebuilt AMIs"
     def deploy
       migrate_old_settings
       load_deploy_options # from method_options above
@@ -491,26 +488,13 @@ module Bosh::Bootstrap
             error "--edge-prebuilt only available for AWS"
           end
           settings["bosh_provider"] = "aws"
-          settings["bosh_rubygems_source"] = "https://s3.amazonaws.com/bosh-jenkins-gems/"
           settings["micro_bosh_stemcell_type"] = "ami"
           settings["micro_bosh_stemcell_name"] = latest_prebuilt_microbosh_ami
+        elsif options[:"edge"] || settings.delete("edge")
+          settings["micro_bosh_stemcell_type"] = "custom"
         else
-          settings["bosh_git_source"] = options[:"edge-deployer"] # use bosh git repo instead of rubygems
-
-          # determine which micro-bosh stemcell to download/create
-          if options[:"stable-stemcell"]
-            settings["micro_bosh_stemcell_type"] = "stable"
-            settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
-          elsif options[:"latest-stemcell"]
-            settings["micro_bosh_stemcell_type"] = "latest"
-            settings["micro_bosh_stemcell_name"] = nil # force name to be refetched
-          elsif options[:"edge-stemcell"]
-            settings["micro_bosh_stemcell_type"] = "custom"
-            settings["micro_bosh_stemcell_name"] = "custom"
-          end
-          # may have already been set from previous deploy run
-          # default to "latest" for both AWS and OpenStack at the moment (no useful stable stemcells)
-          settings["micro_bosh_stemcell_type"] ||= "latest"
+          # currently defaulting to custom stemcells until 1.5.0 is released
+          settings["micro_bosh_stemcell_type"] = "custom"
         end
 
         # once a stemcell is downloaded or created; these fields above should
