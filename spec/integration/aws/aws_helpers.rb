@@ -39,9 +39,13 @@ module AwsHelpers
     setup_home_dir
     @cmd = nil
     @fog = nil
-    @bosh_name = "aws-#{spec_name}-#{aws_region}-#{Random.rand(100000)}"
+    @bosh_name = "aws-#{spec_name}-#{aws_region}-#{unique_number}"
     create_manifest
     destroy_test_constructs(bosh_name)
+  end
+
+  def unique_number
+    ENV['UNIQUE_NUMBER'] || Random.rand(100000)
   end
 
   def create_manifest(options = {})

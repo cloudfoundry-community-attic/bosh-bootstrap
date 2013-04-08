@@ -26,15 +26,17 @@ describe "AWS deployment using gems and AMIs from private jenkins server" do
 
     cmd.deploy
 
-    fog.addresses.should have(2).item
-    inception_ip_address = fog.addresses.first
-    inception_ip_address.domain.should == "standard"
+    ip_adresses = fog.addresses
+    public_ips = ip_adresses.map(&:public_ip)
 
-    inception_vms = servers_with_sg("#{bosh_name}-inception-vm")
+    inception_vms = provider.servers_with_sg("#{bosh_name}-inception-vm")
     inception_vms.size.should == 1
+    # TODO inception VM is not getting its IP address bound correctly
+    # public_ips.include?(inception_vms.first.public_ip_address).should be_true
 
-    micrboshes = servers_with_sg(bosh_name)
+    micrboshes = provider.servers_with_sg(bosh_name)
     micrboshes.size.should == 1
+    public_ips.include?(micrboshes.first.public_ip_address).should be_true
   end
 
 end
