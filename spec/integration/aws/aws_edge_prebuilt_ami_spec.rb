@@ -3,7 +3,7 @@ require File.expand_path("../aws_helpers", __FILE__)
 
 require "active_support/core_ext/hash/keys"
 
-describe "AWS deployment using very latest prebuilt gems and stemcells (outside of us-east-1)" do
+describe "AWS deployment using very latest prebuilt gems and AMIs (us-east-1 only)" do
   include FileUtils
   include Bosh::Bootstrap::Helpers::SettingsSetter
   include AwsHelpers
@@ -13,9 +13,9 @@ describe "AWS deployment using very latest prebuilt gems and stemcells (outside 
   before { prepare_aws("edge-prebuilt", aws_region) }
   # after { destroy_test_constructs(bosh_name) unless keep_after_test? }
 
-  # Jenkins AMIs are produced for us-east-1; so pick a different region to test stemcell
+  # Jenkins AMIs are produced for us-east-1
   def aws_region
-    ENV['AWS_REGION'] || "us-west-2"
+    "us-east-1"
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do

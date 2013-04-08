@@ -299,6 +299,7 @@ module Bosh::Bootstrap
       def deploy_stage_6_deploy_micro_bosh
         header "Stage 6: Deploying micro BOSH"
         recreate_local_ssh_keys_for_inception_vm
+        switch_to_prebuilt_microbosh_ami_if_available
 
         unless run_server(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
           error "Failed to complete Stage 6: Deploying micro BOSH"
@@ -483,20 +484,17 @@ module Bosh::Bootstrap
 
         prompt_git_user_information
 
+        # before deploy stage - need to change type => ami if AWS us-east-1?
         if options[:"edge-prebuilt"] || settings.delete("edge-prebuilt")
-          if settings["bosh_provider"] && settings["bosh_provider"] != "aws"
-            error "--edge-prebuilt only available for AWS"
-          end
-          settings["bosh_provider"] = "aws"
-          settings["micro_bosh_stemcell_type"] = "ami"
-          settings["micro_bosh_stemcell_name"] = latest_prebuilt_microbosh_ami
+          settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
+          settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
         elsif options[:"edge"] || settings.delete("edge")
           settings["micro_bosh_stemcell_type"] = "custom"
           settings["micro_bosh_stemcell_name"] = "custom"
         else
-          # currently defaulting to custom stemcells until 1.5.0 is released
-          settings["micro_bosh_stemcell_type"] = "custom"
-          settings["micro_bosh_stemcell_name"] = "custom"
+          # currently defaulting to latest prebuilt stemcells/amis until 1.5.0 is released
+          settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
+          settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
         end
 
         # once a stemcell is downloaded or created; these fields above should
@@ -1235,8 +1233,22 @@ module Bosh::Bootstrap
         "0.8.1"
       end
 
+      def switch_to_prebuilt_microbosh_ami_if_available
+        if ami = latest_prebuilt_microbosh_ami
+          say "Switching to using prebuilt AMI for bonus speed!", :green
+          settings["micro_bosh_stemcell_type"] = "ami"
+          settings["micro_bosh_stemcell_name"] = ami
+          save_settings!
+        end
+      end
+
+      # return the latest prebuilt microbosh AMI if it is available for target region
       def latest_prebuilt_microbosh_ami
-        Net::HTTP.get("#{AWS_JENKINS_BUCKET}.s3.amazonaws.com", "/last_successful_micro-bosh-stemcell_ami").strip
+        if aws? && settings["region_code"] == "us-east-1"
+          Net::HTTP.get("#{AWS_JENKINS_BUCKET}.s3.amazonaws.com", "/last_successful_micro-bosh-stemcell_ami").strip
+        else
+          nil
+        end
       end
 
       def latest_micro_bosh_stemcell_name

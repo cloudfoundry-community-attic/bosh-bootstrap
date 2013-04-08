@@ -20,6 +20,7 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}X" == "X" ]]; then
 fi
 
 STEMCELLS_DIR=/var/vcap/store/stemcells
+LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL=http://bosh-jenkins-artifacts.s3.amazonaws.com/last_successful_micro-bosh-stemcell.tgz
 
 if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
@@ -61,6 +62,11 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
   MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/bosh_agent-*/work/work/*.tgz | sort | tail -n 1)
   mv $MICRO_BOSH_STEMCELL_PATH $STEMCELLS_DIR
   MICRO_BOSH_STEMCELL_NAME=$(basename $MICRO_BOSH_STEMCELL_PATH)
+
+elif [[ "${MICRO_BOSH_STEMCELL_TYPE}" == "edge-prebuilt" ]]; then
+  cd $STEMCELLS_DIR
+  curl -O $LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL
+  MICRO_BOSH_STEMCELL_NAME=$(basename $LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL)
 
 elif [[ "${MICRO_BOSH_STEMCELL_TYPE}" == "ami" ]]; then
   echo "Using AMI ${MICRO_BOSH_STEMCELL_NAME}, so there is nothing to download."
