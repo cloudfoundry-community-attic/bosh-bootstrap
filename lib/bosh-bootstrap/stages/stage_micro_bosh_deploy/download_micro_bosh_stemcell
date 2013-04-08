@@ -60,7 +60,8 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
   echo "Copying to stemcells folder..."
   MICRO_BOSH_STEMCELL_PATH=$(ls -t /var/tmp/bosh/bosh_agent-*/work/work/*.tgz | sort | tail -n 1)
-  mv $MICRO_BOSH_STEMCELL_PATH $STEMCELLS_DIR
+  sudo mv $MICRO_BOSH_STEMCELL_PATH $STEMCELLS_DIR
+  sudo chown vcap:vcap -R $STEMCELLS_DIR
   MICRO_BOSH_STEMCELL_NAME=$(basename $MICRO_BOSH_STEMCELL_PATH)
 
 elif [[ "${MICRO_BOSH_STEMCELL_TYPE}" == "edge-prebuilt" ]]; then
