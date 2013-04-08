@@ -15,6 +15,7 @@ module Bosh::Bootstrap::Stages
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
         server.download "micro-bosh stemcell", script("download_micro_bosh_stemcell",
                       "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name,
+                      "MICRO_BOSH_STEMCELL_TYPE" => settings.micro_bosh_stemcell_type,
                       "PROVIDER" => settings.bosh_provider),
                       :settings => settings,
                       :save_output_to_settings_key => "micro_bosh_stemcell_name"
@@ -27,6 +28,7 @@ module Bosh::Bootstrap::Stages
         server.deploy "micro bosh", script("bosh_micro_deploy",
                       "BOSH_NAME" => settings.bosh_name,
                       "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name,
+                      "MICRO_BOSH_STEMCELL_TYPE" => settings.micro_bosh_stemcell_type,
                       "BOSH_HOST" => settings.bosh.ip_address,
                       "BOSH_USERNAME" => settings.bosh_username,
                       "BOSH_PASSWORD" => settings.bosh_password)

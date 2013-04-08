@@ -3,8 +3,7 @@
 # Install BOSH CLI
 #
 # Options:
-# * $UPGRADE - re-install or upgrade gems if already installed
-# * $INSTALL_BOSH_FROM_SOURCE - install from bosh git repo
+# * $BOSH_RUBYGEM_SOURCE - URL for where bosh rubygems can be downloaded
 
 set -e # exit immediately if a simple command exits with a non-zero status
 
