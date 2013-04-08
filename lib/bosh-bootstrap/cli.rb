@@ -492,9 +492,11 @@ module Bosh::Bootstrap
           settings["micro_bosh_stemcell_name"] = latest_prebuilt_microbosh_ami
         elsif options[:"edge"] || settings.delete("edge")
           settings["micro_bosh_stemcell_type"] = "custom"
+          settings["micro_bosh_stemcell_name"] = "custom"
         else
           # currently defaulting to custom stemcells until 1.5.0 is released
           settings["micro_bosh_stemcell_type"] = "custom"
+          settings["micro_bosh_stemcell_name"] = "custom"
         end
 
         # once a stemcell is downloaded or created; these fields above should
