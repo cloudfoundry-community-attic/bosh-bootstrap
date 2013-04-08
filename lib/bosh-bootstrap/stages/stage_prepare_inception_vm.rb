@@ -62,7 +62,6 @@ module Bosh::Bootstrap::Stages
       
       gem "bosh_cli", "~> 1.5.0.pre"
       gem "bosh_deployer", "~> 1.5.0.pre"
-      gem "cf"
       RUBY
     end
   end
