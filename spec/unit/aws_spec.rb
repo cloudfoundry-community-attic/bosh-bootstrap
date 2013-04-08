@@ -166,7 +166,6 @@ describe "AWS deployment" do
 
     settings["micro_bosh_stemcell_type"].should == "ami"
     settings["micro_bosh_stemcell_name"].should == "ami-123456"
-    settings["bosh_stemcell_url"].should == "http://bosh-jenkins-artifacts.s3.amazonaws.com/last_successful_bosh-stemcell_light.tgz"
 
     public_ip = settings["bosh"]["ip_address"]
     manifest_path = spec_asset("micro_bosh_yml/micro_bosh.aws_ec2.yml")
