@@ -1122,10 +1122,15 @@ module Bosh::Bootstrap
         end
 
         # Format and mount the volume
-        say "Mounting persistent disk as volume on inception VM..."
-        run_ssh_command_until_successful server, "sudo mkfs.ext4 #{device} -F"
-        run_ssh_command_until_successful server, "sudo mkdir -p /var/vcap/store"
-        run_ssh_command_until_successful server, "sudo mount #{device} /var/vcap/store"
+        if aws?
+          say "Skipping volume mounting on AWS 12.10 inception VM until its fixed", [:yellow, :bold]
+          run_ssh_command_until_successful server, "sudo mkdir -p /var/vcap/store"
+        else
+          say "Mounting persistent disk as volume on inception VM..."
+          run_ssh_command_until_successful server, "sudo mkfs.ext4 #{device} -F"
+          run_ssh_command_until_successful server, "sudo mkdir -p /var/vcap/store"
+          run_ssh_command_until_successful server, "sudo mount #{device} /var/vcap/store"
+        end
       end
 
       def run_ssh_command_until_successful(server, cmd)
