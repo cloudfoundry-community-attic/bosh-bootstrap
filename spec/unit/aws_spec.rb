@@ -122,6 +122,9 @@ describe "AWS deployment" do
     @cmd.deploy
     @settings = nil # reload settings file
 
+    # TODO we are temporarily creating a custom stemcell by default
+    settings["micro_bosh_stemcell_type"].should == "custom"
+
     fog.addresses.should have(2).item
     inception_ip_address = fog.addresses.first
     inception_ip_address.domain.should == "standard"
