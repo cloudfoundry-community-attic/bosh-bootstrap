@@ -11,7 +11,7 @@ describe "AWS deployment using gems and AMIs from private jenkins server" do
   attr_reader :bosh_name
 
   before { prepare_aws("bosh-from-jenkins", aws_region) }
-  after { destroy_test_constructs(bosh_name) unless keep_after_test? }
+  # after { destroy_test_constructs(bosh_name) unless keep_after_test? }
 
   # Jenkins AMIs are produced for us-east-1
   def aws_region
@@ -19,11 +19,7 @@ describe "AWS deployment using gems and AMIs from private jenkins server" do
   end
 
   it "creates an EC2 inception/microbosh with the associated resources" do
-    create_manifest(
-      "bosh_gem_server" => "private",
-      "micro_bosh_stemcell_type" => "ami",
-      "bosh_stemcell_type" => "ami"
-    )
+    create_manifest("edge-prebuilt" => true)
 
     manifest_file = home_file(".bosh_bootstrap", "manifest.yml")
     File.should be_exists(manifest_file)
