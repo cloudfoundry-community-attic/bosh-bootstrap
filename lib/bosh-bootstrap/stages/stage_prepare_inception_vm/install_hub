@@ -16,6 +16,7 @@ else
   git pull origin master
 fi
 rake install prefix=/usr/local
+chown -R vcap:vcap /var/vcap/store/repos/hub
 
 if [[ $(grep "hub alias -s" /home/vcap/.bashrc) == "" ]]; then
   echo 'adding hub alias to .bashrc'
