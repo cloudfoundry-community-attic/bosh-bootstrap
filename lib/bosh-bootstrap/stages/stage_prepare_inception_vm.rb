@@ -23,13 +23,16 @@ module Bosh::Bootstrap::Stages
           run_as_root: true
         server.install "hub", script("install_hub"),
           run_as_root: true
-        server.install "bosh", script("install_bosh",
-          "UPGRADE" => settings[:upgrade_deps],
-          "INSTALL_BOSH_FROM_SOURCE" => settings["bosh_git_source"] || "",
-          "BOSH_RUBYGEM_SOURCE" => settings["bosh_rubygems_source"] || ""),
+        server.upload_file "/var/vcap/store/inception/Gemfile", gemfile
+        server.install "bosh", script("install_bosh"),
           run_as_root: true
-        server.install "bosh plugins", script("install_bosh_plugins", "UPGRADE" => settings[:upgrade_deps]),
-          run_as_root: true
+        # server.install "bosh", script("install_bosh_by_gem_install",
+        #   "UPGRADE" => settings[:upgrade_deps],
+        #   "INSTALL_BOSH_FROM_SOURCE" => settings["bosh_git_source"] || "",
+        #   "BOSH_RUBYGEM_SOURCE" => settings["bosh_rubygems_source"] || ""),
+        #   run_as_root: true
+        # server.install "bosh plugins", script("install_bosh_plugins", "UPGRADE" => settings[:upgrade_deps]),
+        #   run_as_root: true
 
         server.validate "bosh deployer", script("validate_bosh_deployer"), run_as_root: true
       end
@@ -58,6 +61,18 @@ module Bosh::Bootstrap::Stages
         Thor::Base.shell.new.say_status "error", "Missing script lib/bosh-bootstrap/stages/#{stage_name}/#{segment_name}", :red
         exit 1
       end
+    end
+
+    # returns a Gemfile to be used to install bosh & other gems
+    def gemfile
+      <<-RUBY.gsub(/      /, '')
+      source 'https://rubygems.org'
+      source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
+      
+      gem "bosh_cli", "~> 1.5.0.pre"
+      gem "bosh_deployer", "~> 1.5.0.pre"
+      gem "cf"
+      RUBY
     end
   end
 end
