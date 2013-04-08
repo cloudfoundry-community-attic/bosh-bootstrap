@@ -69,7 +69,7 @@ describe Bosh::Bootstrap do
     end
 
     it "stage 6 - download stemcell and deploy microbosh" do
-      testing_stage(5)
+      testing_stage(6)
       @cmd.should_receive(:recreate_local_ssh_keys_for_inception_vm)
       setting "bosh_provider", "aws"
       setting "micro_bosh_stemcell_name", "micro-bosh-stemcell-aws-0.8.1.tgz"
@@ -87,7 +87,7 @@ describe Bosh::Bootstrap do
     end
 
     it "stage 7 - sets up new microbosh" do
-      testing_stage(6)
+      testing_stage(7)
       setting "bosh_name", "microbosh-aws-us-east-1"
       setting "bosh_username", "drnic"
       setting "bosh_password", "password"
