@@ -33,6 +33,8 @@ module Bosh::Bootstrap
       load_deploy_options # from method_options above
 
       deploy_stage_1_choose_infrastructure_provider
+      load_provider_specific_options
+
       deploy_stage_2_bosh_configuration
       deploy_stage_3_create_allocate_inception_vm
       deploy_stage_4_prepare_inception_vm
@@ -484,9 +486,22 @@ module Bosh::Bootstrap
 
         prompt_git_user_information
 
+        # once a stemcell is downloaded or created; these fields above should
+        # be uploaded with values such as:
+        #  -> settings["micro_bosh_stemcell_name"] = "micro-bosh-stemcell-aws-0.8.1.tgz"
+
+        if options["upgrade-deps"]
+          settings["upgrade_deps"] = options["upgrade-deps"]
+        else
+          settings.delete("upgrade_deps")
+        end
+        save_settings!
+      end
+
+      def load_provider_specific_options
         # before deploy stage - need to change type => ami if AWS us-east-1?
         if options[:"edge-prebuilt"] || settings.delete("edge-prebuilt")
-          if settings["fog_credentials"] && aws?
+          if aws?
             settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
             settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
           else
@@ -505,17 +520,6 @@ module Bosh::Bootstrap
             settings["micro_bosh_stemcell_name"] = "custom"
           end
         end
-
-        # once a stemcell is downloaded or created; these fields above should
-        # be uploaded with values such as:
-        #  -> settings["micro_bosh_stemcell_name"] = "micro-bosh-stemcell-aws-0.8.1.tgz"
-
-        if options["upgrade-deps"]
-          settings["upgrade_deps"] = options["upgrade-deps"]
-        else
-          settings.delete("upgrade_deps")
-        end
-        save_settings!
       end
 
       def prompt_git_user_information
