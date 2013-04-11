@@ -66,8 +66,15 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 
 elif [[ "${MICRO_BOSH_STEMCELL_TYPE}" == "edge-prebuilt" ]]; then
   cd $STEMCELLS_DIR
-  curl -O $LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL
-  MICRO_BOSH_STEMCELL_NAME=$(basename $LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL)
+  echo Looking for latest microbosh stemcell at $LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL
+  etag=$(curl -I $LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL 2>&1 | awk '/^ETag/ {print $2}' | sed -e 's/["?]//g')
+  MICRO_BOSH_STEMCELL_NAME="micro_bosh-${etag}-latest.tgz"
+  if [[ ! -f $MICRO_BOSH_STEMCELL_NAME ]]; then
+    echo "Downloading latest microbosh stemcell, etag $etag..."
+    curl -o $MICRO_BOSH_STEMCELL_NAME $LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL
+  else
+    echo "Latest microbosh stemcell with etag $etag already downloaded, skipping."
+  fi
 
 elif [[ "${MICRO_BOSH_STEMCELL_TYPE}" == "ami" ]]; then
   echo "Using AMI ${MICRO_BOSH_STEMCELL_NAME}, so there is nothing to download."
