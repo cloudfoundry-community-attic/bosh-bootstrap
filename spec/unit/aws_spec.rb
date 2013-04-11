@@ -122,8 +122,8 @@ describe "AWS deployment" do
     @cmd.deploy
     @settings = nil # reload settings file
 
-    # TODO we are temporarily creating a custom stemcell by default
-    settings["micro_bosh_stemcell_type"].should == "custom"
+    # TODO we are temporarily using prebuilt stemcells by default for AWS
+    settings["micro_bosh_stemcell_type"].should == "edge-prebuilt"
 
     fog.addresses.should have(2).item
     inception_ip_address = fog.addresses.first

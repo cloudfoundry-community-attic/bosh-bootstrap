@@ -486,7 +486,7 @@ module Bosh::Bootstrap
 
         # before deploy stage - need to change type => ami if AWS us-east-1?
         if options[:"edge-prebuilt"] || settings.delete("edge-prebuilt")
-          if aws?
+          if settings["fog_credentials"] && aws?
             settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
             settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
           else
@@ -496,9 +496,14 @@ module Bosh::Bootstrap
           settings["micro_bosh_stemcell_type"] = "custom"
           settings["micro_bosh_stemcell_name"] = "custom"
         else
-          # currently defaulting to latest prebuilt stemcells/amis until 1.5.0 is released
-          settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
-          settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
+          if settings["fog_credentials"] && aws?
+            # currently defaulting to latest prebuilt stemcells/amis until 1.5.0 is released
+            settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
+            settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
+          else
+            settings["micro_bosh_stemcell_type"] = "custom"
+            settings["micro_bosh_stemcell_name"] = "custom"
+          end
         end
 
         # once a stemcell is downloaded or created; these fields above should
@@ -1193,7 +1198,8 @@ module Bosh::Bootstrap
       end
 
       def aws?
-        settings.fog_credentials.provider == "AWS"
+        (settings["fog_credentials"] && settings["fog_credentials"]["provider"] == "AWS") ||
+        (settings["bosh_provider"] == "aws")
       end
 
       def vpc?
@@ -1201,7 +1207,8 @@ module Bosh::Bootstrap
       end
 
       def openstack?
-        settings.fog_credentials.provider == "OpenStack"
+        (settings["fog_credentials"] && settings["fog_credentials"]["provider"] == "OpenStack") ||
+        (settings["bosh_provider"] == "openstack")
       end
 
       def prompt_for_bosh_credentials
