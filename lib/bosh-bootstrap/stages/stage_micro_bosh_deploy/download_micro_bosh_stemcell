@@ -6,9 +6,9 @@
 # * $MICRO_BOSH_STEMCELL_NAME - public stemcell name to be downloaded
 #                             - if 'custom' the create stemcell from BOSH source
 # * $MICRO_BOSH_STEMCELL_TYPE - what type of stemcell (ami vs tgz)
+# * $PROVIDER - e.g. aws, openstack
 #
 # Optional:
-# * $PROVIDER - required for 'custom' $MICRO_BOSH_STEMCELL_NAME; e.g. aws, openstack
 # * $ISO_NAME - defaults to ubuntu-10.04.4-server-amd64.iso for creating stemcell
 
 set -e # exit immediately if a simple command exits with a non-zero status
@@ -20,7 +20,7 @@ if [[ "${MICRO_BOSH_STEMCELL_NAME}X" == "X" ]]; then
 fi
 
 STEMCELLS_DIR=/var/vcap/store/stemcells
-LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL=http://bosh-jenkins-artifacts.s3.amazonaws.com/last_successful_micro-bosh-stemcell.tgz
+LAST_SUCCESSFUL_MICROBOSH_STEMCELL_URL=http://bosh-jenkins-artifacts.s3.amazonaws.com/last_successful_micro-bosh-stemcell-$PROVIDER.tgz
 
 if [[ "${MICRO_BOSH_STEMCELL_NAME}" == "custom" ]]; then
 

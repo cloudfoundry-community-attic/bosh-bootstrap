@@ -501,24 +501,15 @@ module Bosh::Bootstrap
       def load_provider_specific_options
         # before deploy stage - need to change type => ami if AWS us-east-1?
         if options[:"edge-prebuilt"] || settings.delete("edge-prebuilt")
-          if aws?
-            settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
-            settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
-          else
-            error "Currently --edge-prebuilt is not available for #{bosh_provider} :("
-          end
+          settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
+          settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
         elsif options[:"edge"] || settings.delete("edge")
           settings["micro_bosh_stemcell_type"] = "custom"
           settings["micro_bosh_stemcell_name"] = "custom"
         else
-          if settings["fog_credentials"] && aws?
-            # currently defaulting to latest prebuilt stemcells/amis until 1.5.0 is released
-            settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
-            settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
-          else
-            settings["micro_bosh_stemcell_type"] = "custom"
-            settings["micro_bosh_stemcell_name"] = "custom"
-          end
+          # currently defaulting to latest prebuilt stemcells/amis until 1.5.0 is released
+          settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
+          settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
         end
       end
 
