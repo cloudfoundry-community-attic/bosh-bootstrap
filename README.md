@@ -48,7 +48,7 @@ Stage 1: Choose infrastructure
 Found infrastructure API credentials at ~/.fog (override with --fog)
 1. AWS (default)
 2. AWS (bosh)
-3. Rackspace (default)
+3. Openstack (default)
 Choose infrastructure:  1
 
 Confirming: using AWS infrastructure.
