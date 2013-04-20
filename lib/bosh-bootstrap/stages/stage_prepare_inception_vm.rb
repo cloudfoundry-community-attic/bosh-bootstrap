@@ -61,7 +61,7 @@ module Bosh::Bootstrap::Stages
       source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
       
       gem "bosh_cli", "~> 1.5.0.pre"
-      gem "bosh_deployer", "~> 1.5.0.pre"
+      gem "bosh_cli_plugin_micro", "~> 1.5.0.pre"
       RUBY
     end
   end
