@@ -1,7 +1,7 @@
 require "json" # for inline hashes within YAML
 
 module Bosh::Bootstrap::Stages
-  class MicroBoshDeploy
+  class MicroBoshDownload
     attr_reader :settings
 
     def initialize(settings)
@@ -13,24 +13,17 @@ module Bosh::Bootstrap::Stages
       settings[:bosh_name] ||= "unnamed_bosh"
 
       @commands ||= Bosh::Bootstrap::Commander::Commands.new do |server|
-        server.upload_file \
-                      "/var/vcap/store/microboshes/deployments/#{settings.bosh_name}/micro_bosh.yml",
-                      micro_bosh_manifest
-        server.install "key pair for user", script("install_key_pair_for_user",
-                      "PRIVATE_KEY" => settings.bosh_key_pair.private_key,
-                      "KEY_PAIR_NAME" => settings.bosh_key_pair.name)
-        server.deploy "micro bosh", script("bosh_micro_deploy",
-                      "BOSH_NAME" => settings.bosh_name,
+        server.download "micro-bosh stemcell", script("download_micro_bosh_stemcell",
                       "MICRO_BOSH_STEMCELL_NAME" => settings.micro_bosh_stemcell_name,
                       "MICRO_BOSH_STEMCELL_TYPE" => settings.micro_bosh_stemcell_type,
-                      "BOSH_HOST" => settings.bosh.ip_address,
-                      "BOSH_USERNAME" => settings.bosh_username,
-                      "BOSH_PASSWORD" => settings.bosh_password)
+                      "PROVIDER" => settings.bosh_provider),
+                      :settings => settings,
+                      :save_output_to_settings_key => "micro_bosh_stemcell_name"
       end
     end
 
     def stage_name
-      "stage_micro_bosh_deploy"
+      "stage_micro_bosh_download"
     end
 
     # Loads local script
