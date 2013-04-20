@@ -5,6 +5,14 @@
     gem install bosh-bootstrap
     bosh-bootstrap deploy
 
+## v0.10
+
+* Only using latest pre-release bosh gems & stemcells/amis - do not upgrade if you want the old 2012 gems
+* AWS us-east-1 uses a pre-built AMI for extra speed
+* AWS all regions are working (using pre-created stemcell)
+* OpenStack is now working (using pre-created stemcell)
+* `deploy --create-inception` chooses to create an inception VM
+
 ## v0.9
 
 * v0.8 wasn't working for many people; and neither will v0.9; but its a move in the right direction.

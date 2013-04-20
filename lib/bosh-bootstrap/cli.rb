@@ -28,6 +28,7 @@ module Bosh::Bootstrap
     method_option :"edge", :type => :boolean, :desc => "Use pre-built gems; create microbosh from source [temporary default]"
     method_option :fog, :type => :string, :desc => "fog config file (default: ~/.fog)"
     method_option :"upgrade-deps", :type => :boolean, :desc => "Force upgrade dependencies, packages & gems"
+    method_option :"create-inception", :type => :boolean, :desc => "Choose to create an inception VM"
     def deploy
       migrate_old_settings
       load_deploy_options # from method_options above
@@ -512,6 +513,10 @@ module Bosh::Bootstrap
           settings["upgrade_deps"] = options["upgrade-deps"]
         else
           settings.delete("upgrade_deps")
+        end
+
+        if options["create-inception"]
+          settings["inception"] = {"create_new" => true}
         end
         save_settings!
       end
