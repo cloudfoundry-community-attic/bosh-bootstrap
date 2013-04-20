@@ -21,15 +21,12 @@
 * AWS other regions will use a pre-created stemcell. I haven't tested this well yet.
 * OpenStack support is still broken because you need to create your own stemcells and for that you need a 12.10 inception VM and that work isn't quite done yet.
 
-## v0.8 (& v0.8.1)
+## v0.8
 
 * SSH keys used to access inception VM are now generated and stored within the `~/.bosh_bootstrap/ssh` folder. This fixes many issues that many people were having (their keys had passphrases, their fog_default keypair was old). It also allows a manifest file to be shared between people as it contains the private key contents, and the private key file will be recreated if it is missing.
 * existing inception VMs' manifest.yml will be upgraded automatically and a backup file created (just in case)
 * tightening of net-ssh & net-scp gems to ensure the bosh-bootstrap gem can be installed [thx @mmb]
-
-### v0.8.2
-
-* preinstall net-ssh/net-scp/fog on inception VM before installing `bosh_deployer` to fix in ability to install `bosh_deployer` 1.4.1 due to latest fog 1.10.0 release
+* preinstall net-ssh/net-scp/fog on inception VM before installing `bosh_deployer` to fix in ability to install `bosh_deployer` 1.4.1 due to latest fog 1.10.0 release (v0.8.2)
 
 ## v0.7
 
