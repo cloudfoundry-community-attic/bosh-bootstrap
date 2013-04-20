@@ -39,8 +39,9 @@ module Bosh::Bootstrap
       deploy_stage_3_create_allocate_inception_vm
       deploy_stage_4_prepare_inception_vm
       deploy_stage_5_salted_password
-      deploy_stage_6_deploy_micro_bosh
-      deploy_stage_7_setup_new_bosh
+      deploy_stage_6_download_micro_bosh
+      deploy_stage_7_deploy_micro_bosh
+      deploy_stage_8_setup_new_bosh
     end
 
     desc "upgrade-inception", "Upgrade inception VM with latest packages, gems, security group ports"
@@ -305,30 +306,40 @@ module Bosh::Bootstrap
         end
       end
 
-      def deploy_stage_6_deploy_micro_bosh
-        header "Stage 6: Deploying micro BOSH"
+      def deploy_stage_6_download_micro_bosh
+        header "Stage 6: Download micro BOSH"
         recreate_local_ssh_keys_for_inception_vm
         switch_to_prebuilt_microbosh_ami_if_available
 
-        unless run_server(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
-          error "Failed to complete Stage 6: Deploying micro BOSH"
+        unless run_server(Bosh::Bootstrap::Stages::MicroBoshDownload.new(settings).commands)
+          error "Failed to complete Stage 6: Downloading micro BOSH"
         end
         # Settings are updated by this stage
-        # it generates a salted password from settings.bosh.password
-        # and stores it in settings.bosh.salted_password
+        # It may update the micro_bosh_stemcell_name
         save_settings!
 
         confirm "Successfully built micro BOSH"
       end
 
-      def deploy_stage_7_setup_new_bosh
+      def deploy_stage_7_deploy_micro_bosh
+        header "Stage 7: Deploying micro BOSH"
+        recreate_local_ssh_keys_for_inception_vm
+
+        unless run_server(Bosh::Bootstrap::Stages::MicroBoshDeploy.new(settings).commands)
+          error "Failed to complete Stage 7: Deploying micro BOSH"
+        end
+
+        confirm "Successfully built micro BOSH"
+      end
+
+      def deploy_stage_8_setup_new_bosh
         # TODO change to a polling test of director being available
         say "Pausing to wait for BOSH Director..."
         sleep 5
 
-        header "Stage 7: Setup bosh"
+        header "Stage 8: Setup bosh"
         unless run_server(Bosh::Bootstrap::Stages::SetupNewBosh.new(settings).commands)
-          error "Failed to complete Stage 6: Setup bosh"
+          error "Failed to complete Stage 7: Setup bosh"
         end
 
         say "Locally targeting and login to new BOSH..."
@@ -508,24 +519,15 @@ module Bosh::Bootstrap
       def load_provider_specific_options
         # before deploy stage - need to change type => ami if AWS us-east-1?
         if options[:"edge-prebuilt"] || settings.delete("edge-prebuilt")
-          if aws?
-            settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
-            settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
-          else
-            error "Currently --edge-prebuilt is not available for #{bosh_provider} :("
-          end
+          settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
+          settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
         elsif options[:"edge"] || settings.delete("edge")
           settings["micro_bosh_stemcell_type"] = "custom"
           settings["micro_bosh_stemcell_name"] = "custom"
         else
-          if settings["fog_credentials"] && aws?
-            # currently defaulting to latest prebuilt stemcells/amis until 1.5.0 is released
-            settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
-            settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
-          else
-            settings["micro_bosh_stemcell_type"] = "custom"
-            settings["micro_bosh_stemcell_name"] = "custom"
-          end
+          # currently defaulting to latest prebuilt stemcells/amis until 1.5.0 is released
+          settings["micro_bosh_stemcell_type"] = "edge-prebuilt"
+          settings["micro_bosh_stemcell_name"] = "edge-prebuilt"
         end
       end
 

@@ -64,7 +64,7 @@ describe "AWS deployment" do
     @cmd.should_receive(:provision_and_mount_volume)
     @cmd.stub(:run_server).and_return(true)
     @cmd.stub(:sleep)
-    @cmd.should_receive(:deploy_stage_7_setup_new_bosh)
+    @cmd.should_receive(:deploy_stage_8_setup_new_bosh)
     @cmd.deploy
 
     fog.addresses.should have(1).item # assigned to inception VM
@@ -118,7 +118,7 @@ describe "AWS deployment" do
     @cmd.should_receive(:provision_and_mount_volume)
     @cmd.stub(:run_server).and_return(true)
     @cmd.stub(:sleep)
-    @cmd.should_receive(:deploy_stage_7_setup_new_bosh)
+    @cmd.should_receive(:deploy_stage_8_setup_new_bosh)
     @cmd.deploy
     @settings = nil # reload settings file
 
@@ -161,7 +161,7 @@ describe "AWS deployment" do
     @cmd.should_receive(:provision_and_mount_volume)
     @cmd.stub(:run_server).and_return(true)
     @cmd.stub(:sleep)
-    @cmd.should_receive(:deploy_stage_7_setup_new_bosh)
+    @cmd.should_receive(:deploy_stage_8_setup_new_bosh)
     @cmd.should_receive(:latest_prebuilt_microbosh_ami).and_return("ami-123456")
 
     setting "edge-prebuilt", true

@@ -21,8 +21,9 @@ describe Bosh::Bootstrap do
       deploy_stage_3_create_allocate_inception_vm
       deploy_stage_4_prepare_inception_vm
       deploy_stage_5_salted_password
-      deploy_stage_6_deploy_micro_bosh
-      deploy_stage_7_setup_new_bosh
+      deploy_stage_6_download_micro_bosh
+      deploy_stage_7_deploy_micro_bosh
+      deploy_stage_8_setup_new_bosh
     ]
     stage_methods.each do |method|
       unless method =~ /#{stage}/
@@ -43,8 +44,9 @@ describe Bosh::Bootstrap do
       @cmd.should_receive(:deploy_stage_3_create_allocate_inception_vm)
       @cmd.should_receive(:deploy_stage_4_prepare_inception_vm)
       @cmd.should_receive(:deploy_stage_5_salted_password)
-      @cmd.should_receive(:deploy_stage_6_deploy_micro_bosh)
-      @cmd.should_receive(:deploy_stage_7_setup_new_bosh)
+      @cmd.should_receive(:deploy_stage_6_download_micro_bosh)
+      @cmd.should_receive(:deploy_stage_7_deploy_micro_bosh)
+      @cmd.should_receive(:deploy_stage_8_setup_new_bosh)
       @cmd.deploy
     end
 
@@ -68,8 +70,8 @@ describe Bosh::Bootstrap do
       @cmd.deploy
     end
 
-    it "stage 6 - download stemcell and deploy microbosh" do
-      testing_stage(6)
+    it "stage 7 - deploy microbosh" do
+      testing_stage(7)
       @cmd.should_receive(:recreate_local_ssh_keys_for_inception_vm)
       setting "bosh_provider", "aws"
       setting "micro_bosh_stemcell_name", "micro-bosh-stemcell-aws-0.8.1.tgz"
@@ -86,8 +88,8 @@ describe Bosh::Bootstrap do
       @cmd.deploy
     end
 
-    it "stage 7 - sets up new microbosh" do
-      testing_stage(7)
+    it "stage 8 - sets up new microbosh" do
+      testing_stage(8)
       setting "bosh_name", "microbosh-aws-us-east-1"
       setting "bosh_username", "drnic"
       setting "bosh_password", "password"

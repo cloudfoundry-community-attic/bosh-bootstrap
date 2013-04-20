@@ -5,6 +5,7 @@ module Bosh; module Bootstrap; module Helpers; end; end; end
 
 # Helper methods for loading/saving settings
 module Bosh::Bootstrap::Helpers::Settings
+
   # Previously selected settings are stored in a YAML manifest
   # Protects the manifest file with user-only priveleges
   def settings
