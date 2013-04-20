@@ -14,6 +14,7 @@
 * `deploy --create-inception` chooses to create an inception VM
 * Using `bosh_cli_plugin_micro` (for `bosh micro`) [was `bosh_deployer`]  (v1.10.1)
 * `bosh-cloudfoundry` gem installed with prerelease gems (fix in v0.10.1)
+* AWS inception VM gets its attached volume again (v1.10.2)
 
 ## v0.9
 
