@@ -9,7 +9,7 @@ set -e # exit immediately if a simple command exits with a non-zero status
 
 cd /var/vcap/store/repos
 if [[ ! -d hub ]]; then
-  git clone git://github.com/defunkt/hub.git
+  git clone https://github.com/defunkt/hub.git
   cd hub
 else
   cd hub
