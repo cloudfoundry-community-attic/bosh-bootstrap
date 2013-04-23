@@ -76,7 +76,7 @@ describe Bosh::Bootstrap do
         @cmd.stub!(:ensure_mosh_installed).and_return(true)
         @cmd.should_receive(:exit)
         @cmd.should_receive(:system).
-          with("mosh vcap@5.5.5.5")
+          with("mosh --ssh 'ssh -i #{@private_key_path}' vcap@5.5.5.5")
         @cmd.mosh
       end
       it "should ensure that the mosh ports are opened" do
