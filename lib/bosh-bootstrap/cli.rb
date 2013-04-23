@@ -444,8 +444,11 @@ module Bosh::Bootstrap
         ensure_security_group_allows_mosh
 
         username = 'vcap'
-        host = settings.inception[:host]
-        exit system Escape.shell_command(['mosh', "#{username}@#{host}"])
+        host = settings.inception["host"]
+        exit system Escape.shell_command([
+          'mosh', 
+          '--ssh',"ssh -i #{settings.inception["local_private_key_path"]}", 
+          "#{username}@#{host}"])
       end
 
       def ensure_mosh_installed
