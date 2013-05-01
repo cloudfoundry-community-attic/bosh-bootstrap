@@ -104,7 +104,7 @@ module Bosh::Bootstrap
       DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
       DEFAULT_MICROBOSH_VOLUME_SIZE = 16 # Gb
       DEFAULT_VPC_NETWORK = "10.0.0.0/16"
-      DEFAULT_SUBNET = "10.0.0.0/24"
+      DEFAULT_VPC_SUBNET = "10.0.0.0/24"
 
       def deploy_stage_1_choose_infrastructure_provider
         settings["git"] ||= {}
@@ -191,7 +191,8 @@ module Bosh::Bootstrap
 
         unless settings[:bosh]["ip_address"]
           if vpc?
-            settings[:bosh]["ip_address"] = "10.0.0.6"
+            ip_address = provision_vpc_ip_address(6)
+            settings[:bosh]["ip_address"] = ip_address
           else
             say "Acquiring IP address for micro BOSH..."
             ip_address = acquire_ip_address
@@ -206,7 +207,7 @@ module Bosh::Bootstrap
         save_settings!
 
         if aws? && vpc?
-          create_complete_vpc(settings.bosh_name, DEFAULT_VPC_NETWORK, DEFAULT_SUBNET)
+          create_complete_vpc(settings.bosh_name, DEFAULT_VPC_NETWORK, DEFAULT_VPC_SUBNET)
         end
 
         unless settings[:bosh_security_group]
@@ -398,7 +399,7 @@ module Bosh::Bootstrap
         end
       end
 
-      def create_complete_vpc(name, vpc_range = DEFAULT_VPC_NETWORK, subnet_cidr_block = DEFAULT_SUBNET)
+      def create_complete_vpc(name, vpc_range = DEFAULT_VPC_NETWORK, subnet_cidr_block = DEFAULT_VPC_SUBNET)
         with_setting "vpc" do |setting|
           unless vpc_exists?
             say "Creating VPC '#{name}'..."
@@ -948,7 +949,11 @@ module Bosh::Bootstrap
 
         unless settings["inception"]["ip_address"]
           say "Provisioning IP address for inception VM..."
-          settings["inception"]["ip_address"] = acquire_ip_address
+          if vpc?
+            settings["inception"]["ip_address"] = provision_vpc_ip_address(5)
+          else
+            settings["inception"]["ip_address"] = acquire_ip_address
+          end
           save_settings!
         end
 
@@ -969,20 +974,8 @@ module Bosh::Bootstrap
           }
           if vpc?
             raise "must create subnet before creating VPC inception VM" unless settings["subnet"] && settings["subnet"]["id"]
-            # Get the IP Address from the subnet instead of assuming the default network.  Assigns
-            # The 5th address in the block.  Min network size is /29 since there is only 6 usable IP
-            # Addresses and we use .5 and .6 for inception/microbosh.
-            # If this auto-assignment doesn't work, just override in the settings with:
-            # ---
-            # inception:
-            #   ip_address: 10.0.0.5
-            #
-            subnet = provider.get_subnet(settings["subnet"]["id"])
-            network = NetAddr::CIDR.create(subnet.cidr_block)
-            inception_ip_address = network[5] if network.size >= 8
-            
             inception_vm_attributes[:subnet_id] = settings["subnet"]["id"]
-            inception_vm_attributes[:private_ip_address] = settings["inception"]["ip_address"] || inception_ip_address
+            inception_vm_attributes[:private_ip_address] = ip_address  
           end
           server = provider.bootstrap(inception_vm_attributes)
           unless server
@@ -1166,6 +1159,23 @@ module Bosh::Bootstrap
           q.default = default_size if default_size
           q.in = 1..1024
         end
+      end
+
+      def provision_vpc_ip_address(host_id = 1)
+        if settings["subnet"]["id"]
+          subnet = provider.get_subnet(settings["subnet"]["id"])
+          network = NetAddr::CIDR.create(subnet.cidr_block)  
+        else
+          network = NetAddr::CIDR.create(DEFAULT_VPC_SUBNET)
+        end
+          
+        if network.size >= 8
+          vpc_ip_address = network[host_id].ip
+        else
+          say "Unable to allocate IP for VPC.  Network too small. (#{network.size} IPs available)".red
+          exit -1
+        end
+        vpc_ip_address
       end
 
       # Provision a volume for a specific device (unless already provisioned)
