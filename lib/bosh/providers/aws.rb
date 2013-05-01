@@ -75,6 +75,10 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
     subnet.subnet_id
   end
 
+  def get_subnet(subnet_id)
+    fog_compute.subnets.get(subnet_id)
+  end
+
   def create_internet_gateway(vpc_id)
     gateway = fog_compute.internet_gateways.create(vpc_id: vpc_id)
     gateway.id
@@ -208,11 +212,17 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
         security_group.authorize_port_range(22..22)
       end
     end
-
-    server.save
-    server.wait_for { ready? }
-    server.setup(:keys => [private_key_path])
-    server
+    
+    begin
+      server.save
+      server.wait_for { ready? }
+      server.setup(:keys => [private_key_path])
+      server
+    rescue Fog::Compute::AWS::Error => e
+      puts "An AWS error occurred while provisioning new server."
+      puts ">>>\n\n#{e}\n\n<<<"
+      false
+    end
   end
 
   def servers_with_sg(sg_name)
