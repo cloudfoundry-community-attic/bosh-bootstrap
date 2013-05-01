@@ -1006,7 +1006,12 @@ module Bosh::Bootstrap
         # This way we can always rerun the CLI and rerun this method
         # and idempotently get an inception VM
         unless settings["inception"]["host"]
-          settings["inception"]["host"] = server.dns_name
+          if vpc?
+            settings["inception"]["host"] = server.private_ip_address
+          else
+            settings["inception"]["host"] = server.dns_name
+          end
+
           save_settings!
         end
 
