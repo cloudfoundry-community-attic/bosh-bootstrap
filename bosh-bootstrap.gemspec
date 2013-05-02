@@ -33,6 +33,7 @@ EOS
   gem.add_dependency "escape"
   gem.add_dependency "redcard"
   gem.add_dependency "bosh_cli"
+  gem.add_dependency "netaddr", "~> 1.5.0"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "rspec"
   gem.add_development_dependency "activesupport", ">= 3.0.0"

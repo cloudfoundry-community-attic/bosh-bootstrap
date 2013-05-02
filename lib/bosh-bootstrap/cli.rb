@@ -1,6 +1,7 @@
 require "thor"
 require "highline"
 require "fileutils"
+require "netaddr"
 
 # for the #sh helper
 require "rake"
@@ -102,6 +103,8 @@ module Bosh::Bootstrap
     no_tasks do
       DEFAULT_INCEPTION_VOLUME_SIZE = 32 # Gb
       DEFAULT_MICROBOSH_VOLUME_SIZE = 16 # Gb
+      DEFAULT_VPC_NETWORK = "10.0.0.0/16"
+      DEFAULT_VPC_SUBNET = "10.0.0.0/24"
 
       def deploy_stage_1_choose_infrastructure_provider
         settings["git"] ||= {}
@@ -119,13 +122,7 @@ module Bosh::Bootstrap
         unless settings[:bosh_cloud_properties]
           build_cloud_properties
         end
-        confirm "Using infrastructure provider #{settings.fog_credentials.provider}"
-
-        if aws?
-          if ENV['VPC']
-            choose_aws_vpc_or_ec2
-          end
-        end
+        confirm "infrastructure provider #{settings.fog_credentials.provider}"
 
         unless settings[:region_code]
           choose_provider_region
@@ -137,6 +134,29 @@ module Bosh::Bootstrap
           confirm "Using #{settings.fog_credentials.provider} region #{settings.region_code}"
         else
           confirm "No specific region/data center for #{settings.fog_credentials.provider}"
+        end
+
+        if aws?
+          choose_aws_vpc_or_ec2
+        end
+
+        # Give the options to either create new VPC or select one that exists.  If using existing
+        # VPC then we need to select an internet gateway and subnet to use as well.
+        if aws? && vpc?
+          choose_vpc unless settings["vpc"]
+          if settings.vpc.id
+            confirm "Using VPC #{settings.vpc.id}."
+          else
+            confirm "Creating new VPC for deployment."
+          end
+
+          unless settings["vpc"]["create_new"]
+            choose_internet_gateway unless settings["internet_gateway"]
+            confirm "Using Internet Gateway #{settings.internet_gateway.id} for deployment."
+
+            choose_subnet unless settings["subnet"]
+            confirm "Using Subnet #{settings.subnet.id} for deployment."
+          end
         end
 
         unless settings["network_label"]
@@ -188,7 +208,8 @@ module Bosh::Bootstrap
 
         unless settings[:bosh]["ip_address"]
           if vpc?
-            settings[:bosh]["ip_address"] = "10.0.0.6"
+            ip_address = provision_vpc_ip_address(6)
+            settings[:bosh]["ip_address"] = ip_address
           else
             say "Acquiring IP address for micro BOSH..."
             ip_address = acquire_ip_address
@@ -203,7 +224,7 @@ module Bosh::Bootstrap
         save_settings!
 
         if aws? && vpc?
-          create_complete_vpc(settings.bosh_name, "10.0.0.0/16", "10.0.0.0/24")
+          create_complete_vpc(settings.bosh_name, DEFAULT_VPC_NETWORK, DEFAULT_VPC_SUBNET)
         end
 
         unless settings[:bosh_security_group]
@@ -395,21 +416,33 @@ module Bosh::Bootstrap
         end
       end
 
-      def create_complete_vpc(name, vpc_range="10.0.0.0/16", subnet_cidr_block="10.0.0.0/24")
+      def create_complete_vpc(name, vpc_range = DEFAULT_VPC_NETWORK, subnet_cidr_block = DEFAULT_VPC_SUBNET)
         with_setting "vpc" do |setting|
-          say "Creating VPC '#{name}'..."
-          setting["id"] = provider.create_vpc(name, vpc_range)
+          unless vpc_exists?
+            say "Creating VPC '#{name}'..."
+            setting["id"] = provider.create_vpc(name, vpc_range)
+          else
+            confirm "Micro BOSH will use VPC #{setting["id"]}."
+          end
         end
 
         vpc_id = settings["vpc"]["id"]
         with_setting "internet_gateway" do |setting|
-          say "Creating internet gateway..."
-          setting["id"] = provider.create_internet_gateway(vpc_id)
+          unless internet_gateway_exists?
+            say "Creating internet gateway..."
+            setting["id"] = provider.create_internet_gateway(vpc_id)
+          else
+            confirm "Micro BOSH will use Internet Gateway #{setting["id"]}."
+          end
         end
 
         with_setting "subnet" do |setting|
-          say "Creating subnet #{subnet_cidr_block}..."
-          setting["id"] = provider.create_subnet(vpc_id, subnet_cidr_block)
+          unless subnet_exists?
+            say "Creating subnet #{subnet_cidr_block}..."
+            setting["id"] = provider.create_subnet(vpc_id, subnet_cidr_block)
+          else
+            confirm "Micro BOSH will use Subnet #{setting["id"]}."
+          end
         end
       end
 
@@ -745,10 +778,72 @@ module Bosh::Bootstrap
         end
       end
 
+      def choose_vpc
+        available_vpcs = [ "Create New VPC" ]
+        provider.vpcs.each do |vpc|
+          available_vpcs << vpc.id
+        end
+
+        hl.choose do |menu|
+          menu.prompt = "Choose AWS VPC (default: Create New VPC): "
+          available_vpcs.each do |vpc|
+            menu.choice(vpc) do
+              if vpc == "Create New VPC"
+                setting "vpc.create_new", true
+              else
+                setting "vpc.id", vpc 
+              end
+              save_settings!
+            end
+            menu.default = "Create New VPC"
+          end
+        end
+      end
+
+      def choose_internet_gateway
+        available_gateways = [ "Create Internet Gateway" ]
+        provider.internet_gateways.each do |gateway|
+          available_gateways << gateway.id
+        end
+
+        hl.choose do |menu|
+          menu.prompt = "Choose AWS Internet Gateway (default: Create New Gateway): "
+          available_gateways.each do |gateway|
+            menu.choice(gateway) do
+              unless gateway == "Create New Gateway"
+                setting "internet_gateway.id", gateway 
+              end
+              save_settings!
+            end
+            menu.default = "Create New Gateway"
+          end
+        end
+      end
+
+      def choose_subnet
+        available_subnets = [ "Create New Subnet"]
+        provider.subnets.each do |subnet|
+          available_subnets << subnet.subnet_id
+        end
+
+        hl.choose do |menu|
+          menu.prompt = "Choose AWS Subnet (default: Create New Subnet): "
+          available_subnets.each do |subnet|
+            menu.choice(subnet) do
+              unless subnet == "Create New Subnet"
+                setting "subnet.id", subnet 
+              end
+              save_settings!
+            end
+            menu.default = "Create New Subnet"
+          end
+        end
+      end
+
       def choose_aws_vpc_or_ec2
         if settings["use_vpc"].nil?
           settings["use_vpc"] = begin
-            answer = hl.ask("You want to use VPC, right? ") {|q| q.default="yes"; q.validate = /(yes|no)/i }.match(/y/)
+            answer = hl.ask("Would you like to use a VPC? ") {|q| q.default="yes"; q.validate = /(yes|no)/i }.match(/y/)
             !!answer
           end
           save_settings!
@@ -933,7 +1028,11 @@ module Bosh::Bootstrap
 
         unless settings["inception"]["ip_address"]
           say "Provisioning IP address for inception VM..."
-          settings["inception"]["ip_address"] = acquire_ip_address
+          if vpc?
+            settings["inception"]["ip_address"] = provision_vpc_ip_address(5)
+          else
+            settings["inception"]["ip_address"] = acquire_ip_address
+          end
           save_settings!
         end
 
@@ -955,7 +1054,7 @@ module Bosh::Bootstrap
           if vpc?
             raise "must create subnet before creating VPC inception VM" unless settings["subnet"] && settings["subnet"]["id"]
             inception_vm_attributes[:subnet_id] = settings["subnet"]["id"]
-            inception_vm_attributes[:private_ip_address] = "10.0.0.5"
+            inception_vm_attributes[:private_ip_address] = ip_address  
           end
           server = provider.bootstrap(inception_vm_attributes)
           unless server
@@ -986,7 +1085,12 @@ module Bosh::Bootstrap
         # This way we can always rerun the CLI and rerun this method
         # and idempotently get an inception VM
         unless settings["inception"]["host"]
-          settings["inception"]["host"] = server.dns_name
+          if vpc?
+            settings["inception"]["host"] = server.private_ip_address
+          else
+            settings["inception"]["host"] = server.dns_name
+          end
+
           save_settings!
         end
 
@@ -1141,6 +1245,23 @@ module Bosh::Bootstrap
         end
       end
 
+      def provision_vpc_ip_address(host_id = 1)
+        if settings["subnet"]["id"]
+          subnet = provider.get_subnet(settings["subnet"]["id"])
+          network = NetAddr::CIDR.create(subnet.cidr_block)  
+        else
+          network = NetAddr::CIDR.create(DEFAULT_VPC_SUBNET)
+        end
+          
+        if network.size >= 8
+          vpc_ip_address = network[host_id].ip
+        else
+          say "Unable to allocate IP for VPC.  Network too small. (#{network.size} IPs available)".red
+          exit -1
+        end
+        vpc_ip_address
+      end
+
       # Provision a volume for a specific device (unless already provisioned)
       # Request that the +server+ mount the volume at the +device+ location.
       #
@@ -1225,6 +1346,18 @@ module Bosh::Bootstrap
 
       def vpc?
         settings["use_vpc"]
+      end
+
+      def vpc_exists?
+        settings["vpc"]["id"]
+      end
+
+      def internet_gateway_exists?
+        settings["internet_gateway"]["id"]
+      end
+
+      def subnet_exists?
+        settings["subnet"]["id"]
       end
 
       def openstack?
