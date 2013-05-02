@@ -144,7 +144,6 @@ module Bosh::Bootstrap
         # VPC then we need to select an internet gateway and subnet to use as well.
         if aws? && vpc?
           choose_vpc unless settings["vpc"]
-          say ""
           if settings.vpc.id
             confirm "Using VPC #{settings.vpc.id}."
           else
@@ -153,11 +152,9 @@ module Bosh::Bootstrap
 
           unless settings["vpc"]["create_new"]
             choose_internet_gateway unless settings["internet_gateway"]
-            say ""
             confirm "Using Internet Gateway #{settings.internet_gateway.id} for deployment."
 
             choose_subnet unless settings["subnet"]
-            say ""
             confirm "Using Subnet #{settings.subnet.id} for deployment."
           end
         end
