@@ -425,7 +425,7 @@ module Bosh::Bootstrap
             say "Creating VPC '#{name}'..."
             setting["id"] = provider.create_vpc(name, vpc_range)
           else
-            confirm "Using VPC #{setting["id"]}."
+            confirm "Micro BOSH will use VPC #{setting["id"]}."
           end
         end
 
@@ -435,7 +435,7 @@ module Bosh::Bootstrap
             say "Creating internet gateway..."
             setting["id"] = provider.create_internet_gateway(vpc_id)
           else
-            confirm "Using Internet Gateway #{setting["id"]}."
+            confirm "Micro BOSH will use Internet Gateway #{setting["id"]}."
           end
         end
 
@@ -444,7 +444,7 @@ module Bosh::Bootstrap
             say "Creating subnet #{subnet_cidr_block}..."
             setting["id"] = provider.create_subnet(vpc_id, subnet_cidr_block)
           else
-            confirm "Using Subnet #{setting["id"]}."
+            confirm "Micro BOSH will use Subnet #{setting["id"]}."
           end
         end
       end
