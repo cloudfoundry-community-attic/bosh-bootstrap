@@ -265,4 +265,16 @@ class Bosh::Providers::AWS < Bosh::Providers::BaseProvider
       a.destroy unless a.server
     end
   end
+
+  def vpcs
+    fog_compute.vpcs
+  end
+
+  def internet_gateways
+    fog_compute.internet_gateways
+  end
+
+  def subnets
+    fog_compute.subnets
+  end
 end

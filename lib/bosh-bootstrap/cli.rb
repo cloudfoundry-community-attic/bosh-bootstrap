@@ -122,13 +122,7 @@ module Bosh::Bootstrap
         unless settings[:bosh_cloud_properties]
           build_cloud_properties
         end
-        confirm "Using infrastructure provider #{settings.fog_credentials.provider}"
-
-        if aws?
-          if ENV['VPC']
-            choose_aws_vpc_or_ec2
-          end
-        end
+        confirm "infrastructure provider #{settings.fog_credentials.provider}"
 
         unless settings[:region_code]
           choose_provider_region
@@ -140,6 +134,32 @@ module Bosh::Bootstrap
           confirm "Using #{settings.fog_credentials.provider} region #{settings.region_code}"
         else
           confirm "No specific region/data center for #{settings.fog_credentials.provider}"
+        end
+
+        if aws?
+          choose_aws_vpc_or_ec2
+        end
+
+        # Give the options to either create new VPC or select one that exists.  If using existing
+        # VPC then we need to select an internet gateway and subnet to use as well.
+        if aws? && vpc?
+          choose_vpc unless settings["vpc"]
+          say ""
+          if settings.vpc.id
+            confirm "Using VPC #{settings.vpc.id}."
+          else
+            confirm "Creating new VPC for deployment."
+          end
+
+          unless settings["vpc"]["create_new"]
+            choose_internet_gateway unless settings["internet_gateway"]
+            say ""
+            confirm "Using Internet Gateway #{settings.internet_gateway.id} for deployment."
+
+            choose_subnet unless settings["subnet"]
+            say ""
+            confirm "Using Subnet #{settings.subnet.id} for deployment."
+          end
         end
 
         unless settings["network_label"]
@@ -761,10 +781,72 @@ module Bosh::Bootstrap
         end
       end
 
+      def choose_vpc
+        available_vpcs = [ "Create New VPC" ]
+        provider.vpcs.each do |vpc|
+          available_vpcs << vpc.id
+        end
+
+        hl.choose do |menu|
+          menu.prompt = "Choose AWS VPC (default: Create New VPC): "
+          available_vpcs.each do |vpc|
+            menu.choice(vpc) do
+              if vpc == "Create New VPC"
+                setting "vpc.create_new", true
+              else
+                setting "vpc.id", vpc 
+              end
+              save_settings!
+            end
+            menu.default = "Create New VPC"
+          end
+        end
+      end
+
+      def choose_internet_gateway
+        available_gateways = [ "Create Internet Gateway" ]
+        provider.internet_gateways.each do |gateway|
+          available_gateways << gateway.id
+        end
+
+        hl.choose do |menu|
+          menu.prompt = "Choose AWS Internet Gateway (default: Create New Gateway): "
+          available_gateways.each do |gateway|
+            menu.choice(gateway) do
+              unless gateway == "Create New Gateway"
+                setting "internet_gateway.id", gateway 
+              end
+              save_settings!
+            end
+            menu.default = "Create New Gateway"
+          end
+        end
+      end
+
+      def choose_subnet
+        available_subnets = [ "Create New Subnet"]
+        provider.subnets.each do |subnet|
+          available_subnets << subnet.subnet_id
+        end
+
+        hl.choose do |menu|
+          menu.prompt = "Choose AWS Subnet (default: Create New Subnet): "
+          available_subnets.each do |subnet|
+            menu.choice(subnet) do
+              unless subnet == "Create New Subnet"
+                setting "subnet.id", subnet 
+              end
+              save_settings!
+            end
+            menu.default = "Create New Subnet"
+          end
+        end
+      end
+
       def choose_aws_vpc_or_ec2
         if settings["use_vpc"].nil?
           settings["use_vpc"] = begin
-            answer = hl.ask("You want to use VPC, right? ") {|q| q.default="yes"; q.validate = /(yes|no)/i }.match(/y/)
+            answer = hl.ask("Would you like to use a VPC? ") {|q| q.default="yes"; q.validate = /(yes|no)/i }.match(/y/)
             !!answer
           end
           save_settings!
