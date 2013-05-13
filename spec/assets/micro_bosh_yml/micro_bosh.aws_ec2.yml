@@ -2,7 +2,7 @@
 name: test-bosh
 env:
   bosh:
-    password: pepper
+    password: salted_password
 logging:
   level: DEBUG
 network:
@@ -21,9 +21,14 @@ cloud:
       region: us-west-2
       ec2_endpoint: ec2.us-west-2.amazonaws.com
       default_security_groups:
-      - test-bosh
+        - ssh
+        - bosh_agent_http
+        - bosh_nats_server
+        - bosh_blobstore
+        - bosh_director
+        - bosh_registry
       default_key_name: test-bosh
-      ec2_private_key: /home/vcap/.ssh/test-bosh.pem
+      ec2_private_key: /home/vcap/microboshes/aws-us-west-2/ssh/test-bosh.pem
 apply_spec:
   agent:
     blobstore:
