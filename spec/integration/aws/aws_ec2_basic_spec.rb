@@ -14,4 +14,8 @@ describe "AWS deployment using gems and publish stemcells" do
     # IP was attached to server
   end
 
+  it "EC2 microbosh from latest AMI"
+  it "EC2 microbosh from latest stemcell"
+  it "EC2 microbosh from source"
+
 end
