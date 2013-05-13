@@ -1,18 +1,42 @@
-# Stark & Wayne's Bosh Bootstrapper
+# Bosh Bootstrap
 
 In order to deploy CloudFoundry, and a growing number of other complex systems, you will need a BOSH. BOSH provides a complete lifecycle manager/deployer for complex systems. CloudFoundry is a very complex system when it comes to deployment/upgrades.
 
-The Stark & Wayne Bosh Bootstrapper is the simplest way to get a Micro BOSH running, to upgrade an existing Micro BOSH, and to delete it if you change your mind. 
+Bosh's primary role is orchestration of servers, their persistent storage and networking. It also includes its own packaging and configuration management systems.
 
-Bootstrap a Micro BOSH universe from one CLI command. Also allows SSH access and the ability to delete created Micro BOSHes.
+Bosh can run on AWS, modern OpenStack, vSphere 5+ and latest vCloud. New infrastructures are being added regularly.
+
+Bosh Bootstrap is the simplest way to get a Micro BOSH running and upgrade/destroy it over time. It attempts to auto-detect your infrastructure preferences and asks questions for any information it cannot determine.
+
+It also performs the task as fast as it is possible. On AWS, if a public AMI has been published for your requested region then it will use that (currently: us-east-1/Virginia).
 
 ```
-$ bosh-bootstrap deploy
-Creating inception VM...
-Creating micro BOSH VM...
+$ bosh bootstrap deploy
+Auto-detected infrastructure API credentials at ~/.fog (override with $FOG)
+1. AWS (default)
+2. AWS (starkandwayne)
+3. Alternate credentials
+Choose infrastructure:  2
 
-$ bosh-bootstrap ssh
-Open SSH tunnel to inception VM...
+1. *US East (Northern Virginia) Region (us-east-1)
+2. US West (Oregon) Region (us-west-2)
+3. US West (Northern California) Region (us-west-1)
+4. EU (Ireland) Region (eu-west-1)
+5. Asia Pacific (Singapore) Region (ap-southeast-1)
+6. Asia Pacific (Sydney) Region (ap-southeast-2)
+7. Asia Pacific (Tokyo) Region (ap-northeast-1)
+8. South America (Sao Paulo) Region (sa-east-1)
+Choose AWS region: 1
+
+Auto-detected public AMI for us-east-1: ami-5bf231
+
+Generating ~/.bosh-bootstrap/universes/aws-us-east-1/micro_bosh.yml...
+Deploying micro BOSH server...
+bosh micro deploy ami-5bf231
+
+
+$ bosh bootstrap ssh
+SSH to micro BOSH server...
 
 $ bosh-bootstrap delete
 Deleting micro BOSH VM...
