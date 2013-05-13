@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
 
 # Specify your gem's dependencies in bosh-bootstrap.gemspec
 gemspec
