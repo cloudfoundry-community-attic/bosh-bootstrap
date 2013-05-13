@@ -22,9 +22,8 @@ EOS
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency "thor"
   gem.add_dependency "highline"
-  gem.add_dependency "settingslogic"
+  gem.add_dependency "settingslogic", "~> 2.0.9"
   gem.add_dependency "escape"
   gem.add_dependency "redcard"
   gem.add_dependency "bosh_cli", "~> 1.5.0.pre"
