@@ -1,5 +1,7 @@
 # Copyright (c) 2012-2013 Stark & Wayne, LLC
 
+require "bosh-bootstrap"
+
 module Bosh::Cli::Command
   class Bootstrap < Base
     usage "bootstrap"
