@@ -1,8 +1,9 @@
 source 'https://rubygems.org'
 source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
 
-# Specify your gem's dependencies in bosh-bootstrap.gemspec
 gemspec
+
+gem "settingslogic", github: "drnic/settingslogic", branch: "integration"
 
 group :development do
   gem "awesome_print"

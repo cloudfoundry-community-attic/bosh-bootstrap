@@ -11,10 +11,16 @@ $:.unshift(File.expand_path("../../lib", __FILE__))
 require "rspec/core"
 require "cli" # BOSH CLI
 require "bosh/cli/commands/bootstrap" # "bosh bootstrap COMMAND" commands added to bosh CLI
+require "bosh-bootstrap/cli/helpers"
 
 # for the #sh helper
 require "rake"
 require "rake/file_utils"
+
+# load all files in spec/support/* (but not lower down)
+Dir[File.dirname(__FILE__) + '/support/*'].each do |path|
+  require path unless File.directory?(path)
+end
 
 def spec_asset(filename)
   File.expand_path("../assets/#{filename}", __FILE__)

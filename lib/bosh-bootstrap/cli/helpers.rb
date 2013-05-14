@@ -1,5 +1,4 @@
-module Bosh::Bootstrap::Cli::Helpers
-end
+module Bosh; module Bootstrap; module Cli; module Helpers; end; end; end; end
 
 require "bosh-bootstrap/cli/helpers/interactions"
 require "bosh-bootstrap/cli/helpers/settings"

@@ -4,12 +4,15 @@ class Bosh::Bootstrap::MicroboshProviders::AWS
   include FileUtils
 
   attr_reader :path
+  attr_reader :settings
 
   def initialize(path)
     @path = path
   end
 
   def create_microbosh_yml(settings)
+    @settings = settings.is_a?(Hash) ? Settingslogic.new(settings) : settings
+    raise "@settings must be Settingslogic (or Hash)" unless @settings.is_a?(Settingslogic)
     mkdir_p(File.dirname(path))
     File.open(path, "w") do |f|
       f << self.to_hash.to_yaml
@@ -56,10 +59,10 @@ class Bosh::Bootstrap::MicroboshProviders::AWS
   end
 
   def cloud_properties
-    {"access_key_id"=>"YYY",
-     "secret_access_key"=>"XXX",
-     "region"=>"us-west-2",
-     "ec2_endpoint"=>"ec2.us-west-2.amazonaws.com",
+    {"access_key_id"=>settings.provider.credentials.aws_access_key_id,
+     "secret_access_key"=>settings.provider.credentials.aws_secret_access_key,
+     "region"=>settings.provider.region,
+     "ec2_endpoint"=>"ec2.#{settings.provider.region}.amazonaws.com",
      "default_security_groups"=>security_groups,
      "default_key_name"=>microbosh_name,
      "ec2_private_key"=>private_key_path}

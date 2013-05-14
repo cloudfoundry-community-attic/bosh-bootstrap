@@ -16,8 +16,8 @@ cloud:
   plugin: aws
   properties:
     aws:
-      access_key_id: YYY
-      secret_access_key: XXX
+      access_key_id: ACCESS
+      secret_access_key: SECRET
       region: us-west-2
       ec2_endpoint: ec2.us-west-2.amazonaws.com
       default_security_groups:

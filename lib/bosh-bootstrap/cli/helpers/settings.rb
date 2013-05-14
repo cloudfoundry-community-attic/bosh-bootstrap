@@ -33,6 +33,12 @@ module Bosh::Bootstrap::Cli::Helpers::Settings
     end
   end
 
+  # Set a nested setting with "key1.key2.key3" notation
+  def setting(nested_key, value)
+    settings.set(nested_key, value)
+    save_settings!
+  end
+
   # Saves current nested Settingslogic into pure Hash-based YAML file
   # Recreates accessors on Settingslogic object (since something has changed)
   def save_settings!
