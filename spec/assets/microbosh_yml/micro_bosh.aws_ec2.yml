@@ -7,7 +7,7 @@ logging:
   level: DEBUG
 network:
   type: dynamic
-  vip: $MICROBOSH_IP$
+  vip: 1.2.3.4
 resources:
   persistent_disk: 16384
   cloud_properties:
@@ -32,9 +32,9 @@ cloud:
 apply_spec:
   agent:
     blobstore:
-      address: $MICROBOSH_IP$
+      address: 1.2.3.4
     nats:
-      address: $MICROBOSH_IP$
+      address: 1.2.3.4
   properties:
     aws_registry:
-      address: $MICROBOSH_IP$
+      address: 1.2.3.4

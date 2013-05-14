@@ -15,6 +15,11 @@ describe Bosh::Bootstrap::Microbosh do
       setting "provider.region", "us-west-2"
       setting "provider.credentials.aws_access_key_id", "ACCESS"
       setting "provider.credentials.aws_secret_access_key", "SECRET"
+      setting "bosh.name", "test-bosh"
+      setting "bosh.password", "password"
+      setting "bosh.salted_password", "salted_password"
+      setting "bosh.public_ip", "1.2.3.4"
+      setting "bosh.persistent_disk", 16384
       subject.stub(:sh).with("bundle install")
       subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
     end

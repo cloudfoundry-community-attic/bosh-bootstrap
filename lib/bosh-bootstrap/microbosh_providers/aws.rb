@@ -1,4 +1,5 @@
 require "bosh-bootstrap/microbosh_providers"
+require "bcrypt"
 
 class Bosh::Bootstrap::MicroboshProviders::AWS
   include FileUtils
@@ -39,19 +40,21 @@ class Bosh::Bootstrap::MicroboshProviders::AWS
   end
 
   def microbosh_name
-    "test-bosh"
+    settings.bosh.name
   end
 
   def salted_password
-    "salted_password"
+    # BCrypt::Password.create(settings.bosh.password).to_s.force_encoding("UTF-8")
+    settings.bosh.salted_password
   end
 
   def public_ip
-    "$MICROBOSH_IP$"
+    settings.bosh.public_ip
   end
 
   def persistent_disk
-    16384
+    settings.bosh.persistent_disk
+    # 16384
   end
 
   def resources_cloud_properties
