@@ -1,5 +1,6 @@
 # Copyright (c) 2012-2013 Stark & Wayne, LLC
 
+require "bosh-bootstrap/cli/commands/deploy"
 describe Bosh::Cli::Command::Bootstrap do
   include FileUtils
 
@@ -16,6 +17,9 @@ describe Bosh::Cli::Command::Bootstrap do
   end
 
   it "runs Deploy command" do
+    deploy_cmd = double(Bosh::Bootstrap::Cli::Commands::Deploy)
+    deploy_cmd.stub(:perform)
+    Bosh::Bootstrap::Cli::Commands::Deploy.stub(:new).and_return(deploy_cmd)
     cli.deploy
   end
 end
