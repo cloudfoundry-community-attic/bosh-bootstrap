@@ -18,7 +18,9 @@ module Bosh::Cli::Command
     usage "bootstrap deploy"
     desc "Configure and bootstrap a Micro BOSH; or deploy/upgrade existing Micro Bosh"
     def deploy
-      raise "not implemented yet"
+      require "bosh-bootstrap/cli/commands/deploy"
+      deploy_cmd = Bosh::Bootstrap::Cli::Commands::Deploy.new
+      deploy_cmd.perform
     end
 
     usage "bootstrap delete"

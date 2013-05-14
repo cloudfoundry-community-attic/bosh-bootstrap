@@ -15,9 +15,7 @@ describe Bosh::Cli::Command::Bootstrap do
     cli
   end
 
-  describe "aws" do
-    it "deploy creates provisions IP address micro_bosh.yml, discovers/downloads stemcell/AMI, runs 'bosh micro deploy'"
-    it "delete does nothing if not targetting a deployment"
-    it "delete runs 'bosh micro delete' & releases IP address; updates settings"
+  it "runs Deploy command" do
+    cli.deploy
   end
 end
