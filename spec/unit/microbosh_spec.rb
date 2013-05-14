@@ -80,7 +80,6 @@ describe Bosh::Bootstrap::Microbosh do
       setting "bosh.name", "test-bosh"
       setting "bosh.password", "password"
       setting "bosh.salted_password", "salted_password"
-      setting "bosh.persistent_disk", 16384
       subject.stub(:sh).with("bundle install")
       subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
     end
