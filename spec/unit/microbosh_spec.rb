@@ -56,6 +56,7 @@ describe Bosh::Bootstrap::Microbosh do
 
   describe "vsphere" do
     before do
+      # the meaning of each field can be learned from http://www.brianmmcclain.com/using-bosh-with-vsphere-part-1/
       setting "provider.name", "vsphere"
       setting "provider.credentials.host", "HOST"
       setting "provider.credentials.user", "user"
