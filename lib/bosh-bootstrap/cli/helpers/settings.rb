@@ -10,7 +10,12 @@ module Bosh::Bootstrap::Cli::Helpers::Settings
   # Defaults to ~/.bosh_inception; and can be overridden with either:
   # * $SETTINGS - to a folder (supported method)
   def settings_dir
-    @settings_dir ||= ENV['SETTINGS'] || raise("please assign @settings_dir or $SETTINGS first")
+    @settings_dir ||= File.expand_path(ENV["SETTINGS"] || "~/.microbosh")
+  end
+
+  def settings_dir=(settings_dir)
+    @settings_dir = File.expand_path(settings_dir)
+    reload_settings!
   end
 
   def settings_ssh_dir
@@ -44,6 +49,11 @@ module Bosh::Bootstrap::Cli::Helpers::Settings
   def save_settings!
     File.open(settings_path, "w") { |f| f << settings.to_nested_hash.to_yaml }
     settings.create_accessors!
+  end
+
+  def reload_settings!
+    @settings = nil
+    settings
   end
 
   def migrate_old_settings

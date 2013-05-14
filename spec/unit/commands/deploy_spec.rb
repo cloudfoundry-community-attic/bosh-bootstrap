@@ -2,7 +2,9 @@
 
 require "bosh-bootstrap/cli/commands/deploy"
 describe Bosh::Bootstrap::Cli::Commands::Deploy do
-  include FileUtils
+  include Bosh::Bootstrap::Cli::Helpers::Settings
+
+  let(:settings_dir) { File.expand_path("~/.microbosh") }
 
   before do
     FileUtils.mkdir_p(@stemcells_dir = File.join(Dir.mktmpdir, "stemcells"))
@@ -20,7 +22,12 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
   # * create_microbosh_manifest
   # * microbosh_deploy
   describe "aws" do
-    it "deploy creates provisions IP address micro_bosh.yml, discovers/downloads stemcell/AMI, runs 'bosh micro deploy'"
+    it "deploy creates provisions IP address micro_bosh.yml, discovers/downloads stemcell/AMI, runs 'bosh micro deploy'" do
+      cyoi_provider = double(Cyoi::Cli::Provider)
+      cyoi_provider.stub(:execute!)
+      Cyoi::Cli::Provider.stub(:new).with([settings_dir]).and_return(cyoi_provider)
+      cmd.perform
+    end
     it "delete does nothing if not targetting a deployment"
     it "delete runs 'bosh micro delete' & releases IP address; updates settings"
   end
