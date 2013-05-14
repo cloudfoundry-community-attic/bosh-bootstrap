@@ -30,6 +30,69 @@ describe Bosh::Bootstrap::Microbosh do
       files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_ec2.yml"))
     end
   end
+
+  describe "openstack" do
+    before do
+      setting "provider.name", "openstack"
+      setting "provider.region", "REGION"
+      setting "provider.credentials.openstack_username", "ACCESS"
+      setting "provider.credentials.openstack_api_key", "SECRET"
+      setting "provider.credentials.openstack_tenant", "TENANT"
+      setting "provider.credentials.openstack_auth_url", "URL"
+      setting "provider.credentials.openstack_region", "REGION"
+      setting "bosh.name", "test-bosh"
+      setting "bosh.password", "password"
+      setting "bosh.salted_password", "salted_password"
+      setting "bosh.public_ip", "1.2.3.4"
+      setting "bosh.persistent_disk", 16384
+      subject.stub(:sh).with("bundle install")
+      subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
+    end
+
+    xit "deploys new microbosh" do
+      subject.deploy("openstack", settings)
+      File.should be_exists(microbosh_yml)
+      files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.yml"))
+    end
+  end
+
+  describe "vsphere" do
+    before do
+      setting "provider.name", "vsphere"
+      setting "provider.credentials.host", "HOST"
+      setting "provider.credentials.user", "user"
+      setting "provider.credentials.password", "TempP@ss"
+
+      setting "provider.network.name", "VLAN2194"
+      setting "provider.network.ip", "172.23.194.100"
+      setting "provider.network.netmask", "255.255.254.0"
+      setting "provider.network.gateway", "172.23.194.1"
+      setting "provider.network.dns", %w[172.22.22.153 172.22.22.154]
+
+      setting "provider.npt", %w[ntp01.las01.emcatmos.com ntp02.las01.emcatmos.com]
+      setting "provider.datacenter.name", "LAS01"
+      setting "provider.datacenter.vm_folder", "BOSH_VMs"
+      setting "provider.datacenter.template_folder", "BOSH_Templates"
+      setting "provider.datacenter.disk_path", "BOSH_Deployer"
+      setting "provider.datacenter.datastore_pattern", "las01-.*"
+      setting "provider.datacenter.persistent_datastore_pattern", "las01-.*"
+      setting "provider.datacenter.allow_mixed_datastores", true
+      setting "provider.datacenter.clusters", ["CLUSTER01"]
+
+      setting "bosh.name", "test-bosh"
+      setting "bosh.password", "password"
+      setting "bosh.salted_password", "salted_password"
+      setting "bosh.persistent_disk", 16384
+      subject.stub(:sh).with("bundle install")
+      subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
+    end
+
+    it "deploys new microbosh" do
+      subject.deploy("vsphere", settings)
+      File.should be_exists(microbosh_yml)
+      files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.vsphere.yml"))
+    end
+  end
   xit "updates existing microbosh" do
     subject.deploy
   end
