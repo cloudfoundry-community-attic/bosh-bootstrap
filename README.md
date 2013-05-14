@@ -8,6 +8,8 @@ Bosh can run on AWS, modern OpenStack, vSphere 5+ and latest vCloud. New infrast
 
 Bosh Bootstrap is the simplest way to get a Micro BOSH running and upgrade/destroy it over time. It attempts to auto-detect your infrastructure preferences and asks questions for any information it cannot determine.
 
+Bosh Bootstrap currently supports AWS, OpenStack and vSphere. To "support" one of Bosh's cloud providers is merely to know how to generate a `micro_bosh.yml` file for that Bosh CPI.
+
 It also performs the task as fast as it is possible. On AWS, if a public AMI has been published for your requested region then it will use that (currently: us-east-1/Virginia).
 
 ```
