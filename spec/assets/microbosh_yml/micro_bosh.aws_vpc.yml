@@ -8,6 +8,8 @@ logging:
 network:
   type: dynamic
   vip: $MICROBOSH_IP$
+  cloud_properties:
+    subnet: $SUBNET_ID$
 resources:
   persistent_disk: 16384
   cloud_properties:
@@ -21,12 +23,12 @@ cloud:
       region: us-west-2
       ec2_endpoint: ec2.us-west-2.amazonaws.com
       default_security_groups:
-        - ssh
-        - bosh_agent_http
-        - bosh_nats_server
-        - bosh_blobstore
-        - bosh_director
-        - bosh_registry
+      - ssh
+      - bosh_agent_http
+      - bosh_nats_server
+      - bosh_blobstore
+      - bosh_director
+      - bosh_registry
       default_key_name: test-bosh
       ec2_private_key: /home/vcap/microboshes/aws-us-west-2/ssh/test-bosh.pem
 apply_spec:

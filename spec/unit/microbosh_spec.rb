@@ -17,6 +17,7 @@ describe Bosh::Bootstrap::Microbosh do
     it "deploys new microbosh" do
       subject.deploy("aws", settings)
       File.should be_exists(microbosh_yml)
+      files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_ec2.yml"))
     end
   end
   xit "updates existing microbosh" do
