@@ -34,22 +34,20 @@ describe Bosh::Bootstrap::Microbosh do
   describe "openstack" do
     before do
       setting "provider.name", "openstack"
-      setting "provider.region", "REGION"
-      setting "provider.credentials.openstack_username", "ACCESS"
-      setting "provider.credentials.openstack_api_key", "SECRET"
+      setting "provider.credentials.openstack_auth_url", "http://10.0.0.2:5000/v2.0/tokens"
+      setting "provider.credentials.openstack_username", "USER"
+      setting "provider.credentials.openstack_api_key", "PASSWORD"
       setting "provider.credentials.openstack_tenant", "TENANT"
-      setting "provider.credentials.openstack_auth_url", "URL"
-      setting "provider.credentials.openstack_region", "REGION"
       setting "bosh.name", "test-bosh"
       setting "bosh.password", "password"
       setting "bosh.salted_password", "salted_password"
       setting "bosh.public_ip", "1.2.3.4"
-      setting "bosh.persistent_disk", 16384
+      setting "bosh.persistent_disk", 4096
       subject.stub(:sh).with("bundle install")
       subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
     end
 
-    xit "deploys new microbosh" do
+    it "deploys new microbosh" do
       subject.deploy("openstack", settings)
       File.should be_exists(microbosh_yml)
       files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.yml"))

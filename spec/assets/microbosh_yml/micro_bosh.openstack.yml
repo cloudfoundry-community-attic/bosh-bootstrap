@@ -1,0 +1,33 @@
+---
+name: test-bosh
+env:
+  bosh:
+    password: salted_password
+logging:
+  level: DEBUG
+network:
+  name: default
+  type: dynamic
+  label: private
+  ip: 1.2.3.4
+resources:
+  persistent_disk: 4096
+  cloud_properties:
+    instance_type: m1.medium
+cloud:
+  plugin: openstack
+  properties:
+    openstack:
+      auth_url: http://10.0.0.2:5000/v2.0/tokens
+      username: USER
+      api_key: PASSWORD
+      tenant: TENANT
+      default_security_groups:
+      - ssh
+      - bosh_agent_http
+      - bosh_nats_server
+      - bosh_blobstore
+      - bosh_director
+      - bosh_registry
+      default_key_name: test-bosh
+      private_key: /home/vcap/microboshes/aws-us-west-2/ssh/test-bosh.pem
