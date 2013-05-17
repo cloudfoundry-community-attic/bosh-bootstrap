@@ -27,7 +27,7 @@ class Bosh::Bootstrap::Microbosh
     @provider = provider
   end
 
-  def deploy(provider_name, settings)
+  def deploy(settings)
     mkdir_p(base_path)
     chdir(base_path) do
       setup_base_path

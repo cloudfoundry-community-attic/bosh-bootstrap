@@ -32,9 +32,12 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       address.stub(:execute!)
       Cyoi::Cli::Address.stub(:new).with([settings_dir]).and_return(address)
 
+      microbosh_provider = stub(stemcell: "ami-123456")
+      cmd.stub(:microbosh_provider).and_return(microbosh_provider)
+
       microbosh = double(Bosh::Bootstrap::Microbosh)
       microbosh.stub(:deploy)
-      Bosh::Bootstrap::Microbosh.stub(:new).with(settings_dir).and_return(microbosh)
+      Bosh::Bootstrap::Microbosh.stub(:new).with(microbosh_provider, settings_dir).and_return(microbosh)
 
       cmd.perform
     end

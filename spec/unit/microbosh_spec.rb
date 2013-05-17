@@ -13,7 +13,7 @@ describe Bosh::Bootstrap::Microbosh do
     setting "bosh.stemcell", path_or_ami
     subject.stub(:sh).with("bundle install")
     subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
-    subject.deploy("aws", settings)
+    subject.deploy(settings)
   end
 
   xit "updates existing microbosh" do
