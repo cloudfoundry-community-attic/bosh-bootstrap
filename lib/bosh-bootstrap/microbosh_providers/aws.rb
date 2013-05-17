@@ -77,7 +77,7 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def fetch_ami
-      Net::HTTP.get("#{aws_jenkins_bucket}.s3.amazonaws.com", "/last_successful_micro-bosh-stemcell_ami").strip
+      Net::HTTP.get("#{aws_jenkins_bucket}.s3.amazonaws.com", "/last_successful_micro-bosh-stemcell_aws_ami").strip
     end
   end
 end
