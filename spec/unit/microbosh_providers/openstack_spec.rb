@@ -6,8 +6,6 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
 
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
 
-  subject { Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml) }
-
   it "creates micro_bosh.yml manifest" do
     setting "provider.name", "openstack"
     setting "provider.credentials.openstack_auth_url", "http://10.0.0.2:5000/v2.0/tokens"
@@ -18,6 +16,8 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
     setting "bosh.name", "test-bosh"
     setting "bosh.salted_password", "salted_password"
     setting "bosh.persistent_disk", 4096
+
+    subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings)
 
     subject.create_microbosh_yml(settings)
     File.should be_exists(microbosh_yml)

@@ -6,8 +6,6 @@ describe Bosh::Bootstrap::MicroboshProviders::VSphere do
 
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
 
-  subject { Bosh::Bootstrap::MicroboshProviders::VSphere.new(microbosh_yml) }
-
   it "creates micro_bosh.yml manifest" do
     setting "provider.name", "vsphere"
     setting "provider.credentials.host", "HOST"
@@ -34,6 +32,8 @@ describe Bosh::Bootstrap::MicroboshProviders::VSphere do
     setting "bosh.name", "test-bosh"
     setting "bosh.password", "password"
     setting "bosh.salted_password", "salted_password"
+
+    subject = Bosh::Bootstrap::MicroboshProviders::VSphere.new(microbosh_yml, settings)
 
     subject.create_microbosh_yml(settings)
     File.should be_exists(microbosh_yml)

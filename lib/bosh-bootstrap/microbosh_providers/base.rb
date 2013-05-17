@@ -7,8 +7,10 @@ class Bosh::Bootstrap::MicroboshProviders::Base
   attr_reader :manifest_path
   attr_reader :settings
 
-  def initialize(manifest_path)
+  def initialize(manifest_path, settings)
     @manifest_path = manifest_path
+    @settings = settings.is_a?(Hash) ? Settingslogic.new(settings) : settings
+    raise "@settings must be Settingslogic (or Hash)" unless @settings.is_a?(Settingslogic)
   end
 
   def create_microbosh_yml(settings)

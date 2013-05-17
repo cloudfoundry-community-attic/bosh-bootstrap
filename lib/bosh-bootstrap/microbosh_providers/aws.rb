@@ -2,6 +2,19 @@ require "bosh-bootstrap/microbosh_providers/base"
 
 module Bosh::Bootstrap::MicroboshProviders
   class AWS < Base
+    # if us-east-1 -> ami
+    # if not running in target aws region -> error "Must either use us-east-1 or run 'bosh bootstrap deploy' within target AWS region"
+    # else download stemcell & return path
+    def stemcell
+      unless settings.exists?("bosh.stemcell")
+        if ami_region?
+          fetch_ami
+        else
+          ""
+        end
+      end
+    end
+
     def to_hash
       super.merge({
        "network"=>{"type"=>"dynamic", "vip"=>public_ip},
@@ -50,11 +63,21 @@ module Bosh::Bootstrap::MicroboshProviders
       "/home/vcap/microboshes/aws-us-west-2/ssh/#{microbosh_name}.pem"
     end
 
-    # if us-east-1 -> ami
-    # if not running in target aws region -> error "Must either use us-east-1 or run 'bosh bootstrap deploy' within target AWS region"
-    # else download stemcell & return path
-    def stemcell
-      "ami-123456"
+    def aws_region
+      settings.provider.region
+    end
+
+    # only us-east-1 has AMIs published currently
+    def ami_region?
+      aws_region == "us-east-1"
+    end
+
+    def aws_jenkins_bucket
+      "bosh-jenkins-artifacts"
+    end
+
+    def fetch_ami
+      Net::HTTP.get("#{aws_jenkins_bucket}.s3.amazonaws.com", "/last_successful_micro-bosh-stemcell_ami").strip
     end
   end
 end
