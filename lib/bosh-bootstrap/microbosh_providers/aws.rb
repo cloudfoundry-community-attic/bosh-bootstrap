@@ -10,7 +10,7 @@ module Bosh::Bootstrap::MicroboshProviders
         if ami_region?
           fetch_ami
         else
-          ""
+          download_stemcell
         end
       end
     end
@@ -77,7 +77,31 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def fetch_ami
-      Net::HTTP.get("#{aws_jenkins_bucket}.s3.amazonaws.com", "/last_successful_micro-bosh-stemcell_aws_ami_us-east-1").strip
+      Net::HTTP.get("#{aws_jenkins_bucket}.s3.amazonaws.com", ami_uri_path(aws_region)).strip
+    end
+
+    def ami_uri_path(region)
+      "/last_successful_micro-bosh-stemcell_aws_ami_#{region}"
+    end
+
+    def stemcell_uri
+      "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell_aws.tgz"
+    end
+
+    # downloads latest stemcell & returns path
+    def download_stemcell
+      mkdir_p(stemcell_dir)
+      chdir(stemcell_dir) do
+        stemcell_path = File.expand_path(File.basename(stemcell_uri))
+        unless File.exists?(stemcell_path)
+          sh "curl -O '#{stemcell_uri}'"
+        end
+        return stemcell_path
+      end
+    end
+
+    def stemcell_dir
+      File.dirname(manifest_path)
     end
   end
 end

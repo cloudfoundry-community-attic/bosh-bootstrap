@@ -7,7 +7,8 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
 
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
   let(:aws_jenkins_bucket) { "bosh-jenkins-artifacts" }
-  let(:latest_aws_ami_uri) { "#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell_aws_ami_us-east-1" }
+  let(:latest_ami_uri) { "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell_aws_ami_us-east-1" }
+  let(:latest_stemcell_uri) { "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell_aws.tgz" }
 
   it "creates micro_bosh.yml manifest" do
     setting "provider.name", "aws"
@@ -33,7 +34,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
 
     it "is an AMI if us-east-1 target region" do
       setting "provider.region", "us-east-1"
-      FakeWeb.register_uri(:get, latest_aws_ami_uri, body: "ami-234567")
+      FakeWeb.register_uri(:get, latest_ami_uri, body: "ami-234567")
 
       subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
       subject.stemcell.should == "ami-234567"
@@ -43,8 +44,12 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
       setting "provider.region", "us-west-2"
     end
 
-    xit "downloads latest stemcell and returns path if running in target AWS region" do
+    it "downloads latest stemcell and returns path if running in target AWS region" do
       setting "provider.region", "us-west-2"
+      
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+      subject.stub(:sh).with("curl -O '#{latest_stemcell_uri}'")
+      subject.stemcell.should =~ %r{deployments/last_successful_micro-bosh-stemcell_aws.tgz$}
     end
   end
 end
