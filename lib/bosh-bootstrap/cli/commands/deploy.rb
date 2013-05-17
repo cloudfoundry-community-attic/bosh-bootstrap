@@ -32,7 +32,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
   end
 
   def provider_client
-    @provider_client ||= Cyoi::Providers.provider_client(settings)
+    @provider_client ||= Cyoi::Providers.provider_client(settings.provider)
   end
 
   # public_ip or ip/network/gateway
@@ -49,6 +49,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     network.deploy
   end
 
+  # TODO should this go inside Microbosh, like NetworkProvider is to Network?
   def microbosh_provider
     @microbosh_provider ||= begin
       provider_name = settings.provider.name

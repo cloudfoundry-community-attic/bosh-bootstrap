@@ -4,7 +4,6 @@
 * Need key pair (delegate to cyoi)
   * setup private key within .microbosh folder
   * microbosh_providers/aws.rb - private_key_path has hardcoded root `/home/vcap/microboshes/`
-* Need to create security groups (delegate to cyoi)
 * setup hard coded settings.bosh.X from options or defaults
 
 ## Cyoi
