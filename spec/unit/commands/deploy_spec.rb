@@ -23,9 +23,14 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
   # * microbosh_deploy
   describe "aws" do
     it "deploy creates provisions IP address micro_bosh.yml, discovers/downloads stemcell/AMI, runs 'bosh micro deploy'" do
-      cyoi_provider = double(Cyoi::Cli::Provider)
-      cyoi_provider.stub(:execute!)
-      Cyoi::Cli::Provider.stub(:new).with([settings_dir]).and_return(cyoi_provider)
+      provider = double(Cyoi::Cli::Provider)
+      provider.stub(:execute!)
+      Cyoi::Cli::Provider.stub(:new).with([settings_dir]).and_return(provider)
+
+      address = double(Cyoi::Cli::Address)
+      address.stub(:execute!)
+      Cyoi::Cli::Address.stub(:new).with([settings_dir]).and_return(address)
+
       cmd.perform
     end
     it "delete does nothing if not targetting a deployment"
