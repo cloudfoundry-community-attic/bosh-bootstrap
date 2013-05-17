@@ -37,7 +37,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
 
       microbosh = double(Bosh::Bootstrap::Microbosh)
       microbosh.stub(:deploy)
-      Bosh::Bootstrap::Microbosh.stub(:new).with(microbosh_provider, settings_dir).and_return(microbosh)
+      Bosh::Bootstrap::Microbosh.stub(:new).with(settings_dir, microbosh_provider).and_return(microbosh)
 
       cmd.perform
     end

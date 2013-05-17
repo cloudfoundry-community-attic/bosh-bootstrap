@@ -1,6 +1,10 @@
 require "bosh-bootstrap/microbosh_providers"
 require "bcrypt"
 
+# for the #sh helper
+require "rake"
+require "rake/file_utils"
+
 class Bosh::Bootstrap::MicroboshProviders::Base
   include FileUtils
 

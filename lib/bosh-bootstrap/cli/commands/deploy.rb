@@ -47,7 +47,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
       provider_name = settings.provider.name
       require "bosh-bootstrap/microbosh_providers/#{provider_name}"
       klass = Bosh::Bootstrap::MicroboshProviders.provider_class(provider_name)
-      klass.new(File.join(settings_dir, "deployments/micro_bosh.yml"))
+      klass.new(File.join(settings_dir, "deployments/micro_bosh.yml"), settings)
     end
   end
 
@@ -58,7 +58,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
   end
 
   def perform_microbosh_deploy
-    @microbosh ||= Bosh::Bootstrap::Microbosh.new(microbosh_provider, settings_dir)
+    @microbosh ||= Bosh::Bootstrap::Microbosh.new(settings_dir, microbosh_provider)
     @microbosh.deploy(settings)
   end
 end
