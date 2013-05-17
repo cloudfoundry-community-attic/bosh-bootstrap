@@ -7,7 +7,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
 
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
   let(:aws_jenkins_bucket) { "bosh-jenkins-artifacts" }
-  let(:latest_aws_ami_uri) { "#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell_aws_ami" }
+  let(:latest_aws_ami_uri) { "#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell_aws_ami_us-east-1" }
 
   it "creates micro_bosh.yml manifest" do
     setting "provider.name", "aws"
