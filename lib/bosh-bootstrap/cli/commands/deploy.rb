@@ -44,6 +44,9 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
 
   # download if stemcell
   def select_public_image_or_download_stemcell
+    # TODO if aws & us-east-1 -> ami
+    # TODO if aws & not running in target aws region -> error "Must either use us-east-1 or run 'bosh bootstrap deploy' within target AWS region"
+    # TODO else download stemcell
     settings.set("bosh.stemcell", "ami-123456")
     save_settings!
   end
