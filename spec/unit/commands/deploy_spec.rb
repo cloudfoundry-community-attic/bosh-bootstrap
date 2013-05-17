@@ -1,6 +1,7 @@
 # Copyright (c) 2012-2013 Stark & Wayne, LLC
 
 require "bosh-bootstrap/cli/commands/deploy"
+require "cyoi/providers/clients/aws_provider_client"
 describe Bosh::Bootstrap::Cli::Commands::Deploy do
   include Bosh::Bootstrap::Cli::Helpers
 
@@ -27,6 +28,10 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       provider = double(Cyoi::Cli::Provider)
       provider.stub(:execute!)
       Cyoi::Cli::Provider.stub(:new).with([settings_dir]).and_return(provider)
+
+      provider_client = double(Cyoi::Providers::Clients::AwsProviderClient)
+      provider_client.stub(:create_security_group)
+      cmd.stub(:provider_client).and_return(provider_client)
 
       address = double(Cyoi::Cli::Address)
       address.stub(:execute!)

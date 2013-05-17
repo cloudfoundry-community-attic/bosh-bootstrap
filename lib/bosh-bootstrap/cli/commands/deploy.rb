@@ -31,6 +31,10 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     reload_settings!
   end
 
+  def provider_client
+    @provider_client ||= Cyoi::Providers.provider_client(settings)
+  end
+
   # public_ip or ip/network/gateway
   def select_or_provision_public_networking
     # TODO remove this when off the airplane
@@ -40,6 +44,9 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     address = Cyoi::Cli::Address.new([settings_dir])
     address.execute!
     reload_settings!
+
+    network = Bosh::Bootstrap::Network.new(settings.provider.name, provider_client)
+    network.deploy
   end
 
   def microbosh_provider
