@@ -18,7 +18,7 @@ describe Bosh::Bootstrap::Microbosh do
       setting "bosh.name", "test-bosh"
       setting "bosh.password", "password"
       setting "bosh.salted_password", "salted_password"
-      setting "bosh.public_ip", "1.2.3.4"
+      setting "address.ip", "1.2.3.4"
       setting "bosh.persistent_disk", 16384
       setting "bosh.stemcell", path_or_ami
       subject.stub(:sh).with("bundle install")
@@ -42,7 +42,7 @@ describe Bosh::Bootstrap::Microbosh do
       setting "bosh.name", "test-bosh"
       setting "bosh.password", "password"
       setting "bosh.salted_password", "salted_password"
-      setting "bosh.public_ip", "1.2.3.4"
+      setting "address.ip", "1.2.3.4"
       setting "bosh.persistent_disk", 4096
       setting "bosh.stemcell", path_or_ami
       subject.stub(:sh).with("bundle install")
@@ -64,8 +64,9 @@ describe Bosh::Bootstrap::Microbosh do
       setting "provider.credentials.user", "user"
       setting "provider.credentials.password", "TempP@ss"
 
+      # TODO - perhaps network.ip_address is better?
+      setting "address.ip", "172.23.194.100"
       setting "provider.network.name", "VLAN2194"
-      setting "provider.network.ip", "172.23.194.100"
       setting "provider.network.netmask", "255.255.254.0"
       setting "provider.network.gateway", "172.23.194.1"
       setting "provider.network.dns", %w[172.22.22.153 172.22.22.154]

@@ -36,4 +36,8 @@ class Bosh::Bootstrap::MicroboshProviders::Base
     settings.bosh.salted_password
   end
 
+  def public_ip
+    settings.address.ip
+  end
+
 end

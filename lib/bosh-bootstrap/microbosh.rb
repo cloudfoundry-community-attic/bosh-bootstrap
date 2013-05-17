@@ -1,5 +1,21 @@
 require "bosh-bootstrap/microbosh_providers"
 
+# Configures and deploys (or re-deploys) a micro bosh.
+# A "micro bosh" is a single VM containing all necessary parts of bosh
+# and is deployed from the terminal; rather than from another bosh.
+#
+# Usage:
+#   microbosh = Bosh::Bootstrap::Microbosh.new(project_path)
+#   settings = Settingslogic.new({
+#     "provider" => {"name" => "aws", "credentials" => {...}},
+#     "address" => {"ip" => "1.2.3.4"},
+#     "bosh" => {
+#       "name" => "test-bosh",
+#       "stemcell" => "ami-123456",
+#       "salted_password" => "452435hjg2345hjg2435ghk3452"
+#     }
+#   })
+#   microbosh.deploy("aws", settings)
 class Bosh::Bootstrap::Microbosh
   include FileUtils
 

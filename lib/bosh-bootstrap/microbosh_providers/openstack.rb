@@ -15,10 +15,6 @@ module Bosh::Bootstrap::MicroboshProviders
       })
     end
 
-    def public_ip
-      settings.bosh.public_ip
-    end
-
     def persistent_disk
       settings.bosh.persistent_disk
     end

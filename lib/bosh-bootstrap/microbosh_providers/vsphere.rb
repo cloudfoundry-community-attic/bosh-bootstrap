@@ -26,7 +26,7 @@ module Bosh::Bootstrap::MicroboshProviders
       dns = settings.provider.network.dns
       dns = dns.split(",") if dns.is_a?(String)
       {
-        "ip"=>settings.provider.network.ip,
+        "ip"=>public_ip,
         "netmask"=>settings.provider.network.netmask,
         "gateway"=>settings.provider.network.gateway,
         "dns"=>dns,
