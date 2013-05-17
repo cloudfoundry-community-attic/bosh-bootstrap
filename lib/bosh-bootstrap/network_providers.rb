@@ -1,4 +1,4 @@
-module Bosh::Bootstrap::MicroboshProviders
+module Bosh::Bootstrap::NetworkProviders
   extend self
   def register_provider(provider_name, provider_klass)
     @providers ||= {}

@@ -8,4 +8,5 @@ module Bosh
 end
 
 require "bosh-bootstrap/version"
+require "bosh-bootstrap/network"
 require "bosh-bootstrap/microbosh"
