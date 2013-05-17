@@ -1,12 +1,20 @@
+require File.expand_path("../aws_helpers", __FILE__)
 describe "AWS deployment using gems and publish stemcells" do
-  include FileUtils
+  include Bosh::Bootstrap::Cli::Helpers::Settings
+  include AwsHelpers
 
-  before { prepare_aws_test }
-  after { destroy_test_constructs }
+  let(:cli) do
+    cli = Bosh::Cli::Command::Bootstrap.new(nil)
+    cli.add_option(:non_interactive, true)
+    cli.add_option(:cache_dir, @cache_dir)
+    cli
+  end
 
-  xit "creates an EC2 inception/microbosh with the associated resources" do
+  # after { destroy_test_constructs }
+
+  it "creates an EC2 inception/microbosh with the associated resources" do
     create_manifest
-    cmd.deploy
+    cli.deploy
 
     # creates a server with a specific tagged name
     # server has a 16G volume attached (plus a root volume)
