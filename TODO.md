@@ -1,5 +1,8 @@
 ## Known issues
 
+* Fog.mock! always enabled
+* Need key pair
+* Need to create security groups
 * microbosh_providers/aws.rb - private_key_path has hardcoded root `/home/vcap/microboshes/`
 
 ## Validations
