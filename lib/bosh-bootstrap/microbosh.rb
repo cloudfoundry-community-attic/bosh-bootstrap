@@ -39,16 +39,25 @@ class Bosh::Bootstrap::Microbosh
   protected
   def setup_base_path
     gempath = File.expand_path("../../..", __FILE__)
+    pwd = File.expand_path(".")
     File.open("Gemfile", "w") do |f|
       f << <<-RUBY
 source 'https://rubygems.org'
 source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
 
-gem "bosh-bootstrap", path: #{gempath}
+gem "bosh-bootstrap", path: "#{gempath}"
+gem "bosh_cli_plugin_micro"
       RUBY
     end
     rm_rf "Gemfile.lock"
-    sh "bundle install"
+    bundle "install"
+  end
+
+  def bundle(*args)
+    Bundler.with_clean_env {
+      ENV.delete 'RUBYOPT'
+      sh "bundle #{args.join(' ')}"
+    }
   end
 
   def create_microbosh_yml(settings)
@@ -56,6 +65,6 @@ gem "bosh-bootstrap", path: #{gempath}
   end
 
   def deploy_or_update(stemcell)
-    sh "bundle exec bosh micro deploy #{stemcell}"
+    bundle "exec bosh micro deploy", stemcell
   end
 end

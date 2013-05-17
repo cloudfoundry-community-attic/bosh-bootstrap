@@ -53,11 +53,17 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
 
   # download if stemcell
   def select_public_image_or_download_stemcell
+    print "Determining stemcell image/file to use... "
     settings.set("bosh.stemcell", microbosh_provider.stemcell)
     save_settings!
+    puts settings.bosh.stemcell
   end
 
   def perform_microbosh_deploy
+    settings.set("bosh.name", "test-bosh")
+    settings.set("bosh.persistent_disk", 16384)
+    settings.set("bosh.password", "password")
+    settings.set("bosh.salted_password", "salted_password") # TODO generate from bcrypt-ruby
     @microbosh ||= Bosh::Bootstrap::Microbosh.new(settings_dir, microbosh_provider)
     @microbosh.deploy(settings)
   end

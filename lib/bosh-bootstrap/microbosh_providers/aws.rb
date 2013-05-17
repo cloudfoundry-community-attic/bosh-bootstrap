@@ -41,6 +41,7 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def cloud_properties
+      p settings
       {"access_key_id"=>settings.provider.credentials.aws_access_key_id,
        "secret_access_key"=>settings.provider.credentials.aws_secret_access_key,
        "region"=>settings.provider.region,

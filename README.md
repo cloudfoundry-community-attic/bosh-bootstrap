@@ -294,38 +294,13 @@ That is the core of the service being provided by the BOSH Bootstrapper - to pre
 
 Once you've used the CLI it stores your settings for your BOSH, so that you can re-run the tool for upgrades or other future functionality.
 
-By default, the settings file is stored at `~/.bosh_bootstrap/manifest.yml`.
+By default, the settings file is stored at `~/.bosh_bootstrap/settings.yml`.
 
 For an AWS BOSH it looks like:
 
 ``` yaml
 ---
-fog_path: /Users/drnic/.fog
-fog_credentials:
-  provider: AWS
-  aws_access_key_id: ACCESS_KEY
-  aws_secret_access_key: SECRET_KEY
-  region: us-east-1
-bosh_cloud_properties:
-  aws:
-    access_key_id: ACCESS_KEY
-    secret_access_key: SECRET_KEY
-    default_key_name: microbosh
-    default_security_groups:
-    - microbosh
-    ec2_private_key: /home/vcap/.ssh/microbosh.pem
-bosh_resources_cloud_properties:
-  instance_type: m1.medium
-bosh_provider: aws
-region_code: us-east-1
-bosh_username: drnic
-bosh_password: PASSWORD
-bosh:
-  password: PASSWORD
-  salted_password: 'sdfkjhadsjkadsfjhdsf'
-  persistent_disk: 16384
-  ip_address: 107.22.247.45
-micro_bosh_stemcell_name: "micro-bosh-stemcell-aws-0.6.4.tgz"
+TODO paste in example
 ```
 
 ## Contributing

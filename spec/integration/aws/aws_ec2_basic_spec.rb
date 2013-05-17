@@ -13,6 +13,7 @@ describe "AWS deployment using gems and publish stemcells" do
   # after { destroy_test_constructs }
 
   it "creates an EC2 inception/microbosh with the associated resources" do
+    setup_home_dir
     create_manifest
     cli.deploy
 
