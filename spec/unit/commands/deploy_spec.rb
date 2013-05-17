@@ -2,7 +2,7 @@
 
 require "bosh-bootstrap/cli/commands/deploy"
 describe Bosh::Bootstrap::Cli::Commands::Deploy do
-  include Bosh::Bootstrap::Cli::Helpers::Settings
+  include Bosh::Bootstrap::Cli::Helpers
 
   let(:settings_dir) { File.expand_path("~/.microbosh") }
 
@@ -23,6 +23,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
   # * microbosh_deploy
   describe "aws" do
     it "deploy creates provisions IP address micro_bosh.yml, discovers/downloads stemcell/AMI, runs 'bosh micro deploy'" do
+      setting "provider.name", "aws"
       provider = double(Cyoi::Cli::Provider)
       provider.stub(:execute!)
       Cyoi::Cli::Provider.stub(:new).with([settings_dir]).and_return(provider)
@@ -30,6 +31,10 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       address = double(Cyoi::Cli::Address)
       address.stub(:execute!)
       Cyoi::Cli::Address.stub(:new).with([settings_dir]).and_return(address)
+
+      microbosh = double(Bosh::Bootstrap::Microbosh)
+      microbosh.stub(:deploy)
+      Bosh::Bootstrap::Microbosh.stub(:new).with(settings_dir, "ami-123456").and_return(microbosh)
 
       cmd.perform
     end

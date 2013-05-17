@@ -3,9 +3,10 @@ module Bosh; module Bootstrap; module Cli; module Commands; end; end; end; end
 require "cyoi/cli/provider"
 require "cyoi/cli/address"
 require "bosh-bootstrap/cli/helpers"
+require "bosh-bootstrap/microbosh"
 
 class Bosh::Bootstrap::Cli::Commands::Deploy
-  include Bosh::Bootstrap::Cli::Helpers::Settings
+  include Bosh::Bootstrap::Cli::Helpers
 
   def initialize
     
@@ -20,7 +21,6 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     select_provider
     select_or_provision_public_networking
     select_public_image_or_download_stemcell
-    create_microbosh_manifest
     perform_microbosh_deploy
   end
 
@@ -44,14 +44,12 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
 
   # download if stemcell
   def select_public_image_or_download_stemcell
-    
-  end
-
-  def create_microbosh_manifest
-  
+    settings.set("bosh.stemcell", "ami-123456")
+    save_settings!
   end
 
   def perform_microbosh_deploy
-    
+    @microbosh ||= Bosh::Bootstrap::Microbosh.new(settings_dir, settings.bosh.stemcell)
+    @microbosh.deploy(settings.provider.name, settings)
   end
 end

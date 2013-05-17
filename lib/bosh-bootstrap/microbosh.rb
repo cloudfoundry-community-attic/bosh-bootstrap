@@ -1,3 +1,5 @@
+require "bosh-bootstrap/microbosh_providers"
+
 class Bosh::Bootstrap::Microbosh
   include FileUtils
 
