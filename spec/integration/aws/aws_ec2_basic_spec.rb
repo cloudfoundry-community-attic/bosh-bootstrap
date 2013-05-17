@@ -17,6 +17,11 @@ describe "AWS deployment using gems and publish stemcells" do
     create_manifest
     cli.deploy
 
+    # creates ~/.microbosh/settings.yml
+    # creates ~/.microbosh/Gemfile
+    # creates ~/.microbosh/ssh/microbosh-test-bosh
+    # creates ~/.microbosh/deployments/test-bosh/micro_bosh.yml
+
     # creates a server with a specific tagged name
     # server has a 16G volume attached (plus a root volume)
     # IP was provisioned
