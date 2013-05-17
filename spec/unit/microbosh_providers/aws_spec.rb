@@ -7,8 +7,8 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
 
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
   let(:aws_jenkins_bucket) { "bosh-jenkins-artifacts" }
-  let(:latest_ami_uri) { "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell_aws_ami_us-east-1" }
-  let(:latest_stemcell_uri) { "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell_aws.tgz" }
+  let(:latest_ami_uri) { "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell-aws_ami_us-east-1" }
+  let(:latest_stemcell_uri) { "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell-aws.tgz" }
 
   it "creates micro_bosh.yml manifest" do
     setting "provider.name", "aws"
@@ -49,7 +49,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
       
       subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
       subject.stub(:sh).with("curl -O '#{latest_stemcell_uri}'")
-      subject.stemcell.should =~ %r{deployments/last_successful_micro-bosh-stemcell_aws.tgz$}
+      subject.stemcell.should =~ %r{deployments/last_successful_micro-bosh-stemcell-aws.tgz$}
     end
   end
 end

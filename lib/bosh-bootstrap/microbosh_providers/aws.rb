@@ -81,11 +81,11 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def ami_uri_path(region)
-      "/last_successful_micro-bosh-stemcell_aws_ami_#{region}"
+      "/last_successful_micro-bosh-stemcell-aws_ami_#{region}"
     end
 
     def stemcell_uri
-      "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell_aws.tgz"
+      "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful_micro-bosh-stemcell-aws.tgz"
     end
 
     # downloads latest stemcell & returns path
