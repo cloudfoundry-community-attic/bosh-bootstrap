@@ -9,86 +9,13 @@ describe Bosh::Bootstrap::Microbosh do
   let(:microbosh_provider) { stub(create_microbosh_yml: {}) }
   subject { Bosh::Bootstrap::Microbosh.new(base_path, microbosh_provider) }
 
-  describe "aws" do
-    before do
-      setting "provider.name", "aws"
-      setting "provider.region", "us-west-2"
-      setting "provider.credentials.aws_access_key_id", "ACCESS"
-      setting "provider.credentials.aws_secret_access_key", "SECRET"
-      setting "bosh.name", "test-bosh"
-      setting "bosh.password", "password"
-      setting "bosh.salted_password", "salted_password"
-      setting "address.ip", "1.2.3.4"
-      setting "bosh.persistent_disk", 16384
-      setting "bosh.stemcell", path_or_ami
-      subject.stub(:sh).with("bundle install")
-      subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
-    end
-
-    it "deploys new microbosh" do
-      subject.deploy("aws", settings)
-    end
+  it "deploys new microbosh" do
+    setting "bosh.stemcell", path_or_ami
+    subject.stub(:sh).with("bundle install")
+    subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
+    subject.deploy("aws", settings)
   end
 
-  describe "openstack" do
-    before do
-      setting "provider.name", "openstack"
-      setting "provider.credentials.openstack_auth_url", "http://10.0.0.2:5000/v2.0/tokens"
-      setting "provider.credentials.openstack_username", "USER"
-      setting "provider.credentials.openstack_api_key", "PASSWORD"
-      setting "provider.credentials.openstack_tenant", "TENANT"
-      setting "bosh.name", "test-bosh"
-      setting "bosh.password", "password"
-      setting "bosh.salted_password", "salted_password"
-      setting "address.ip", "1.2.3.4"
-      setting "bosh.persistent_disk", 4096
-      setting "bosh.stemcell", path_or_ami
-      subject.stub(:sh).with("bundle install")
-      subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
-    end
-
-    it "deploys new microbosh" do
-      subject.deploy("openstack", settings)
-    end
-  end
-
-  describe "vsphere" do
-    before do
-      # the meaning of each field can be learned from http://www.brianmmcclain.com/using-bosh-with-vsphere-part-1/
-      setting "provider.name", "vsphere"
-      setting "provider.credentials.host", "HOST"
-      setting "provider.credentials.user", "user"
-      setting "provider.credentials.password", "TempP@ss"
-
-      # TODO - perhaps network.ip_address is better?
-      setting "address.ip", "172.23.194.100"
-      setting "provider.network.name", "VLAN2194"
-      setting "provider.network.netmask", "255.255.254.0"
-      setting "provider.network.gateway", "172.23.194.1"
-      setting "provider.network.dns", %w[172.22.22.153 172.22.22.154]
-
-      setting "provider.npt", %w[ntp01.las01.emcatmos.com ntp02.las01.emcatmos.com]
-      setting "provider.datacenter.name", "LAS01"
-      setting "provider.datacenter.vm_folder", "BOSH_VMs"
-      setting "provider.datacenter.template_folder", "BOSH_Templates"
-      setting "provider.datacenter.disk_path", "BOSH_Deployer"
-      setting "provider.datacenter.datastore_pattern", "las01-.*"
-      setting "provider.datacenter.persistent_datastore_pattern", "las01-.*"
-      setting "provider.datacenter.allow_mixed_datastores", true
-      setting "provider.datacenter.clusters", ["CLUSTER01"]
-
-      setting "bosh.name", "test-bosh"
-      setting "bosh.password", "password"
-      setting "bosh.salted_password", "salted_password"
-      setting "bosh.stemcell", path_or_ami
-      subject.stub(:sh).with("bundle install")
-      subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
-    end
-
-    it "deploys new microbosh" do
-      subject.deploy("vsphere", settings)
-    end
-  end
   xit "updates existing microbosh" do
     subject.deploy
   end
