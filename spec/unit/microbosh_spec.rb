@@ -6,8 +6,9 @@ describe Bosh::Bootstrap::Microbosh do
   let(:path_or_ami) { "/path/to/stemcell.tgz" }
   let(:base_path) { File.expand_path("~/.microbosh") }
   let(:settings_dir) { base_path }
+  let(:microbosh_provider) { stub(create_microbosh_yml: {}) }
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
-  subject { Bosh::Bootstrap::Microbosh.new(base_path) }
+  subject { Bosh::Bootstrap::Microbosh.new(base_path, microbosh_provider) }
 
   describe "aws" do
     before do
@@ -27,8 +28,6 @@ describe Bosh::Bootstrap::Microbosh do
 
     it "deploys new microbosh" do
       subject.deploy("aws", settings)
-      File.should be_exists(microbosh_yml)
-      files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_ec2.yml"))
     end
   end
 
@@ -51,8 +50,6 @@ describe Bosh::Bootstrap::Microbosh do
 
     it "deploys new microbosh" do
       subject.deploy("openstack", settings)
-      File.should be_exists(microbosh_yml)
-      files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.yml"))
     end
   end
 
@@ -91,8 +88,6 @@ describe Bosh::Bootstrap::Microbosh do
 
     it "deploys new microbosh" do
       subject.deploy("vsphere", settings)
-      File.should be_exists(microbosh_yml)
-      files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.vsphere.yml"))
     end
   end
   xit "updates existing microbosh" do

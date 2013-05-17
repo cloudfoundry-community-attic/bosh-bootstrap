@@ -22,15 +22,15 @@ class Bosh::Bootstrap::Microbosh
   attr_reader :base_path
   attr_reader :provider
 
-  def initialize(base_path)
+  def initialize(base_path, provider)
     @base_path = base_path
+    @provider = provider
   end
 
   def deploy(provider_name, settings)
     mkdir_p(base_path)
     chdir(base_path) do
       setup_base_path
-      initialize_microbosh_provider(provider_name)
       create_microbosh_yml(settings)
       deploy_or_update(settings.bosh.stemcell)
     end
@@ -49,14 +49,6 @@ gem "bosh-bootstrap", path: #{gempath}
     end
     rm_rf "Gemfile.lock"
     sh "bundle install"
-  end
-
-  def initialize_microbosh_provider(provider_name)
-    @provider ||= begin
-      require "bosh-bootstrap/microbosh_providers/#{provider_name}"
-      klass = Bosh::Bootstrap::MicroboshProviders.provider_class(provider_name)
-      klass.new(File.expand_path("deployments/micro_bosh.yml"))
-    end
   end
 
   def create_microbosh_yml(settings)

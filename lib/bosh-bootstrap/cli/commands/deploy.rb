@@ -42,12 +42,18 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     reload_settings!
   end
 
+  def microbosh_provider
+    @microbosh_provider ||= begin
+      provider_name = settings.provider.name
+      require "bosh-bootstrap/microbosh_providers/#{provider_name}"
+      klass = Bosh::Bootstrap::MicroboshProviders.provider_class(provider_name)
+      klass.new(File.join(settings_dir, "deployments/micro_bosh.yml"))
+    end
+  end
+
   # download if stemcell
   def select_public_image_or_download_stemcell
-    # TODO if aws & us-east-1 -> ami
-    # TODO if aws & not running in target aws region -> error "Must either use us-east-1 or run 'bosh bootstrap deploy' within target AWS region"
-    # TODO else download stemcell
-    settings.set("bosh.stemcell", "ami-123456")
+    settings.set("bosh.stemcell", microbosh_provider.stemcell)
     save_settings!
   end
 

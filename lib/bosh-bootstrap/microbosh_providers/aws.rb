@@ -49,6 +49,13 @@ module Bosh::Bootstrap::MicroboshProviders
     def private_key_path
       "/home/vcap/microboshes/aws-us-west-2/ssh/#{microbosh_name}.pem"
     end
+
+    # if us-east-1 -> ami
+    # if not running in target aws region -> error "Must either use us-east-1 or run 'bosh bootstrap deploy' within target AWS region"
+    # else download stemcell & return path
+    def stemcell
+      "ami-123456"
+    end
   end
 end
 Bosh::Bootstrap::MicroboshProviders.register_provider("aws", Bosh::Bootstrap::MicroboshProviders::AWS)
