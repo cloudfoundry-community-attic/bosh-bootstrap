@@ -10,8 +10,10 @@ describe Bosh::Bootstrap::Microbosh do
   subject { Bosh::Bootstrap::Microbosh.new(base_path, microbosh_provider) }
 
   it "deploys new microbosh" do
+    setting "bosh.name", "test-bosh"
     setting "bosh.stemcell", path_or_ami
     subject.stub(:sh).with("bundle install")
+    subject.stub(:sh).with("bundle exec bosh micro deployment test-bosh")
     subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
     subject.deploy(settings)
   end

@@ -21,6 +21,9 @@ class Bosh::Bootstrap::Microbosh
 
   attr_reader :base_path
   attr_reader :provider
+  attr_reader :bosh_name
+  attr_reader :deployments_dir
+  attr_reader :manifest_yml
 
   def initialize(base_path, provider)
     @base_path = base_path
@@ -28,11 +31,14 @@ class Bosh::Bootstrap::Microbosh
   end
 
   def deploy(settings)
-    mkdir_p(base_path)
+    @bosh_name = settings.bosh.name
+    @deployments_dir = File.join(base_path, "deployments")
+    @manifest_yml = File.join(deployments_dir, bosh_name, "micro_bosh.yml")
+    mkdir_p(File.dirname(manifest_yml))
     chdir(base_path) do
       setup_base_path
       create_microbosh_yml(settings)
-      deploy_or_update(settings.bosh.stemcell)
+      deploy_or_update(settings.bosh.name, settings.bosh.stemcell)
     end
   end
 
@@ -64,7 +70,10 @@ gem "bosh_cli_plugin_micro"
     provider.create_microbosh_yml(settings)
   end
 
-  def deploy_or_update(stemcell)
-    bundle "exec bosh micro deploy", stemcell
+  def deploy_or_update(bosh_name, stemcell)
+    chdir("deployments") do
+      bundle "exec bosh micro deployment", bosh_name
+      bundle "exec bosh micro deploy", stemcell
+    end
   end
 end
