@@ -4,18 +4,18 @@ require "bcrypt"
 class Bosh::Bootstrap::MicroboshProviders::Base
   include FileUtils
 
-  attr_reader :path
+  attr_reader :manifest_path
   attr_reader :settings
 
-  def initialize(path)
-    @path = path
+  def initialize(manifest_path)
+    @manifest_path = manifest_path
   end
 
   def create_microbosh_yml(settings)
     @settings = settings.is_a?(Hash) ? Settingslogic.new(settings) : settings
     raise "@settings must be Settingslogic (or Hash)" unless @settings.is_a?(Settingslogic)
-    mkdir_p(File.dirname(path))
-    File.open(path, "w") do |f|
+    mkdir_p(File.dirname(manifest_path))
+    File.open(manifest_path, "w") do |f|
       f << self.to_hash.to_yaml
     end
   end

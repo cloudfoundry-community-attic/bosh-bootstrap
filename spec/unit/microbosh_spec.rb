@@ -7,7 +7,6 @@ describe Bosh::Bootstrap::Microbosh do
   let(:base_path) { File.expand_path("~/.microbosh") }
   let(:settings_dir) { base_path }
   let(:microbosh_provider) { stub(create_microbosh_yml: {}) }
-  let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
   subject { Bosh::Bootstrap::Microbosh.new(base_path, microbosh_provider) }
 
   describe "aws" do
