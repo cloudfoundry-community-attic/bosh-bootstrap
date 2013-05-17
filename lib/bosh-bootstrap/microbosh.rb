@@ -4,12 +4,10 @@ class Bosh::Bootstrap::Microbosh
   include FileUtils
 
   attr_reader :base_path
-  attr_reader :stemcell
   attr_reader :provider
 
-  def initialize(base_path, stemcell)
+  def initialize(base_path)
     @base_path = base_path
-    @stemcell = stemcell
   end
 
   def deploy(provider_name, settings)
@@ -18,7 +16,7 @@ class Bosh::Bootstrap::Microbosh
       setup_base_path
       initialize_microbosh_provider(provider_name)
       create_microbosh_yml(settings)
-      deploy_or_update
+      deploy_or_update(settings.bosh.stemcell)
     end
   end
 
@@ -49,7 +47,7 @@ gem "bosh-bootstrap", path: #{gempath}
     provider.create_microbosh_yml(settings)
   end
 
-  def deploy_or_update
-      sh "bundle exec bosh micro deploy #{stemcell}"
+  def deploy_or_update(stemcell)
+    sh "bundle exec bosh micro deploy #{stemcell}"
   end
 end

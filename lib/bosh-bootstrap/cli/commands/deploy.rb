@@ -49,7 +49,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
   end
 
   def perform_microbosh_deploy
-    @microbosh ||= Bosh::Bootstrap::Microbosh.new(settings_dir, settings.bosh.stemcell)
+    @microbosh ||= Bosh::Bootstrap::Microbosh.new(settings_dir)
     @microbosh.deploy(settings.provider.name, settings)
   end
 end

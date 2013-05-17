@@ -7,7 +7,7 @@ describe Bosh::Bootstrap::Microbosh do
   let(:base_path) { File.expand_path("~/.microbosh") }
   let(:settings_dir) { base_path }
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
-  subject { Bosh::Bootstrap::Microbosh.new(base_path, path_or_ami) }
+  subject { Bosh::Bootstrap::Microbosh.new(base_path) }
 
   describe "aws" do
     before do
@@ -20,6 +20,7 @@ describe Bosh::Bootstrap::Microbosh do
       setting "bosh.salted_password", "salted_password"
       setting "bosh.public_ip", "1.2.3.4"
       setting "bosh.persistent_disk", 16384
+      setting "bosh.stemcell", path_or_ami
       subject.stub(:sh).with("bundle install")
       subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
     end
@@ -43,6 +44,7 @@ describe Bosh::Bootstrap::Microbosh do
       setting "bosh.salted_password", "salted_password"
       setting "bosh.public_ip", "1.2.3.4"
       setting "bosh.persistent_disk", 4096
+      setting "bosh.stemcell", path_or_ami
       subject.stub(:sh).with("bundle install")
       subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
     end
@@ -81,6 +83,7 @@ describe Bosh::Bootstrap::Microbosh do
       setting "bosh.name", "test-bosh"
       setting "bosh.password", "password"
       setting "bosh.salted_password", "salted_password"
+      setting "bosh.stemcell", path_or_ami
       subject.stub(:sh).with("bundle install")
       subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
     end
