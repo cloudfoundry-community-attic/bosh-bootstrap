@@ -38,10 +38,6 @@ bosh -u admin -p admin create user drnic PASSWORD (do not display password)
 * AWS/us-east-1 - upload light stemcell
 * Others - upload normal base stemcell
 
-## Shipping
-
-* bosh_cli => 1.0.3 ok?
-
 ## Validations
 
 If using stemcells, then must be Ubuntu with following packages installed:
