@@ -1,4 +1,4 @@
-require "settingslogic"
+require "readwritesettings"
 require "fileutils"
 
 module Bosh::Bootstrap::Cli::Helpers::Settings

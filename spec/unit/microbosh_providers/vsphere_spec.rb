@@ -1,4 +1,4 @@
-require "settingslogic"
+require "readwritesettings"
 require "bosh-bootstrap/microbosh_providers/vsphere"
 
 describe Bosh::Bootstrap::MicroboshProviders::VSphere do

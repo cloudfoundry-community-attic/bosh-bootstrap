@@ -1,4 +1,4 @@
-require "settingslogic"
+require "readwritesettings"
 
 describe Bosh::Bootstrap::Microbosh do
   include Bosh::Bootstrap::Cli::Helpers::Settings

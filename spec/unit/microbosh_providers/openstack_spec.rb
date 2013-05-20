@@ -1,4 +1,4 @@
-require "settingslogic"
+require "readwritesettings"
 require "bosh-bootstrap/microbosh_providers/openstack"
 
 describe Bosh::Bootstrap::MicroboshProviders::OpenStack do

@@ -23,7 +23,7 @@ EOS
   gem.require_paths = ["lib"]
 
   gem.add_dependency "cyoi"
-  gem.add_dependency "settingslogic", "~> 2.0.9"
+  gem.add_dependency "readwritesettings", "~> 3.0"
   gem.add_dependency "bcrypt-ruby"
   gem.add_dependency "redcard"
   gem.add_dependency "bosh_cli", "~> 1.5.0.pre"

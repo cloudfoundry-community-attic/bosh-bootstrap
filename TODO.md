@@ -40,7 +40,6 @@ bosh -u admin -p admin create user drnic PASSWORD (do not display password)
 
 ## Shipping
 
-* settingslogic gem release
 * bosh_cli => 1.0.3 ok?
 
 ## Validations

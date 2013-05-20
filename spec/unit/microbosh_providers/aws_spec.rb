@@ -1,4 +1,4 @@
-require "settingslogic"
+require "readwritesettings"
 require "fakeweb"
 require "bosh-bootstrap/microbosh_providers/aws"
 

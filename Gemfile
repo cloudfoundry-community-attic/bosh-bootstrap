@@ -3,7 +3,6 @@ source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
 
 gemspec
 
-gem "settingslogic", github: "drnic/settingslogic", branch: "integration"
 if File.directory?("../cyoi")
   gem "cyoi", path: "../cyoi"
 end
