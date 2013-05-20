@@ -27,7 +27,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       setting "provider.name", "aws"
       provider = double(Cyoi::Cli::Provider)
       provider.stub(:execute!)
-      Cyoi::Cli::Provider.stub(:new).with([settings_dir]).and_return(provider)
+      Cyoi::Cli::Provider.should_receive(:new).with([settings_dir]).and_return(provider)
 
       provider_client = double(Cyoi::Providers::Clients::AwsProviderClient)
       provider_client.stub(:create_security_group)
@@ -35,10 +35,14 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
 
       address = double(Cyoi::Cli::Address)
       address.stub(:execute!)
-      Cyoi::Cli::Address.stub(:new).with([settings_dir]).and_return(address)
+      Cyoi::Cli::Address.should_receive(:new).with([settings_dir]).and_return(address)
 
       microbosh_provider = stub(stemcell: "ami-123456")
       cmd.stub(:microbosh_provider).and_return(microbosh_provider)
+
+      key_pair = double(Cyoi::Cli::KeyPair)
+      key_pair.stub(:execute!)
+      Cyoi::Cli::KeyPair.should_receive(:new).with([settings_dir]).and_return(key_pair)
 
       microbosh = double(Bosh::Bootstrap::Microbosh)
       microbosh.stub(:deploy)
