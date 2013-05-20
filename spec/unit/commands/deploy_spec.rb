@@ -50,7 +50,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
 
       keypair = double(Bosh::Bootstrap::KeyPair)
       keypair.stub(:install)
-      Bosh::Bootstrap::KeyPair.stub(:new).with("test-bosh", "PRIVATE").and_return(keypair)
+      Bosh::Bootstrap::KeyPair.stub(:new).with(settings_dir, "test-bosh", "PRIVATE").and_return(keypair)
 
       microbosh = double(Bosh::Bootstrap::Microbosh)
       microbosh.stub(:deploy)

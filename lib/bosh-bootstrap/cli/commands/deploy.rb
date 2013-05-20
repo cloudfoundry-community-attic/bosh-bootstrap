@@ -57,7 +57,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     cli.execute!
     reload_settings!
 
-    network = Bosh::Bootstrap::KeyPair.new(settings.key_pair.name, settings.key_pair.private_key)
+    network = Bosh::Bootstrap::KeyPair.new(settings_dir, settings.key_pair.name, settings.key_pair.private_key)
     network.install
   end
 
