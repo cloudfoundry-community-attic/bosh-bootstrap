@@ -41,6 +41,18 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
       subject.stemcell.should == "ami-234567"
     end
 
+    it "retries to get AMI if initially fails" do
+      setting "provider.region", "us-east-1"
+      FakeWeb.register_uri(:get, latest_ami_uri, [
+        { status: 404 },
+        { body: "ami-234567"}
+      ])
+
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+      subject.stemcell.should == ""
+      subject.stemcell.should == "ami-234567"
+    end
+
     xit "errors if AMI not available and not running within target region" do
       setting "provider.region", "us-west-2"
     end

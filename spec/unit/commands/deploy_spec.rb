@@ -38,7 +38,9 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       address.stub(:execute!)
       Cyoi::Cli::Address.should_receive(:new).with([settings_dir]).and_return(address)
 
-      microbosh_provider = stub(stemcell: "ami-123456")
+      microbosh_provider = stub()
+      microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("")
+      microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("ami-123456")
       cmd.stub(:microbosh_provider).and_return(microbosh_provider)
 
       key_pair = double(Cyoi::Cli::KeyPair)
