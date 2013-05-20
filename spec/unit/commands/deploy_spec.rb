@@ -3,6 +3,7 @@
 require "bosh-bootstrap/cli/commands/deploy"
 require "cyoi/providers/clients/aws_provider_client"
 describe Bosh::Bootstrap::Cli::Commands::Deploy do
+  include StdoutCapture
   include Bosh::Bootstrap::Cli::Helpers
 
   let(:settings_dir) { File.expand_path("~/.microbosh") }
@@ -25,6 +26,9 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
   describe "aws" do
     it "deploy creates provisions IP address micro_bosh.yml, discovers/downloads stemcell/AMI, runs 'bosh micro deploy'" do
       setting "provider.name", "aws"
+      setting "key_pair.name", "test-bosh"
+      setting "key_pair.private_key", "PRIVATE"
+
       provider = double(Cyoi::Cli::Provider)
       provider.stub(:execute!)
       Cyoi::Cli::Provider.should_receive(:new).with([settings_dir]).and_return(provider)
@@ -44,11 +48,15 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       key_pair.stub(:execute!)
       Cyoi::Cli::KeyPair.should_receive(:new).with(["test-bosh", settings_dir]).and_return(key_pair)
 
+      keypair = double(Bosh::Bootstrap::KeyPair)
+      keypair.stub(:install)
+      Bosh::Bootstrap::KeyPair.stub(:new).with("test-bosh", "PRIVATE").and_return(keypair)
+
       microbosh = double(Bosh::Bootstrap::Microbosh)
       microbosh.stub(:deploy)
       Bosh::Bootstrap::Microbosh.stub(:new).with(settings_dir, microbosh_provider).and_return(microbosh)
 
-      cmd.perform
+      capture_stdout { cmd.perform }
     end
     it "delete does nothing if not targetting a deployment"
     it "delete runs 'bosh micro delete' & releases IP address; updates settings"

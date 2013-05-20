@@ -9,4 +9,5 @@ end
 
 require "bosh-bootstrap/version"
 require "bosh-bootstrap/network"
+require "bosh-bootstrap/key_pair"
 require "bosh-bootstrap/microbosh"

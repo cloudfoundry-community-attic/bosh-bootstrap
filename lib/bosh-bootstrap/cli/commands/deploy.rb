@@ -24,6 +24,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
 
     select_provider
     select_or_provision_public_networking
+    setup_keypair
     select_public_image_or_download_stemcell
     perform_microbosh_deploy
   end
@@ -48,11 +49,16 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     # TODO why passing provider_client rather than a Cyoi::Cli::Network object?
     network = Bosh::Bootstrap::Network.new(settings.provider.name, provider_client)
     network.deploy
+  end
 
-    key_pair_name = settings.bosh.name
-    key_pair = Cyoi::Cli::KeyPair.new([key_pair_name, settings_dir])
-    key_pair.execute!
+  def setup_keypair
+    key_pair_name = settings.exists?("key_pair.name") || settings.bosh.name
+    cli = Cyoi::Cli::KeyPair.new([key_pair_name, settings_dir])
+    cli.execute!
     reload_settings!
+
+    network = Bosh::Bootstrap::KeyPair.new(settings.key_pair.name, settings.key_pair.private_key)
+    network.install
   end
 
   # TODO should this go inside Microbosh, like NetworkProvider is to Network?
