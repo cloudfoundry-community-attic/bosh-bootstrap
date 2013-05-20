@@ -57,8 +57,9 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     cli.execute!
     reload_settings!
 
-    network = Bosh::Bootstrap::KeyPair.new(settings_dir, settings.key_pair.name, settings.key_pair.private_key)
-    network.install
+    key_pair = Bosh::Bootstrap::KeyPair.new(settings_dir, settings.key_pair.name, settings.key_pair.private_key)
+    key_pair.install
+    settings.set("key_pair.path", key_pair.path)
   end
 
   # TODO should this go inside Microbosh, like NetworkProvider is to Network?

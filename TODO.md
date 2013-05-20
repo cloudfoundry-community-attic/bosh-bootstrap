@@ -1,7 +1,5 @@
 ## Known issues
 
-* Need key pair (delegate to cyoi)
-  * microbosh_providers/aws.rb - private_key_path has hardcoded root `/home/vcap/microboshes/`
 * setup hard coded settings.bosh.X from options or defaults
 
 ## Cyoi

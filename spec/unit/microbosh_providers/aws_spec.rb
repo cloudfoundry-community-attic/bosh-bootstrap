@@ -16,6 +16,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     setting "provider.credentials.aws_access_key_id", "ACCESS"
     setting "provider.credentials.aws_secret_access_key", "SECRET"
     setting "address.ip", "1.2.3.4"
+    setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
     setting "bosh.name", "test-bosh"
     setting "bosh.salted_password", "salted_password"
     setting "bosh.persistent_disk", 16384

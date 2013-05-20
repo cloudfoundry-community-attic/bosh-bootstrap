@@ -30,4 +30,4 @@ cloud:
       - bosh_director
       - bosh_registry
       default_key_name: test-bosh
-      private_key: /home/vcap/microboshes/aws-us-west-2/ssh/test-bosh.pem
+      private_key: ~/.microbosh/ssh/test-bosh

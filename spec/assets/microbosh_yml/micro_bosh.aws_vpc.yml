@@ -30,7 +30,7 @@ cloud:
       - bosh_director
       - bosh_registry
       default_key_name: test-bosh
-      ec2_private_key: /home/vcap/microboshes/aws-us-west-2/ssh/test-bosh.pem
+      ec2_private_key: ~/.microbosh/ssh/test-bosh
 apply_spec:
   agent:
     blobstore:

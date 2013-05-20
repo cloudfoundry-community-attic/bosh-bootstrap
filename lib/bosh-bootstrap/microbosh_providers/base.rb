@@ -46,4 +46,7 @@ class Bosh::Bootstrap::MicroboshProviders::Base
     settings.address.ip
   end
 
+  def private_key_path
+    settings.key_pair.path
+  end
 end

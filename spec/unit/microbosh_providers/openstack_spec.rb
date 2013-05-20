@@ -13,6 +13,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
     setting "provider.credentials.openstack_api_key", "PASSWORD"
     setting "provider.credentials.openstack_tenant", "TENANT"
     setting "address.ip", "1.2.3.4"
+    setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
     setting "bosh.name", "test-bosh"
     setting "bosh.salted_password", "salted_password"
     setting "bosh.persistent_disk", 4096

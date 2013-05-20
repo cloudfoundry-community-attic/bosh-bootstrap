@@ -56,9 +56,6 @@ module Bosh::Bootstrap::MicroboshProviders
        "bosh_registry"]
     end
 
-    def private_key_path
-      "/home/vcap/microboshes/aws-us-west-2/ssh/#{microbosh_name}.pem"
-    end
   end
 end
 Bosh::Bootstrap::MicroboshProviders.register_provider("openstack", Bosh::Bootstrap::MicroboshProviders::OpenStack)

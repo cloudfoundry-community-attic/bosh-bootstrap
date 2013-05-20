@@ -49,7 +49,8 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       Cyoi::Cli::KeyPair.should_receive(:new).with(["test-bosh", settings_dir]).and_return(key_pair)
 
       keypair = double(Bosh::Bootstrap::KeyPair)
-      keypair.stub(:install)
+      keypair.should_receive(:install)
+      keypair.should_receive(:path).and_return(home_file(".microbosh/ssh/test-bosh"))
       Bosh::Bootstrap::KeyPair.stub(:new).with(settings_dir, "test-bosh", "PRIVATE").and_return(keypair)
 
       microbosh = double(Bosh::Bootstrap::Microbosh)
