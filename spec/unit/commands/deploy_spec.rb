@@ -42,7 +42,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
 
       key_pair = double(Cyoi::Cli::KeyPair)
       key_pair.stub(:execute!)
-      Cyoi::Cli::KeyPair.should_receive(:new).with([settings_dir]).and_return(key_pair)
+      Cyoi::Cli::KeyPair.should_receive(:new).with(["test-bosh", settings_dir]).and_return(key_pair)
 
       microbosh = double(Bosh::Bootstrap::Microbosh)
       microbosh.stub(:deploy)

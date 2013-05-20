@@ -19,6 +19,9 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
   # * create_microbosh_manifest
   # * microbosh_deploy
   def perform
+    settings.set_default("bosh.name", "test-bosh")
+    save_settings!
+
     select_provider
     select_or_provision_public_networking
     select_public_image_or_download_stemcell
@@ -46,7 +49,8 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     network = Bosh::Bootstrap::Network.new(settings.provider.name, provider_client)
     network.deploy
 
-    key_pair = Cyoi::Cli::KeyPair.new([settings_dir])
+    key_pair_name = settings.bosh.name
+    key_pair = Cyoi::Cli::KeyPair.new([key_pair_name, settings_dir])
     key_pair.execute!
     reload_settings!
   end
@@ -63,7 +67,6 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
 
   # download if stemcell
   def select_public_image_or_download_stemcell
-    settings.set("bosh.name", "test-bosh")
     print "Determining stemcell image/file to use... "
     settings.set("bosh.stemcell", microbosh_provider.stemcell)
     save_settings!
