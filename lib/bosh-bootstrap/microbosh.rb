@@ -7,7 +7,7 @@ require "bosh-bootstrap/cli/helpers"
 #
 # Usage:
 #   microbosh = Bosh::Bootstrap::Microbosh.new(project_path)
-#   settings = Settingslogic.new({
+#   settings = ReadWriteSettings.new({
 #     "provider" => {"name" => "aws", "credentials" => {...}},
 #     "address" => {"ip" => "1.2.3.4"},
 #     "bosh" => {

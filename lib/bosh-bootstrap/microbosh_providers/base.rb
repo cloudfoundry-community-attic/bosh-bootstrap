@@ -13,13 +13,13 @@ class Bosh::Bootstrap::MicroboshProviders::Base
 
   def initialize(manifest_path, settings)
     @manifest_path = manifest_path
-    @settings = settings.is_a?(Hash) ? Settingslogic.new(settings) : settings
-    raise "@settings must be Settingslogic (or Hash)" unless @settings.is_a?(Settingslogic)
+    @settings = settings.is_a?(Hash) ? ReadWriteSettings.new(settings) : settings
+    raise "@settings must be ReadWriteSettings (or Hash)" unless @settings.is_a?(ReadWriteSettings)
   end
 
   def create_microbosh_yml(settings)
-    @settings = settings.is_a?(Hash) ? Settingslogic.new(settings) : settings
-    raise "@settings must be Settingslogic (or Hash)" unless @settings.is_a?(Settingslogic)
+    @settings = settings.is_a?(Hash) ? ReadWriteSettings.new(settings) : settings
+    raise "@settings must be ReadWriteSettings (or Hash)" unless @settings.is_a?(ReadWriteSettings)
     mkdir_p(File.dirname(manifest_path))
     File.open(manifest_path, "w") do |f|
       f << self.to_hash.to_yaml

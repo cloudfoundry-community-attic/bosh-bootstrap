@@ -34,7 +34,7 @@ module Bosh::Bootstrap::Cli::Helpers::Settings
       end
       chmod(0600, settings_path)
       chmod(0700, settings_ssh_dir) if File.directory?(settings_ssh_dir)
-      Settingslogic.new(settings_path)
+      ReadWriteSettings.new(settings_path)
     end
   end
 
@@ -44,8 +44,8 @@ module Bosh::Bootstrap::Cli::Helpers::Settings
     save_settings!
   end
 
-  # Saves current nested Settingslogic into pure Hash-based YAML file
-  # Recreates accessors on Settingslogic object (since something has changed)
+  # Saves current nested ReadWriteSettings into pure Hash-based YAML file
+  # Recreates accessors on ReadWriteSettings object (since something has changed)
   def save_settings!
     File.open(settings_path, "w") { |f| f << settings.to_nested_hash.to_yaml }
     settings.create_accessors!
