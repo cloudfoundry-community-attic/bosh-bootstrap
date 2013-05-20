@@ -15,7 +15,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
   # * create_microbosh_manifest
   # * microbosh_deploy
   def perform
-    settings.set_default("bosh.name", "test-bosh")
+    settings.set_default("bosh.name", "firstbosh")
     save_settings!
 
     select_provider
