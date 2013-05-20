@@ -43,6 +43,11 @@ bosh -u admin -p admin target https://107.21.94.132:25555
 bosh -u admin -p admin create user drnic PASSWORD (do not display password)
 ```
 
+## Multiple deployments
+
+* bosh name (currently fixed at test-bosh)
+* ~/.microbosh folder is singular
+
 ## Bonus
 
 * AWS/us-east-1 - upload light stemcell
