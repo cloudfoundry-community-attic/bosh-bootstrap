@@ -6,7 +6,7 @@ describe Bosh::Bootstrap::Network do
 
   it "uses NetworkProvider if available" do
     network = Bosh::Bootstrap::Network.new("aws", aws_provider_client)
-    aws_provider_client.stub(:create_security_group)
+    aws_provider_client.should_receive(:create_security_group).exactly(6).times
     network.deploy
   end
 
