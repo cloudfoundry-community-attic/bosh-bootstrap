@@ -1,28 +1,28 @@
 ---
 name: test-bosh
-logging:
+logging: 
   level: DEBUG
-network:
+network: 
   ip: 172.23.194.100
   netmask: 255.255.254.0
   gateway: 172.23.194.1
-  dns:
+  dns: 
   - 172.22.22.153
   - 172.22.22.154
-  cloud_properties:
+  cloud_properties: 
     name: VLAN2194
-cloud:
+cloud: 
   plugin: vsphere
-  properties:
-    agent:
-      ntp:
+  properties: 
+    agent: 
+      ntp: 
       - ntp01.las01.emcatmos.com
       - ntp02.las01.emcatmos.com
-    vcenters:
+    vcenters: 
     - host: HOST
       user: user
       password: TempP@ss
-      datacenters:
+      datacenters: 
       - name: LAS01
         vm_folder: BOSH_VMs
         template_folder: BOSH_Templates
@@ -30,5 +30,5 @@ cloud:
         datastore_pattern: las01-.*
         persistent_datastore_pattern: las01-.*
         allow_mixed_datastores: true
-        clusters:
+        clusters: 
         - CLUSTER01

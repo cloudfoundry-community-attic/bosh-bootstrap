@@ -1,25 +1,25 @@
 ---
 name: test-bosh
-logging:
+logging: 
   level: DEBUG
-network:
+network: 
   name: default
   type: dynamic
   label: private
   ip: 1.2.3.4
-resources:
+resources: 
   persistent_disk: 4096
-  cloud_properties:
+  cloud_properties: 
     instance_type: m1.medium
-cloud:
+cloud: 
   plugin: openstack
-  properties:
-    openstack:
+  properties: 
+    openstack: 
       auth_url: http://10.0.0.2:5000/v2.0/tokens
       username: USER
       api_key: PASSWORD
       tenant: TENANT
-      default_security_groups:
+      default_security_groups: 
       - ssh
       - bosh_agent_http
       - bosh_nats_server
