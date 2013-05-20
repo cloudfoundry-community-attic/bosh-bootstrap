@@ -1,8 +1,5 @@
 ---
 name: test-bosh
-env:
-  bosh:
-    password: salted_password
 logging:
   level: DEBUG
 network:

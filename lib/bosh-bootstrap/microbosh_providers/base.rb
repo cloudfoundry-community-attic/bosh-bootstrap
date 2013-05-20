@@ -28,7 +28,6 @@ class Bosh::Bootstrap::MicroboshProviders::Base
 
   def to_hash
     {"name"=>microbosh_name,
-     "env"=>{"bosh"=>{"password"=>salted_password}},
      "logging"=>{"level"=>"DEBUG"}
     }
   end

@@ -1,7 +1,6 @@
 ## Known issues
 
 * target & create user after deployment
-* bcrypt for salted password
 * upgrade (if its already running successfully; else delete & redeploy)
 * multiple deployments
   * bosh name (currently fixed at test-bosh)
