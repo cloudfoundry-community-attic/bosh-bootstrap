@@ -16,7 +16,7 @@ module Bosh::Cli::Command
     end
 
     usage "bootstrap deploy"
-    desc "Configure and bootstrap a Micro BOSH; or deploy/upgrade existing Micro Bosh"
+    desc "Configure and bootstrap a Micro bosh; or deploy/upgrade existing Micro Bosh"
     def deploy
       require "bosh-bootstrap/cli/commands/deploy"
       deploy_cmd = Bosh::Bootstrap::Cli::Commands::Deploy.new
@@ -24,7 +24,7 @@ module Bosh::Cli::Command
     end
 
     usage "bootstrap ssh"
-    desc "SSH into Micro BOSH"
+    desc "SSH into Micro bosh"
     def ssh
       require "bosh-bootstrap/cli/commands/ssh"
       cmd = Bosh::Bootstrap::Cli::Commands::SSH.new

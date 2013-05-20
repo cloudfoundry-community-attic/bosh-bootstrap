@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.version       = Bosh::Bootstrap::VERSION
   gem.authors       = ["Dr Nic Williams"]
   gem.email         = ["drnicwilliams@gmail.com"]
-  gem.description   = %q{Bootstrap a micro BOSH universe from one CLI}
+  gem.description   = %q{Bootstrap a micro bosh universe from one CLI}
   gem.summary       = <<-EOS
 bosh-bootstrap configures and deploys a microbosh deployed on either
 AWS or OpenStack.

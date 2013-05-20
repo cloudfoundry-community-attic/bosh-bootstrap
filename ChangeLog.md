@@ -72,7 +72,7 @@ Changes:
 
 Work in progress:
 
-* AWS VPC support was begin by the core BOSH team; though work has stopped sadly.
+* AWS VPC support was begin by the core bosh team; though work has stopped sadly.
 * Growing number of specs mostly using Fog.mock! mode; tests being run on travis
 
 ### v0.7.1
@@ -88,7 +88,7 @@ Work in progress:
 Highlights:
 
 * Defaults to downloading latest stemcell (rather than stable, which are getting old now).
-* Installs the Cloud Foundry plugin for BOSH https://github.com/StarkAndWayne/bosh-cloudfoundry
+* Installs the Cloud Foundry plugin for bosh https://github.com/StarkAndWayne/bosh-cloudfoundry
 
 Additions:
 
