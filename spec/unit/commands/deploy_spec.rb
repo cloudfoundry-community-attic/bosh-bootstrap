@@ -13,10 +13,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
     FileUtils.mkdir_p(@cache_dir = File.join(Dir.mktmpdir, "cache"))
   end
 
-  let(:cmd) do
-    cmd = Bosh::Bootstrap::Cli::Commands::Deploy.new
-    cmd
-  end
+  let(:cmd) { Bosh::Bootstrap::Cli::Commands::Deploy.new }
 
   # * select_provider
   # * select_or_provision_public_networking # public_ip or ip/network/gateway

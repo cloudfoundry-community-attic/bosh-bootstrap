@@ -9,10 +9,6 @@ require "bosh-bootstrap/microbosh"
 class Bosh::Bootstrap::Cli::Commands::Deploy
   include Bosh::Bootstrap::Cli::Helpers
 
-  def initialize
-    
-  end
-
   # * select_provider
   # * select_or_provision_public_networking # public_ip or ip/network/gateway
   # * select_public_image_or_download_stemcell # download if stemcell

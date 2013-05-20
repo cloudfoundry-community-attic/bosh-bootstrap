@@ -23,6 +23,14 @@ module Bosh::Cli::Command
       deploy_cmd.perform
     end
 
+    usage "bootstrap ssh"
+    desc "SSH into Micro BOSH"
+    def ssh
+      require "bosh-bootstrap/cli/commands/ssh"
+      cmd = Bosh::Bootstrap::Cli::Commands::SSH.new
+      cmd.perform
+    end
+
     usage "bootstrap delete"
     desc "Delete existing Micro Bosh (does not delete any bosh deployments running)"
     def delete
