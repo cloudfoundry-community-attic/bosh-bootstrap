@@ -8,7 +8,6 @@ class Bosh::Bootstrap::KeyPair
   end
 
   def execute!
-
     mkdir_p(File.dirname(path))
     chmod(0700, File.dirname(path))
 

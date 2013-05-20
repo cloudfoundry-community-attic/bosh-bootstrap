@@ -58,7 +58,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     reload_settings!
 
     key_pair = Bosh::Bootstrap::KeyPair.new(settings_dir, settings.key_pair.name, settings.key_pair.private_key)
-    key_pair.install
+    key_pair.execute!
     settings.set("key_pair.path", key_pair.path)
   end
 
