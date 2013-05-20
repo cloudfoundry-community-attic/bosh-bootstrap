@@ -8,6 +8,7 @@
 ## v0.11
 
 * Complete rewrite of bosh-bootstrap in orphan branch
+* CodeClimate score changed from 0.82 to 3.85
 * Initial support for AWS EC2; WIP for OpenStack; initial unit tests for vSphere
 * Interactive Q&A is extracted into [cyoi](https://github.com/drnic/cyoi) (choose-your-own-infrastructure) library
 * Accessing settings is much cleaner; functionality moved into fork of settingslogic called [readwritesettings](https://github.com/drnic/readwritesettings)
