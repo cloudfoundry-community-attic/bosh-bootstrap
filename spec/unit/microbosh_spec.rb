@@ -14,7 +14,7 @@ describe Bosh::Bootstrap::Microbosh do
     setting "bosh.stemcell", path_or_ami
     subject.stub(:sh).with("bundle install")
     subject.stub(:sh).with("bundle exec bosh micro deployment test-bosh")
-    subject.stub(:sh).with("bundle exec bosh micro deploy #{path_or_ami}")
+    subject.stub(:sh).with("bundle exec bosh -n micro deploy #{path_or_ami}")
     subject.deploy(settings)
   end
 
