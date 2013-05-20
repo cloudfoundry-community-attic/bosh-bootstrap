@@ -1,5 +1,4 @@
 require "bosh-bootstrap/microbosh_providers"
-require "bcrypt"
 
 # for the #sh helper
 require "rake"

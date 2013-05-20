@@ -83,8 +83,6 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
 
   def perform_microbosh_deploy
     settings.set("bosh.persistent_disk", 16384)
-    settings.set("bosh.password", "password")
-    settings.set("bosh.salted_password", "salted_password") # TODO generate from bcrypt-ruby
     @microbosh ||= Bosh::Bootstrap::Microbosh.new(settings_dir, microbosh_provider)
     @microbosh.deploy(settings)
   end

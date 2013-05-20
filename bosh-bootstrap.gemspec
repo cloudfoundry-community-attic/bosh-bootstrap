@@ -24,7 +24,6 @@ EOS
 
   gem.add_dependency "cyoi"
   gem.add_dependency "readwritesettings", "~> 3.0"
-  gem.add_dependency "bcrypt-ruby"
   gem.add_dependency "redcard"
   gem.add_dependency "bosh_cli"
   gem.add_development_dependency "rake"
