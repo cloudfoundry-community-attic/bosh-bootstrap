@@ -5,21 +5,6 @@
 * multiple deployments
   * bosh name (currently fixed at test-bosh)
   * ~/.microbosh folder is singular
-* testing security groups is very slow (since they were broken out)
-  * perhaps only test for the name and assume ports are correct
-  * perhaps its just bad starbucks wifi
-* setup hard coded settings.bosh.X from options or defaults
-* fail if no stemcell/AMI discovered (internet error?)
-
-### Stemcell reset
-
-```
-Determining stemcell image/file to use... 
-```
-
-And then it resets settings.bosh.stemcell to empty.
-
-Retry and fail.
 
 ### Display status
 
