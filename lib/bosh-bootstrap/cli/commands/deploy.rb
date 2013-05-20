@@ -38,10 +38,6 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
 
   # public_ip or ip/network/gateway
   def select_or_provision_public_networking
-    # TODO remove this when off the airplane
-    require "fog"
-    Fog.mock!
-
     address = Cyoi::Cli::Address.new([settings_dir])
     address.execute!
     reload_settings!

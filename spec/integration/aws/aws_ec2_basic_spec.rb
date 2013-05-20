@@ -13,6 +13,10 @@ describe "AWS deployment using gems and publish stemcells" do
   # after { destroy_test_constructs }
 
   it "creates an EC2 inception/microbosh with the associated resources" do
+    # TODO remove this when finished initial development
+    require "fog"
+    Fog.mock!
+
     setup_home_dir
     create_manifest
     cli.deploy
