@@ -1,6 +1,7 @@
 # Copyright (c) 2012-2013 Stark & Wayne, LLC
 
 require "bosh-bootstrap/cli/commands/deploy"
+require "bosh-bootstrap/cli/commands/delete"
 require "bosh-bootstrap/cli/commands/ssh"
 describe Bosh::Cli::Command::Bootstrap do
   include FileUtils
@@ -22,6 +23,13 @@ describe Bosh::Cli::Command::Bootstrap do
     cmd.should_receive(:perform)
     Bosh::Bootstrap::Cli::Commands::Deploy.stub(:new).and_return(cmd)
     cli.deploy
+  end
+
+  it "runs delete command" do
+    cmd = double(Bosh::Bootstrap::Cli::Commands::Delete)
+    cmd.should_receive(:perform)
+    Bosh::Bootstrap::Cli::Commands::Delete.stub(:new).and_return(cmd)
+    cli.delete
   end
 
   it "runs ssh command" do

@@ -1,4 +1,5 @@
 require "bosh-bootstrap/microbosh_providers"
+require "bosh-bootstrap/cli/helpers"
 
 # Configures and deploys (or re-deploys) a micro bosh.
 # A "micro bosh" is a single VM containing all necessary parts of bosh
@@ -18,6 +19,7 @@ require "bosh-bootstrap/microbosh_providers"
 #   microbosh.deploy("aws", settings)
 class Bosh::Bootstrap::Microbosh
   include FileUtils
+  include Bosh::Bootstrap::Cli::Helpers::Bundle
 
   attr_reader :base_path
   attr_reader :provider
@@ -57,13 +59,6 @@ gem "bosh_cli_plugin_micro"
     end
     rm_rf "Gemfile.lock"
     bundle "install"
-  end
-
-  def bundle(*args)
-    Bundler.with_clean_env {
-      ENV.delete 'RUBYOPT'
-      sh "bundle #{args.join(' ')}"
-    }
   end
 
   def create_microbosh_yml(settings)

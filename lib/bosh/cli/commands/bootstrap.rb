@@ -34,7 +34,9 @@ module Bosh::Cli::Command
     usage "bootstrap delete"
     desc "Delete existing Micro Bosh (does not delete any bosh deployments running)"
     def delete
-      raise "not implemented yet"
+      require "bosh-bootstrap/cli/commands/delete"
+      cmd = Bosh::Bootstrap::Cli::Commands::Delete.new
+      cmd.perform
     end
   end
 end
