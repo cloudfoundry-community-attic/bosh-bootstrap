@@ -3,9 +3,27 @@
 `bosh-bootstrap` is a command line tool that you can run on your laptop and automatically get a microbosh (and an inception VM) deployed on either AWS or OpenStack.
 
     gem install bosh-bootstrap
-    bosh-bootstrap deploy
+    bosh bootstrap deploy
+
+## v0.11
+
+* Complete rewrite of bosh-bootstrap in orphan branch
+* Initial support for AWS EC2; WIP for OpenStack; initial unit tests for vSphere
+* Interactive Q&A is extracted into [cyoi](https://github.com/drnic/cyoi) (choose-your-own-infrastructure) library
+* Accessing settings is much cleaner; functionality moved into fork of settingslogic called [readwritesettings](https://github.com/drnic/readwritesettings)
+* Inception VM/server is now provisioned via separate CLI project [inception-server](https://github.com/drnic/inception-server)
+* AWS/us-east-1 uses public AMIs; other regions & other CPIs use stemcells
+* CLI via bosh plugin (`bosh bootstrap`) rather than a stand alone CLI (`bosh-bootstrap`)
+* Added `ssh` action to ssh into the microbosh
+* Added `delete` actions to delete the microbosh (but not the IP address and security groups)
 
 ## v0.10
+
+Available on branch [v0.10](https://github.com/StarkAndWayne/bosh-bootstrap/tree/v0.10).
+
+Install using:
+
+    gem install bosh-bootstrap -v "~> 0.10.0"
 
 * Only using latest pre-release bosh gems & stemcells/amis - do not upgrade if you want the old 2012 gems
 * AWS us-east-1 uses a pre-built AMI for extra speed
