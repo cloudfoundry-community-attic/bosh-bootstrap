@@ -158,6 +158,19 @@ bosh login
 
 The `deploy` command can be re-run and it will not prompt again for inputs. It aims to be idempotent. This means that if you see any errors when running `deploy`, such as unavailability of VMs or IP addresses, then when you resolve those issues you can re-run the `deploy` command and it will resume the bootstrap of micro-bosh (and the optional inception VM).
 
+### Restrict AWS availability zones
+
+If you get any errors from AWS about availability zones (AZs) being unavailable to your AWS account, or a specific instance type/flavor is not available to you in your AZ, then you can try specifying an explicit AZ in your `~/.microbosh/settings.yml` file.
+
+Add `provider.az` to specify an AZ within the region you have chosen:
+
+```
+provider:
+  name: "aws"
+  region: us-east-1
+  az: us-east-1c
+```
+
 ## SSH access
 
 You can open an SSH shell to your micro bosh:
