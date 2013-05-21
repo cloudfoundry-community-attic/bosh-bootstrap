@@ -6,6 +6,8 @@
   * bosh name (currently fixed at test-bosh)
   * ~/.microbosh folder is singular
 
+* specify an AZ to use in the region
+
 ### Display status
 
 ```
