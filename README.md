@@ -13,7 +13,7 @@ Bosh Bootstrap currently supports AWS, with OpenStack and vSphere coming soon. T
 It also performs the task as fast as it is possible. On AWS, if a public AMI has been published for your requested region then it will use that (currently: us-east-1/Virginia).
 
 ```
-$ bosh bootstrap deploy
+$ bosh-bootstrap deploy
 Auto-detected infrastructure API credentials at ~/.fog (override with $FOG)
 1. AWS (default)
 2. AWS (bosh)
@@ -46,7 +46,7 @@ Confirming: Using address 107.21.194.123
 Generating ~/.bosh-bootstrap/universes/aws-us-east-1/micro_bosh.yml...
 Deploying micro bosh server...
 
-$ bosh bootstrap ssh
+$ bosh-bootstrap ssh
 SSH to micro bosh server...
 
 $ bosh-bootstrap delete
@@ -76,7 +76,7 @@ $ gem install bosh-bootstrap
 The first time you use `bosh bootstrap` it will create everything necessary, including a public IP address, security groups, a private key, and the all-important micro bosh that you want. The example output below includes user prompts.
 
 ```
-$ bosh bootstrap deploy
+$ bosh-bootstrap deploy
 Auto-detected infrastructure API credentials at ~/.fog (override with $FOG)
 1. AWS (default)
 2. AWS (bosh)
@@ -161,22 +161,22 @@ The `deploy` command can be re-run and it will not prompt again for inputs. It a
 You can open an SSH shell to your micro bosh:
 
 ```
-$ bosh bootstrap ssh
+$ bosh-bootstrap ssh
 ```
 
 ## Deleting micro bosh
 
-The `bosh bootstrap delete`  command will delete the target micro-bosh.
+The `bosh-bootstrap delete` command will delete the target micro-bosh.
 
 ```
-$ bosh bootstrap delete
+$ bosh-bootstrap delete
 ```
 
 ## Deep dive into the Bosh Bootstrap deploy command
 
-What is actually happening when you run `bosh bootstrap deploy`?
+What is actually happening when you run `bosh-bootstrap deploy`?
 
-At the heart of `bosh bootstrap deploy` is the execution of the micro bosh deployer, a bosh plugin provided to bootstrap a single VM with all the parts of bosh running on it. If you ran this command yourself you would run:
+At the heart of `bosh-bootstrap deploy` is the execution of the micro bosh deployer, a bosh plugin provided to bootstrap a single VM with all the parts of bosh running on it. If you ran this command yourself you would run:
 
 ```
 $ gem install bosh_cli_plugin_micro -s https://s3.amazonaws.com/bosh-jenkins-gems/
@@ -190,7 +190,7 @@ Unfortunately for this simple scenario, there are many little prerequisite steps
 * publicly available stemcells
 * custom stemcells generated from the bosh repository.
 
-To understand exactly what the `bosh bootstrap deploy` command is doing, let's start with what the running parts of bosh are and how `bosh micro deploy` deploys them.
+To understand exactly what the `bosh-bootstrap deploy` command is doing, let's start with what the running parts of bosh are and how `bosh micro deploy` deploys them.
 
 ### What is in bosh?
 
@@ -268,7 +268,7 @@ One of the feature of the Bosh Bootstrap is that you can run it from your local 
 
 ### When do I need an inception server?
 
-There are occasions when it is preferable or required to provision a initial server (called an [inception server](https://github.com/drnic/inception-server)) and to run Bosh Bootstrap (`bosh bootstrap deploy`) within that.
+There are occasions when it is preferable or required to provision a initial server (called an [inception server](https://github.com/drnic/inception-server)) and to run Bosh Bootstrap (`bosh-bootstrap deploy`) within that.
 
 * Using a AWS region other than us-east-1 (you need to be in that region to create an AMI)
 * You want much faster internet between your terminal (an ssh session into your inception server) and your micro bosh and deployed servers
