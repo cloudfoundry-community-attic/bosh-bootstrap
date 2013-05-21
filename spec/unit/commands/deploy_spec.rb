@@ -58,7 +58,5 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
 
       capture_stdout { cmd.perform }
     end
-    it "delete does nothing if not targetting a deployment"
-    it "delete runs 'bosh micro delete' & releases IP address; updates settings"
   end
 end
