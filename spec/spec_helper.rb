@@ -9,8 +9,6 @@ Bundler.setup(:default, :test)
 $:.unshift(File.expand_path("../../lib", __FILE__))
 
 require "rspec/core"
-require "cli" # bosh CLI
-require "bosh/cli/commands/bootstrap" # "bosh bootstrap COMMAND" commands added to bosh CLI
 require "bosh-bootstrap/cli/helpers"
 
 # for the #sh helper
