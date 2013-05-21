@@ -1,3 +1,5 @@
+require "fileutils"
+
 class Bosh::Bootstrap::KeyPair
   include FileUtils
 
