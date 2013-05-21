@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+$:.push File.dirname(__FILE__) + '/../lib'
+
+require "rubygems"
+require "bosh-bootstrap"
+require "bosh-bootstrap/thor_cli"
+
+Bosh::Bootstrap::ThorCli.start
