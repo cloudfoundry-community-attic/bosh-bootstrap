@@ -71,6 +71,8 @@ $ gem install bosh-bootstrap
 
 ## Usage
 
+Bosh Bootstrap is available primarily as a standalone CLI `bosh-bootstrap`. If you have the bosh CLI installed, then it is also available as a bosh plugin via `bosh bootstrap`. This readme assumes the former usage.
+
 ### First time usage
 
 The first time you use `bosh bootstrap` it will create everything necessary, including a public IP address, security groups, a private key, and the all-important micro bosh that you want. The example output below includes user prompts.
