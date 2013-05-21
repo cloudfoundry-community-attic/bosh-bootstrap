@@ -16,7 +16,7 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def to_hash
-      super.merge({
+      data = super.merge({
        "network"=>{"type"=>"dynamic", "vip"=>public_ip},
        "resources"=>
         {"persistent_disk"=>persistent_disk,
@@ -30,6 +30,10 @@ module Bosh::Bootstrap::MicroboshProviders
           {"blobstore"=>{"address"=>public_ip},
            "nats"=>{"address"=>public_ip}},
          "properties"=>{"aws_registry"=>{"address"=>public_ip}}}})
+      if az = settings.exists?("provider.az")
+        data["resources"]["cloud_properties"]["availability_zone"] = az
+      end
+      data
     end
 
     def persistent_disk

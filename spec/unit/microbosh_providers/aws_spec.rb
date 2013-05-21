@@ -28,6 +28,25 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_ec2.yml"))
   end
 
+  it "supports explicit provider.az" do
+    setting "provider.az", "us-west-2a"
+    setting "provider.name", "aws"
+    setting "provider.region", "us-west-2"
+    setting "provider.credentials.aws_access_key_id", "ACCESS"
+    setting "provider.credentials.aws_secret_access_key", "SECRET"
+    setting "address.ip", "1.2.3.4"
+    setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
+    setting "bosh.name", "test-bosh"
+    setting "bosh.salted_password", "salted_password"
+    setting "bosh.persistent_disk", 16384
+
+    subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+
+    subject.create_microbosh_yml(settings)
+    File.should be_exists(microbosh_yml)
+    yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_ec2.us-west-2a.yml"))
+  end
+
   describe "stemcell" do
     before do
       setting "provider.name", "aws"
