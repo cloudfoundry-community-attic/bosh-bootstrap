@@ -1,12 +1,43 @@
 ## Known issues
 
+* specify an AZ to use in the region
 * target & create user after deployment
 * upgrade (if its already running successfully; else delete & redeploy)
 * multiple deployments
   * bosh name (currently fixed at test-bosh)
   * ~/.microbosh folder is singular
 
-* specify an AZ to use in the region
+
+### Specify region
+
+You run the tool, it fails because of region restrictions.
+
+Add the following to your settings.yml
+
+``` yaml
+provider:
+  name: "aws"
+  ignore_az:
+  - us-east-1b
+  - us-west-2c
+```
+
+Or:
+
+``` yaml
+provider:
+  name: "aws"
+  region: us-east-1
+  az: us-east-1c
+```
+
+The AZ choice then maps into `micro_bosh.yml`:
+
+``` yaml
+resources:
+  cloud_properties:
+    availability_zone: AZ
+```
 
 ### Display status
 
