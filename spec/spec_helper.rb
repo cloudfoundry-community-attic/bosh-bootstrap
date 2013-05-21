@@ -30,6 +30,12 @@ def files_match(filename, expected_filename)
   file.should == expected_file
 end
 
+def yaml_files_match(filename, expected_filename)
+  yaml = YAML.load_file(filename)
+  expected_yaml = YAML.load_file(expected_filename)
+  yaml.should == expected_yaml
+end
+
 def setup_home_dir
   home_dir = File.expand_path("../../tmp/home", __FILE__)
   FileUtils.rm_rf(home_dir)

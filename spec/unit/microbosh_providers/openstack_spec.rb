@@ -22,6 +22,6 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
 
     subject.create_microbosh_yml(settings)
     File.should be_exists(microbosh_yml)
-    files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.yml"))
+    yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.yml"))
   end
 end

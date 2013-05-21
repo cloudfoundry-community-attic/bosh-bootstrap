@@ -25,7 +25,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
 
     subject.create_microbosh_yml(settings)
     File.should be_exists(microbosh_yml)
-    files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_ec2.yml"))
+    yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_ec2.yml"))
   end
 
   describe "stemcell" do
