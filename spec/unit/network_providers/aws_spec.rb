@@ -1,5 +1,6 @@
 require "readwritesettings"
 require "fakeweb"
+require "bosh-bootstrap/network_providers"
 require "bosh-bootstrap/network_providers/aws"
 
 describe Bosh::Bootstrap::NetworkProviders::AWS do

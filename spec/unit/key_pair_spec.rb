@@ -1,3 +1,5 @@
+require "bosh-bootstrap/key_pair"
+
 describe Bosh::Bootstrap::KeyPair do
   include Bosh::Bootstrap::Cli::Helpers::Settings
 

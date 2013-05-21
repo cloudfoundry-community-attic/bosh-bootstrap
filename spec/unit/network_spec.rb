@@ -1,3 +1,5 @@
+require "bosh-bootstrap/network"
+
 describe Bosh::Bootstrap::Network do
   include Bosh::Bootstrap::Cli::Helpers::Settings
 
