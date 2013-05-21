@@ -18,6 +18,7 @@
 * Added `ssh` action to ssh into the microbosh
 * Added `delete` actions to delete the microbosh (but not the IP address and security groups)
 * Add back `bosh-bootstrap` CLI & remove bosh_cli dependency (v0.11.1)
+* Specify which AWS AZ to use via `provider.az` in settings.yml (v0.11.2)
 
 ## v0.10
 
