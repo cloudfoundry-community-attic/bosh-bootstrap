@@ -3,7 +3,7 @@
 `bosh-bootstrap` is a command line tool that you can run on your laptop and automatically get a microbosh (and an inception VM) deployed on AWS (with OpenStack & vSphere coming soon).
 
     gem install bosh-bootstrap
-    bosh bootstrap deploy
+    bosh-bootstrap deploy
 
 ## v0.11
 
@@ -17,6 +17,7 @@
 * CLI via bosh plugin (`bosh bootstrap`) rather than a stand alone CLI (`bosh-bootstrap`)
 * Added `ssh` action to ssh into the microbosh
 * Added `delete` actions to delete the microbosh (but not the IP address and security groups)
+* Add back `bosh-bootstrap` CLI & remove bosh_cli dependency (v0.11.1)
 
 ## v0.10
 
