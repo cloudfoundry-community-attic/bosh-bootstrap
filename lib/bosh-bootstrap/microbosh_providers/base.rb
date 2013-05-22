@@ -47,4 +47,24 @@ class Bosh::Bootstrap::MicroboshProviders::Base
   def private_key_path
     settings.key_pair.path
   end
+
+  def jenkins_bucket
+    "bosh-jenkins-artifacts"
+  end
+
+  # downloads latest stemcell & returns path
+  def download_stemcell
+    mkdir_p(stemcell_dir)
+    chdir(stemcell_dir) do
+      stemcell_path = File.expand_path(File.basename(stemcell_uri))
+      unless File.exists?(stemcell_path)
+        sh "curl -O '#{stemcell_uri}'"
+      end
+      return stemcell_path
+    end
+  end
+
+  def stemcell_dir
+    File.dirname(manifest_path)
+  end
 end
