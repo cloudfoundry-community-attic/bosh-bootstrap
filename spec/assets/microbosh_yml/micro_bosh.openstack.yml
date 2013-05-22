@@ -2,11 +2,9 @@
 name: test-bosh
 logging: 
   level: DEBUG
-network: 
-  name: default
+network:
   type: dynamic
-  label: private
-  ip: 1.2.3.4
+  vip: 1.2.3.4
 resources: 
   persistent_disk: 4096
   cloud_properties: 
@@ -19,6 +17,7 @@ cloud:
       username: USER
       api_key: PASSWORD
       tenant: TENANT
+      region: REGION
       default_security_groups: 
       - ssh
       - bosh_agent_http
@@ -28,3 +27,9 @@ cloud:
       - bosh_registry
       default_key_name: test-bosh
       private_key: ~/.microbosh/ssh/test-bosh
+apply_spec:
+  agent:
+    blobstore:
+      address: 1.2.3.4
+    nats:
+      address: 1.2.3.4

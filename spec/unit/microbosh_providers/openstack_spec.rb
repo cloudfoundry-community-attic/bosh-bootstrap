@@ -12,6 +12,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
     setting "provider.credentials.openstack_username", "USER"
     setting "provider.credentials.openstack_api_key", "PASSWORD"
     setting "provider.credentials.openstack_tenant", "TENANT"
+    setting "provider.credentials.openstack_region", "REGION"
     setting "address.ip", "1.2.3.4"
     setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
     setting "bosh.name", "test-bosh"
