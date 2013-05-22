@@ -8,7 +8,7 @@ module Bosh::Bootstrap::NetworkProviders
 
     def perform
       security_groups.each do |name, ports|
-        provider_client.create_security_group(name.to_s, name.to_s, ports)
+        provider_client.create_security_group(name.to_s, name.to_s, ports: ports)
       end
     end
 
