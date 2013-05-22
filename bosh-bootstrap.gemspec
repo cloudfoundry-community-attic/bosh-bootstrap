@@ -22,7 +22,7 @@ EOS
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency "cyoi", "~> 0.4"
+  gem.add_dependency "cyoi", "~> 0.4.3"
   gem.add_dependency "fog", "~> 1.11"
   gem.add_dependency "readwritesettings", "~> 3.0"
   gem.add_dependency "thor", "~> 0.18"
