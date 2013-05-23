@@ -2,6 +2,9 @@
 $:.push File.dirname(__FILE__) + '/../lib'
 
 require "rubygems"
+require "bundler"
+Bundler.setup(:default)
+
 require "bosh-bootstrap"
 require "bosh-bootstrap/thor_cli"
 
