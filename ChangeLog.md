@@ -20,6 +20,7 @@
 * Add back `bosh-bootstrap` CLI & remove bosh_cli dependency (v0.11.1)
 * Specify which AWS AZ to use via `provider.az` in settings.yml (v0.11.2)
 * Support for OpenStack (also in cyoi 0.4.3) thanks to Ferdy! (v0.11.3)
+* Ensure CLI loads bundler (v0.11.4)
 
 ## v0.10
 
