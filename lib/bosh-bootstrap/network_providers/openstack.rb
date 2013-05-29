@@ -17,7 +17,7 @@ module Bosh::Bootstrap::NetworkProviders
       {
         ssh: 22,
         bosh_nats_server: 4222,
-        bosh_agent_http: 6868,
+        bosh_agent_https: 6868,
         bosh_blobstore: 25250,
         bosh_director: 25555,
         bosh_registry: 25777

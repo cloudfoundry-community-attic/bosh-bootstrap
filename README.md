@@ -109,7 +109,7 @@ Created security group ssh
  -> opened ports ports TCP 22..22 from IP range 0.0.0.0/0
 Created security group bosh_nats_server
  -> opened ports ports TCP 4222..4222 from IP range 0.0.0.0/0
-Created security group bosh_agent_http
+Created security group bosh_agent_https
  -> opened ports ports TCP 6868..6868 from IP range 0.0.0.0/0
 Created security group bosh_blobstore
  -> opened ports ports TCP 25250..25250 from IP range 0.0.0.0/0
