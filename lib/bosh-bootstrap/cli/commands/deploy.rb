@@ -2,7 +2,6 @@ module Bosh; module Bootstrap; module Cli; module Commands; end; end; end; end
 
 require "cyoi/cli/provider"
 require "cyoi/cli/address"
-require "cyoi/cli/key_pair"
 require "bosh-bootstrap/cli/helpers"
 require "bosh-bootstrap/microbosh"
 
@@ -45,17 +44,6 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     # TODO why passing provider_client rather than a Cyoi::Cli::Network object?
     network = Bosh::Bootstrap::Network.new(settings.provider.name, provider_client)
     network.deploy
-  end
-
-  def setup_keypair
-    key_pair_name = settings.exists?("key_pair.name") || settings.bosh.name
-    cli = Cyoi::Cli::KeyPair.new([key_pair_name, settings_dir])
-    cli.execute!
-    reload_settings!
-
-    key_pair = Bosh::Bootstrap::KeyPair.new(settings_dir, settings.key_pair.name, settings.key_pair.private_key)
-    key_pair.execute!
-    settings.set("key_pair.path", key_pair.path)
   end
 
   # TODO should this go inside Microbosh, like NetworkProvider is to Network?

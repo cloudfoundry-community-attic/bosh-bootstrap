@@ -14,6 +14,7 @@ class Bosh::Bootstrap::Cli::Commands::SSH
   include FileUtils
 
   def perform
+    setup_keypair
     sh "ssh -i #{private_key_path} #{user}@#{host}"
   end
 
