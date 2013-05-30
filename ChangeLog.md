@@ -7,6 +7,7 @@
 
 ## Next
 
+* microbosh volume is smaller 4G and automatically fits on devstack/openstack
 * security group `bosh_agent_http` renamed to `bosh_agent_https`, with same 6868 port for talking to bosh_agent running in https mode (`bosh_agent_http` can be deleted)
 
 ## v0.11
