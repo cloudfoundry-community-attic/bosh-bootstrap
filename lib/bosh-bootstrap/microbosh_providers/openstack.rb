@@ -66,6 +66,7 @@ module Bosh::Bootstrap::MicroboshProviders
 
     def security_groups
       ["ssh",
+       "bosh_agent_https",
        "bosh_nats_server",
        "bosh_blobstore",
        "bosh_director",

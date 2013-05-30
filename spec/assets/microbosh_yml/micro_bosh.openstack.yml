@@ -8,7 +8,7 @@ network:
 resources: 
   persistent_disk: 4096
   cloud_properties: 
-    instance_type: m1.microbosh
+    instance_type: m1.medium
 cloud: 
   plugin: openstack
   properties: 
@@ -20,6 +20,7 @@ cloud:
       region: REGION
       default_security_groups: 
       - ssh
+      - bosh_agent_https
       - bosh_nats_server
       - bosh_blobstore
       - bosh_director

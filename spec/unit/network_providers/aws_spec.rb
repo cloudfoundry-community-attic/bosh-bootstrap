@@ -17,6 +17,7 @@ describe Bosh::Bootstrap::NetworkProviders::AWS do
     expected_groups = [
       ["ssh", "ssh", ports: 22],
       ["bosh_nats_server", "bosh_nats_server", ports: 4222],
+      ["bosh_agent_https", "bosh_agent_https", ports: 6868],
       ["bosh_blobstore", "bosh_blobstore", ports: 25250],
       ["bosh_director", "bosh_director", ports: 25555],
       ["bosh_registry", "bosh_registry", ports: 25777],
