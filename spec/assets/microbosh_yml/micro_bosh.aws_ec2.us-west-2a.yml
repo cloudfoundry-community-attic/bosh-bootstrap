@@ -20,7 +20,6 @@ cloud:
       ec2_endpoint: ec2.us-west-2.amazonaws.com
       default_security_groups: 
       - ssh
-      - bosh_agent_https
       - bosh_nats_server
       - bosh_blobstore
       - bosh_director
