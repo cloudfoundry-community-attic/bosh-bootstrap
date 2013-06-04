@@ -3,6 +3,8 @@ $:.push File.dirname(__FILE__) + '/../lib'
 
 require "rubygems"
 require "bundler"
+
+ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', __FILE__)
 Bundler.setup(:default)
 
 require "bosh-bootstrap"
