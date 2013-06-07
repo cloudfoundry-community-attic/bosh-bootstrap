@@ -7,8 +7,6 @@
 
 ## Next
 
-* microbosh volume is smaller 4G and automatically fits on devstack/openstack
-* security group `bosh_agent_http` renamed to `bosh_agent_https`, with same 6868 port for talking to bosh_agent running in https mode (`bosh_agent_http` can be deleted)
 
 ## v0.11
 
@@ -26,6 +24,9 @@
 * Specify which AWS AZ to use via `provider.az` in settings.yml (v0.11.2)
 * Support for OpenStack (also in cyoi 0.4.3) thanks to Ferdy! (v0.11.3)
 * Ensure CLI loads bundler (v0.11.4)
+* rubygem users should be able to install & run from rubygems instead of source workaround (v0.11.5)
+* microbosh volume is smaller 4G and automatically fits on devstack/openstack (v0.11.5; thx @ryfow)
+* security group `bosh_agent_http` renamed to `bosh_agent_https`, with same 6868 port for talking to bosh_agent running in https mode (`bosh_agent_http` can then be deleted) (v0.11.5)
 
 ## v0.10
 
