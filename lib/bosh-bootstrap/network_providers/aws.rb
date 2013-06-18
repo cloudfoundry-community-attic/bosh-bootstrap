@@ -16,6 +16,7 @@ module Bosh::Bootstrap::NetworkProviders
     def security_groups
       {
         ssh: 22,
+        dns_server: 53,
         bosh_nats_server: 4222,
         bosh_agent_https: 6868,
         bosh_blobstore: 25250,
