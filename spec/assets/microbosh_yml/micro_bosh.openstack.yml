@@ -20,6 +20,7 @@ cloud:
       region: REGION
       default_security_groups: 
       - ssh
+      - dns_server
       - bosh_agent_https
       - bosh_nats_server
       - bosh_blobstore
