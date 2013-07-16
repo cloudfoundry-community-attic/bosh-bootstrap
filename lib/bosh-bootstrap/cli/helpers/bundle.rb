@@ -2,6 +2,8 @@
 require "rake"
 require "rake/file_utils"
 
+require "bundler"
+
 module Bosh::Bootstrap::Cli::Helpers::Bundle
   def bundle(*args)
     Bundler.with_clean_env {
