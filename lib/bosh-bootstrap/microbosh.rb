@@ -39,6 +39,7 @@ class Bosh::Bootstrap::Microbosh
     mkdir_p(File.dirname(manifest_yml))
     chdir(base_path) do
       setup_base_path
+      setup_gems
       create_microbosh_yml(settings)
       deploy_or_update(settings.bosh.name, settings.bosh.stemcell)
     end
@@ -46,6 +47,12 @@ class Bosh::Bootstrap::Microbosh
 
   protected
   def setup_base_path
+    sh("git init")
+    sh("git add .")
+    sh("git commit -m 'Creating repo to suppress bundler warnings'")
+  end
+
+  def setup_gems
     gempath = File.expand_path("../../..", __FILE__)
     pwd = File.expand_path(".")
     File.open("Gemfile", "w") do |f|
