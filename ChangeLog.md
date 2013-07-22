@@ -29,6 +29,7 @@
 * security group `bosh_agent_http` renamed to `bosh_agent_https`, with same 6868 port for talking to bosh_agent running in https mode (`bosh_agent_http` can then be deleted) (v0.11.5)
 * add port 53/dns security group (v0.11.6)
 * port 53 open on UDP only as workaround for multi-region AWS (v0.11.7; thx @yudai)
+* suppress bundler git "fatal" warnings (by converting ~/.microbosh into git repo) (v0.11.8)
 
 ## v0.10
 
