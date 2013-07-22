@@ -15,7 +15,7 @@ describe Bosh::Bootstrap::NetworkProviders::OpenStack do
   it "creates security groups it needs" do
     expected_groups = [
       ["ssh", "ssh", ports: 22],
-      ["dns_server", "dns_server", ports: 53],
+      ["dns_server", "dns_server", ports: { protocol: "udp", ports: (53..53) }],
       ["bosh_nats_server", "bosh_nats_server", ports: 4222],
       ["bosh_agent_https", "bosh_agent_https", ports: 6868],
       ["bosh_blobstore", "bosh_blobstore", ports: 25250],
