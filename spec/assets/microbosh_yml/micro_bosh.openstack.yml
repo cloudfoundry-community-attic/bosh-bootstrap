@@ -6,7 +6,7 @@ network:
   type: dynamic
   vip: 1.2.3.4
 resources:
-  persistent_disk: 40960
+  persistent_disk: 8192
   cloud_properties:
     instance_type: m1.microbosh
 cloud:
