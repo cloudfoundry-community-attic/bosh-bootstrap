@@ -1,24 +1,24 @@
---- 
+---
 name: test-bosh
-logging: 
+logging:
   level: DEBUG
-network: 
+network:
   type: dynamic
   vip: 1.2.3.4
-resources: 
-  persistent_disk: 4096
-  cloud_properties: 
+resources:
+  persistent_disk: 40960
+  cloud_properties:
     instance_type: m1.medium
     availability_zone: us-west-2a
-cloud: 
+cloud:
   plugin: aws
-  properties: 
-    aws: 
+  properties:
+    aws:
       access_key_id: ACCESS
       secret_access_key: SECRET
       region: us-west-2
       ec2_endpoint: ec2.us-west-2.amazonaws.com
-      default_security_groups: 
+      default_security_groups:
       - ssh
       - dns_server
       - bosh_agent_https
@@ -28,12 +28,12 @@ cloud:
       - bosh_registry
       default_key_name: test-bosh
       ec2_private_key: ~/.microbosh/ssh/test-bosh
-apply_spec: 
-  agent: 
-    blobstore: 
+apply_spec:
+  agent:
+    blobstore:
       address: 1.2.3.4
-    nats: 
+    nats:
       address: 1.2.3.4
-  properties: 
-    aws_registry: 
+  properties:
+    aws_registry:
       address: 1.2.3.4

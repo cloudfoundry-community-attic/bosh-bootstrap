@@ -1,24 +1,24 @@
---- 
+---
 name: test-bosh
-logging: 
+logging:
   level: DEBUG
 network:
   type: dynamic
   vip: 1.2.3.4
-resources: 
-  persistent_disk: 4096
-  cloud_properties: 
+resources:
+  persistent_disk: 40960
+  cloud_properties:
     instance_type: m1.microbosh
-cloud: 
+cloud:
   plugin: openstack
-  properties: 
-    openstack: 
+  properties:
+    openstack:
       auth_url: http://10.0.0.2:5000/v2.0/tokens
       username: USER
       api_key: PASSWORD
       tenant: TENANT
       region: REGION
-      default_security_groups: 
+      default_security_groups:
       - ssh
       - dns_server
       - bosh_agent_https
