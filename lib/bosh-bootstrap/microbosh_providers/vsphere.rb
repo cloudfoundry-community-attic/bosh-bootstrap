@@ -2,9 +2,16 @@ require "bosh-bootstrap/microbosh_providers/base"
 
 module Bosh::Bootstrap::MicroboshProviders
   class VSphere < Base
+    def stemcell
+      unless settings.exists?("bosh.stemcell")
+        download_stemcell
+      end
+    end
+
     def to_hash
       super.merge({
         "network" => network_configuration,
+        "resources" => resource_configuration,
         "cloud"=>
          {"plugin"=>"vsphere",
           "properties"=>{
@@ -36,8 +43,27 @@ module Bosh::Bootstrap::MicroboshProviders
       }
     end
 
+    # resources:
+    #  persistent_disk: 16384
+    #  cloud_properties:
+    #    ram: 4096
+    #    disk: 10240
+    #    cpu: 2
+    def resource_configuration
+      {
+        "persistent_disk"=>settings.provider.resources.persistent_disk,
+        "cloud_properties"=>{
+          "ram"=>settings.provider.resources.ram,
+          "disk"=>settings.provider.resources.disk,
+          "cpu"=>settings.provider.resources.cpu
+        }
+      }
+    end
+
     def ntps
-      settings.provider.npt
+      ntp_servers = settings.provider.ntps
+      ntp_servers = ntp_servers.split(",") if ntp_servers.is_a?(String)
+      ntp_servers
     end
 
     # vcenters:
@@ -58,9 +84,9 @@ module Bosh::Bootstrap::MicroboshProviders
       clusters = settings.provider.datacenter.clusters
       clusters = clusters.split(",") if clusters.is_a?(String)
       {
-        "host"=>settings.provider.credentials.host,
-        "user"=>settings.provider.credentials.user,
-        "password"=>settings.provider.credentials.password,
+        "host"=>settings.provider.credentials.vsphere_server,
+        "user"=>settings.provider.credentials.vsphere_username,
+        "password"=>settings.provider.credentials.vsphere_password,
         "datacenters"=>[{
           "name"=>settings.provider.datacenter.name,
           "vm_folder"=>settings.provider.datacenter.vm_folder,
@@ -72,6 +98,10 @@ module Bosh::Bootstrap::MicroboshProviders
           "clusters"=>clusters
         }]
       }
+    end
+
+    def stemcell_uri
+      "http://#{jenkins_bucket}.s3.amazonaws.com/bosh-stemcell/vsphere/bosh-stemcell-latest-vsphere-esxi-ubuntu.tgz"
     end
   end
 end
