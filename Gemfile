@@ -2,9 +2,6 @@ source 'https://rubygems.org'
 
 gemspec
 
-# Need to overwrite SSL settings
-gem "excon"
-
 if File.directory?("../cyoi")
   gem "cyoi", path: "../cyoi"
 end
