@@ -82,7 +82,7 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def stemcell_uri
-      "http://#{jenkins_bucket}.s3.amazonaws.com/micro-bosh-stemcell/aws/latest-micro-bosh-stemcell-aws.tgz"
+      "http://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/aws/bosh-stemcell-latest-aws-xen-ubuntu.tgz"
     end
   end
 end
