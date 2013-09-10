@@ -75,7 +75,7 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def stemcell_uri
-      "http://#{jenkins_bucket}.s3.amazonaws.com/micro-bosh-stemcell/openstack/latest-micro-bosh-stemcell-openstack.tgz"
+      "http://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/openstack/bosh-stemcell-latest-openstack-kvm-ubuntu.tgz"
     end
   end
 end
