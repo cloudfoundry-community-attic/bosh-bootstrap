@@ -374,8 +374,8 @@ provider:
   name: openstack
   credentials:
     connection_options:
-		  ssl_ca_path: ENV['SSL_CERT_DIR']
-	  	ssl_ca_file: ENV['SSL_CERT_FILE']
+      ssl_ca_path: ENV['SSL_CERT_DIR']
+      ssl_ca_file: ENV['SSL_CERT_FILE']
 ```
 
 ## Copyright
