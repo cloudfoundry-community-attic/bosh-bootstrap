@@ -78,7 +78,7 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def ami_uri_path(region)
-      "/last_successful_micro-bosh-stemcell-aws_ami_#{region}"
+      "/last_successful-bosh-stemcell-aws_ami_#{region}"
     end
 
     def stemcell_uri
