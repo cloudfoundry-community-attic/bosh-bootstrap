@@ -47,6 +47,11 @@ class Bosh::Bootstrap::Microbosh
 
   protected
   def setup_base_path
+    system 'which git'
+      if $?.to_i!=0
+          puts "Git doesn't seem to be on your path.  Maybe it's not installed?"
+          exit 1
+      end
     sh("git init")
     sh("git add .")
     sh("git commit -m 'Creating repo to suppress bundler warnings'")
