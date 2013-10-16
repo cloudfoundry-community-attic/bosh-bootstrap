@@ -19,7 +19,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
     setting "bosh.name", "test-bosh"
     setting "bosh.salted_password", "salted_password"
-    setting "bosh.persistent_disk", 4096
+    setting "bosh.persistent_disk", 16384
 
     subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
 
@@ -38,7 +38,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
     setting "bosh.name", "test-bosh"
     setting "bosh.salted_password", "salted_password"
-    setting "bosh.persistent_disk", 4096
+    setting "bosh.persistent_disk", 16384
 
     subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
 
