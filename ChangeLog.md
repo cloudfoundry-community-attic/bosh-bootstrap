@@ -26,11 +26,12 @@
 * Ensure CLI loads bundler (v0.11.4)
 * rubygem users should be able to install & run from rubygems instead of source workaround (v0.11.5)
 * microbosh volume is smaller 4G and automatically fits on devstack/openstack (v0.11.5; thx @ryfow)
-* security group `bosh_agent_http` renamed to `bosh_agent_https`, with same 6868 port for talking to bosh_agent running in https mode (`bosh_agent_http` can then be deleted) (v0.11.5)
-* add port 53/dns security group (v0.11.6)
-* port 53 open on UDP only as workaround for multi-region AWS (v0.11.7; thx @yudai)
-* suppress bundler git "fatal" warnings (by converting ~/.microbosh into git repo) (v0.11.8)
-* update to newer-er-er stemcell paths from Pivotal's s3 bucket (v0.11.9, v0.11.10)
+* Security group `bosh_agent_http` renamed to `bosh_agent_https`, with same 6868 port for talking to bosh_agent running in https mode (`bosh_agent_http` can then be deleted) (v0.11.5)
+* Add port 53/dns security group (v0.11.6)
+* Port 53 open on UDP only as workaround for multi-region AWS (v0.11.7; thx @yudai)
+* Suppress bundler git "fatal" warnings (by converting ~/.microbosh into git repo) (v0.11.8)
+* Update to newer-er-er stemcell paths from Pivotal's s3 bucket (v0.11.9, v0.11.10)
+* Enlarge persistent disk from 4G to 16G (v0.11.11)
 
 ## v0.10
 
