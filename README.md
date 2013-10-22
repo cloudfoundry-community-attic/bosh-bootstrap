@@ -194,7 +194,7 @@ What is actually happening when you run `bosh-bootstrap deploy`?
 At the heart of `bosh-bootstrap deploy` is the execution of the micro bosh deployer, a bosh plugin provided to bootstrap a single VM with all the parts of bosh running on it. If you ran this command yourself you would run:
 
 ```
-$ gem install bosh_cli_plugin_micro -s https://s3.amazonaws.com/bosh-jenkins-gems/
+$ gem install bosh_cli_plugin_micro --pre
 $ bosh micro deployment path/to/manifest/folder
 $ bosh micro deploy ami-43f49d2a
 ```
