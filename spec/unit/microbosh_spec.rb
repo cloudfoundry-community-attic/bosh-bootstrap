@@ -12,9 +12,6 @@ describe Bosh::Bootstrap::Microbosh do
   it "deploys new microbosh" do
     setting "bosh.name", "test-bosh"
     setting "bosh.stemcell", path_or_ami
-    subject.should_receive(:sh).with("git init")
-    subject.should_receive(:sh).with("git add .")
-    subject.should_receive(:sh).with("git commit -m 'Creating repo to suppress bundler warnings'")
     subject.should_receive(:sh).with("bundle install")
     subject.should_receive(:sh).with("bundle exec bosh micro deployment test-bosh")
     subject.should_receive(:sh).with("bundle exec bosh -n micro deploy #{path_or_ami}")

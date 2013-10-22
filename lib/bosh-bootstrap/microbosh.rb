@@ -38,7 +38,6 @@ class Bosh::Bootstrap::Microbosh
     @manifest_yml = File.join(deployments_dir, bosh_name, "micro_bosh.yml")
     mkdir_p(File.dirname(manifest_yml))
     chdir(base_path) do
-      setup_base_path
       setup_gems
       create_microbosh_yml(settings)
       deploy_or_update(settings.bosh.name, settings.bosh.stemcell)
@@ -46,24 +45,12 @@ class Bosh::Bootstrap::Microbosh
   end
 
   protected
-  def setup_base_path
-    system 'which git'
-      if $?.to_i!=0
-          puts "Git doesn't seem to be on your path.  Maybe it's not installed?"
-          exit 1
-      end
-    sh("git init")
-    sh("git add .")
-    sh("git commit -m 'Creating repo to suppress bundler warnings'")
-  end
-
   def setup_gems
     gempath = File.expand_path("../../..", __FILE__)
     pwd = File.expand_path(".")
     File.open("Gemfile", "w") do |f|
       f << <<-RUBY
 source 'https://rubygems.org'
-source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
 
 gem "bosh-bootstrap", path: "#{gempath}"
 gem "bosh_cli_plugin_micro"
