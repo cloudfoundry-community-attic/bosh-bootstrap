@@ -63,7 +63,6 @@ class Bosh::Bootstrap::Microbosh
     File.open("Gemfile", "w") do |f|
       f << <<-RUBY
 source 'https://rubygems.org'
-source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
 
 gem "bosh-bootstrap", path: "#{gempath}"
 gem "bosh_cli_plugin_micro"
