@@ -32,6 +32,7 @@
 * Suppress bundler git "fatal" warnings (by converting ~/.microbosh into git repo) (v0.11.8)
 * Update to newer-er-er stemcell paths from Pivotal's s3 bucket (v0.11.9, v0.11.10)
 * Enlarge persistent disk from 4G to 16G (v0.11.11)
+* bosh_cli gems now on rubygems instead of pivotal s3 bucket (v0.11.12)
 
 ## v0.10
 
