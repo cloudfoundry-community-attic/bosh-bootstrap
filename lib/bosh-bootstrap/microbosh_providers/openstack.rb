@@ -21,7 +21,12 @@ module Bosh::Bootstrap::MicroboshProviders
        "apply_spec"=>
         {"agent"=>
           {"blobstore"=>{"address"=>public_ip},
-           "nats"=>{"address"=>public_ip}}}
+           "nats"=>{"address"=>public_ip}},
+         "properties"=>
+           {"director"=>
+             {"max_threads"=>3},
+            "hm"=>{"resurrector_enabled" => true},
+            "ntp"=>["0.north-america.pool.ntp.org","1.north-america.pool.ntp.org"]}}
       })
     end
 
