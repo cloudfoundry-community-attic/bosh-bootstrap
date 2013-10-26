@@ -34,3 +34,11 @@ apply_spec:
       address: 1.2.3.4
     nats:
       address: 1.2.3.4
+  properties:
+    director:
+      max_threads: 3
+    hm:
+      resurrector_enabled: true
+    ntp:
+      - 0.north-america.pool.ntp.org
+      - 1.north-america.pool.ntp.org
