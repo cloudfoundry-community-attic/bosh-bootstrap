@@ -7,7 +7,7 @@ rvm:
 notifications:
   email:
     recipients:
-      - drnicwilliams@gmail.com
+      - lookitup4me@gmail.com
     on_success: change
     on_failure: always
 env:
