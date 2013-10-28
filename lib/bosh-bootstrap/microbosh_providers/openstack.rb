@@ -43,11 +43,9 @@ module Bosh::Bootstrap::MicroboshProviders
       settings.bosh.persistent_disk
     end
 
-    # TODO discover m1.microbosh via cyoi (a VM with ephemeral volume)
-    # Create m1.microboh with:
-    # nova flavor-create m1.microbosh 6 2048 20 2 --ephemeral 20 --rxtx-factor 1 --is-public true
+    # TODO Allow discovery of an appropriate OpenStack flavor with 2+CPUs, 3+G RAM
     def resources_cloud_properties
-      {"instance_type"=>"m1.microbosh"}
+      {"instance_type"=>"m1.medium"}
     end
 
     def cloud_properties

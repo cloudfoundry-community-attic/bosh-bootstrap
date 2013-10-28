@@ -8,7 +8,7 @@ network:
 resources: 
   persistent_disk: 16384
   cloud_properties: 
-    instance_type: m1.microbosh
+    instance_type: m1.medium
 cloud: 
   plugin: openstack
   properties: 
