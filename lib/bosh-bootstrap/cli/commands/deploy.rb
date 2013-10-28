@@ -70,7 +70,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
   end
 
   def perform_microbosh_deploy
-    settings.set("bosh.persistent_disk", 4 * 1024)
+    settings.set("bosh.persistent_disk", 16 * 1024)
     @microbosh ||= Bosh::Bootstrap::Microbosh.new(settings_dir, microbosh_provider)
     @microbosh.deploy(settings)
   end
