@@ -34,6 +34,8 @@
 * Enlarge persistent disk from 4G to 16G (v0.11.11)
 * bosh_cli gems now on rubygems instead of pivotal s3 bucket (v0.11.12)
 * OpenStack improvements to reduce POST API throttling (v0.11.13)
+* Can now update a running microbosh (thanks @lookitup4me) (v0.11.14)
+* OpenStack uses commonly available m1.medium flavor instead of bespoke m1.microbosh (v0.11.14)
 
 ## v0.10
 
