@@ -33,6 +33,7 @@
 * Update to newer-er-er stemcell paths from Pivotal's s3 bucket (v0.11.9, v0.11.10)
 * Enlarge persistent disk from 4G to 16G (v0.11.11)
 * bosh_cli gems now on rubygems instead of pivotal s3 bucket (v0.11.12)
+* OpenStack improvements to reduce POST API throttling (v0.11.13)
 
 ## v0.10
 
