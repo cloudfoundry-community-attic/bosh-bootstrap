@@ -36,6 +36,7 @@
 * OpenStack improvements to reduce POST API throttling (v0.11.13)
 * Can now update a running microbosh (thanks @lookitup4me) (v0.11.14)
 * OpenStack uses commonly available m1.medium flavor instead of bespoke m1.microbosh (v0.11.14)
+* Properly enlarge persistent disk from 4G to 16G (v0.11.15)
 
 ## v0.10
 
