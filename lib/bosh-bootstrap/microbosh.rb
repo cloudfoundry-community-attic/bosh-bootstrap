@@ -67,7 +67,7 @@ gem "bosh_cli_plugin_micro"
   def deploy_or_update(bosh_name, stemcell)
     chdir("deployments") do
       bundle "exec bosh micro deployment", bosh_name
-      bundle "exec bosh -n micro deploy", stemcell
+      bundle "exec bosh -n micro deploy --update-if-exists", stemcell
     end
   end
 end
