@@ -8,9 +8,14 @@ describe Bosh::Bootstrap::MicroboshProviders::VSphere do
 
   it "creates micro_bosh.yml manifest" do
     setting "provider.name", "vsphere"
-    setting "provider.credentials.host", "HOST"
-    setting "provider.credentials.user", "user"
-    setting "provider.credentials.password", "TempP@ss"
+    setting "provider.credentials.vsphere_server", "HOST"
+    setting "provider.credentials.vsphere_username", "user"
+    setting "provider.credentials.vsphere_password", "TempP@ss"
+
+    setting "provider.resources.persistent_disk", "16384"
+    setting "provider.resources.ram", "2048"
+    setting "provider.resources.disk", "16384"
+    setting "provider.resources.cpu", "2"
 
     # TODO - perhaps network.ip_address is better?
     setting "address.ip", "172.23.194.100"
@@ -19,7 +24,7 @@ describe Bosh::Bootstrap::MicroboshProviders::VSphere do
     setting "provider.network.gateway", "172.23.194.1"
     setting "provider.network.dns", %w[172.22.22.153 172.22.22.154]
 
-    setting "provider.npt", %w[ntp01.las01.emcatmos.com ntp02.las01.emcatmos.com]
+    setting "provider.ntps", %w[ntp01.las01.emcatmos.com ntp02.las01.emcatmos.com]
     setting "provider.datacenter.name", "LAS01"
     setting "provider.datacenter.vm_folder", "BOSH_VMs"
     setting "provider.datacenter.template_folder", "BOSH_Templates"
