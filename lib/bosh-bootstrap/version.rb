@@ -1,5 +1,5 @@
 module Bosh
   module Bootstrap
-    VERSION = "0.11.15"
+    VERSION = "0.12.0"
   end
 end

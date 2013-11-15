@@ -7,6 +7,9 @@
 
 ## Next
 
+## v0.12
+
+* vSphere support [thanks Matt Stine!!]
 
 ## v0.11
 
