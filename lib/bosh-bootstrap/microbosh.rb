@@ -50,10 +50,11 @@ class Bosh::Bootstrap::Microbosh
     pwd = File.expand_path(".")
     File.open("Gemfile", "w") do |f|
       f << <<-RUBY
-source 'https://rubygems.org'
+source "https://rubygems.org"
+source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
 
 gem "bosh-bootstrap", path: "#{gempath}"
-gem "bosh_cli_plugin_micro"
+gem "bosh_cli_plugin_micro", "~> 1.5.0.pre"
       RUBY
     end
     rm_rf "Gemfile.lock"
