@@ -30,6 +30,7 @@ EOS
   gem.add_dependency "rbvmomi"
   gem.add_development_dependency "rake"
   gem.add_development_dependency "rspec"
+  gem.add_development_dependency "fakeweb"
   gem.add_development_dependency "bosh-bootstrap"
   gem.add_development_dependency "bosh_cli_plugin_micro", "~> 1.5.0.pre"
 end
