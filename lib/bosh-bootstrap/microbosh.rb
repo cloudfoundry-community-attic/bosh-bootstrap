@@ -38,28 +38,28 @@ class Bosh::Bootstrap::Microbosh
     @manifest_yml = File.join(deployments_dir, bosh_name, "micro_bosh.yml")
     mkdir_p(File.dirname(manifest_yml))
     chdir(base_path) do
-      setup_gems
+      # setup_gems
       create_microbosh_yml(settings)
       deploy_or_update(settings.bosh.name, settings.bosh.stemcell)
     end
   end
 
   protected
-  def setup_gems
-    gempath = File.expand_path("../../..", __FILE__)
-    pwd = File.expand_path(".")
-    File.open("Gemfile", "w") do |f|
-      f << <<-RUBY
-source "https://rubygems.org"
-source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
+#   def setup_gems
+#     gempath = File.expand_path("../../..", __FILE__)
+#     pwd = File.expand_path(".")
+#     File.open("Gemfile", "w") do |f|
+#       f << <<-RUBY
+# source "https://rubygems.org"
+# source 'https://s3.amazonaws.com/bosh-jenkins-gems/'
 
-gem "bosh-bootstrap", path: "#{gempath}"
-gem "bosh_cli_plugin_micro", "~> 1.5.0.pre"
-      RUBY
-    end
-    rm_rf "Gemfile.lock"
-    bundle "install"
-  end
+# gem "bosh-bootstrap", path: "#{gempath}"
+# gem "bosh_cli_plugin_micro", "~> 1.5.0.pre"
+#       RUBY
+#     end
+#     rm_rf "Gemfile.lock"
+#     bundle "install"
+#   end
 
   def create_microbosh_yml(settings)
     provider.create_microbosh_yml(settings)
