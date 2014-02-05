@@ -30,13 +30,57 @@ module Bosh::Bootstrap::MicroboshProviders
       })
     end
 
-    # network:
-    #   type: dynamic
-    #   ip: 1.2.3.4
+    # For Nova/Floating IP:
+    #   network:
+    #     type: dynamic
+    #     vip: 1.2.3.4
+    # For Neutron/Floating IP:
+    #   network:
+    #     type: dynamic
+    #     vip: 1.2.3.4  # public floating IP
+    #     cloud_properties:
+    #       net_id: XXX # internal subnet
+    # For Neutron/Internal IP:
+    #   network:
+    #     type: manual
+    #     vip: 10.10.10.3 # an IP in subnets range
+    #     cloud_properties:
+    #       net_id: XXX   # internal subnet
     def network_configuration
-      {"type"=>"dynamic",
-        "vip"=>public_ip
-      }
+      if nova?
+        {
+          "type"=>"dynamic",
+          "vip"=>public_ip
+        }
+      elsif neutron? && using_external_gateway?
+        {
+          "type"=>"dynamic",
+          "vip"=>public_ip,
+          "cloud_properties" => {
+            "net_id" => settings.network.subnet_id
+          }
+        }
+      else
+        {
+          "type"=>"manual",
+          "ip"=>public_ip,
+          "cloud_properties" => {
+            "net_id" => settings.network.subnet_id
+          }
+        }
+      end
+    end
+
+    def nova?
+      !neutron?
+    end
+
+    def neutron?
+      settings.exists?("network")
+    end
+
+    def using_external_gateway?
+      settings.exists?("network.pool_name")
     end
 
     def persistent_disk

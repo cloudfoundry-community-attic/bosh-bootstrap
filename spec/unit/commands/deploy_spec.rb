@@ -22,11 +22,13 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
   # * create_microbosh_manifest
   # * microbosh_deploy
   describe "aws" do
-    it "deploy creates provisions IP address micro_bosh.yml, discovers/downloads stemcell/AMI, runs 'bosh micro deploy'" do
+    before do
       setting "provider.name", "aws"
       setting "key_pair.name", "test-bosh"
       setting "key_pair.private_key", "PRIVATE"
+    end
 
+    it "deploy creates provisions IP address micro_bosh.yml, discovers/downloads stemcell/AMI, runs 'bosh micro deploy'" do
       provider = double(Cyoi::Cli::Provider)
       provider.stub(:execute!)
       Cyoi::Cli::Provider.should_receive(:new).with([settings_dir]).and_return(provider)
@@ -59,6 +61,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
 
       capture_stdout { cmd.perform }
     end
+
   end
 
   describe "openstack" do
