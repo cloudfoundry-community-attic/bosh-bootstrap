@@ -57,7 +57,7 @@ module Bosh::Bootstrap::MicroboshProviders
           "type"=>"dynamic",
           "vip"=>public_ip,
           "cloud_properties" => {
-            "net_id" => settings.network.subnet_id
+            "net_id" => settings.address.subnet_id
           }
         }
       else
@@ -65,7 +65,7 @@ module Bosh::Bootstrap::MicroboshProviders
           "type"=>"manual",
           "ip"=>public_ip,
           "cloud_properties" => {
-            "net_id" => settings.network.subnet_id
+            "net_id" => settings.address.subnet_id
           }
         }
       end
@@ -76,11 +76,11 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def neutron?
-      settings.exists?("network")
+      settings.exists?("address.subnet_id")
     end
 
     def using_external_gateway?
-      settings.exists?("network.pool_name")
+      settings.exists?("address.pool_name")
     end
 
     def persistent_disk

@@ -35,8 +35,8 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       setting "provider.credentials.openstack_api_key", "PASSWORD"
       setting "provider.credentials.openstack_tenant", "TENANT"
       setting "provider.credentials.openstack_region", "REGION"
-      setting "network.subnet_id", "7b8788eb-b49e-4424-9065-75a6b07094ea"
-      setting "network.pool_name", "INTERNET"
+      setting "address.subnet_id", "7b8788eb-b49e-4424-9065-75a6b07094ea"
+      setting "address.pool_name", "INTERNET"
       setting "address.ip", "1.2.3.4" # network.vip
       setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
       setting "bosh.name", "test-bosh"
@@ -57,7 +57,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       setting "provider.credentials.openstack_api_key", "PASSWORD"
       setting "provider.credentials.openstack_tenant", "TENANT"
       setting "provider.credentials.openstack_region", "REGION"
-      setting "network.subnet_id", "7b8788eb-b49e-4424-9065-75a6b07094ea"
+      setting "address.subnet_id", "7b8788eb-b49e-4424-9065-75a6b07094ea"
       setting "address.ip", "10.10.10.3" # network.ip
       setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
       setting "bosh.name", "test-bosh"
