@@ -6,6 +6,7 @@ if File.directory?("../cyoi")
   gem "cyoi", path: "../cyoi"
 end
 
+gem "unf"
 group :development do
   gem "awesome_print"
   gem "rb-fsevent", "~> 0.9.1"
