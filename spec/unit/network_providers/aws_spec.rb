@@ -17,11 +17,7 @@ describe Bosh::Bootstrap::NetworkProviders::AWS do
     expected_groups = [
       ["ssh", "ssh", ports: 22],
       ["dns_server", "dns_server", ports: { protocol: "udp", ports: (53..53) }],
-      ["bosh_nats_server", "bosh_nats_server", ports: 4222],
-      ["bosh_agent_https", "bosh_agent_https", ports: 6868],
-      ["bosh_blobstore", "bosh_blobstore", ports: 25250],
-      ["bosh_director", "bosh_director", ports: 25555],
-      ["bosh_registry", "bosh_registry", ports: 25777],
+      ["bosh", "bosh", ports: [4222, 6868, 25250, 25555, 25777]]
     ]
     expected_groups.each do |security_group_name, description, ports|
       provider_client.stub(:create_security_group).with(security_group_name, description, ports)

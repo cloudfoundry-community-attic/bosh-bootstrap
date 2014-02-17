@@ -23,11 +23,7 @@ cloud:
       default_security_groups: 
       - ssh
       - dns_server
-      - bosh_agent_https
-      - bosh_nats_server
-      - bosh_blobstore
-      - bosh_director
-      - bosh_registry
+      - bosh
       default_key_name: test-bosh
       private_key: ~/.microbosh/ssh/test-bosh
 apply_spec:

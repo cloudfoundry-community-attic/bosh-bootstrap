@@ -7,23 +7,11 @@ module Bosh::Bootstrap::NetworkProviders
     end
 
     def perform
-      security_groups.each do |name, ports|
-        provider_client.create_security_group(name.to_s, name.to_s, ports: ports)
-      end
+      provider_client.create_security_group("ssh", "ssh", 22)
+      provider_client.create_security_group("dns_server", "dns_server", protocol: "udp", ports: (53..53) )
+      provider_client.create_security_group("bosh", "bosh", [4222, 6868, 25250, 25555, 25777] )
     end
 
-    protected
-    def security_groups
-      {
-        ssh: 22,
-        dns_server: { protocol: "udp", ports: (53..53) },
-        bosh_nats_server: 4222,
-        bosh_agent_https: 6868,
-        bosh_blobstore: 25250,
-        bosh_director: 25555,
-        bosh_registry: 25777
-      }
-    end
   end
 end
 Bosh::Bootstrap::NetworkProviders.register_provider("openstack", Bosh::Bootstrap::NetworkProviders::OpenStack)
