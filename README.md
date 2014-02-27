@@ -340,6 +340,44 @@ key_pair:
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+## Troubleshooting
+
+### Ruby Version / Psych errors
+A bug exists within Bosh requiring Ruby 1.9.3-p327.  See:  https://github.com/cloudfoundry/bosh/issues/112.  This bug will manifest itself with the following error:
+
+```
+Incorrect YAML structure in `/var/vcap/store/repos/bosh/release/config/final.yml':
+undefined method `root' for #<Psych::Nodes::Mapping:0x00000002e63f50>
+```
+
+Upgrading to a more recent version of Ruby will resolve this error.
+
+
+### Self Signed SSL Certificates
+If your test OpenStack implementation is using a self signed SSL certificate, Excon will error out using default SSL verification settings.
+Use the following ssl_verify_peer configuration element to silence the errors for Excon.
+
+```yaml
+---
+provider:
+  name: openstack
+  credentials:
+    connection_options:
+      ssl_verify_peer: false
+```
+
+Alternatively, for a more secure / production environment, you can use the following configurations:
+
+```yaml
+---
+provider:
+  name: openstack
+  credentials:
+    connection_options:
+      ssl_ca_path: ENV['SSL_CERT_DIR']
+      ssl_ca_file: ENV['SSL_CERT_FILE']
+```
+
 ## Copyright
 
 All documentation and source code is copyright of Stark & Wayne LLC.
