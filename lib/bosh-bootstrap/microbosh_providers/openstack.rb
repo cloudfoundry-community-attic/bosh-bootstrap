@@ -30,13 +30,57 @@ module Bosh::Bootstrap::MicroboshProviders
       })
     end
 
-    # network:
-    #   type: dynamic
-    #   ip: 1.2.3.4
+    # For Nova/Floating IP:
+    #   network:
+    #     type: dynamic
+    #     vip: 1.2.3.4
+    # For Neutron/Floating IP:
+    #   network:
+    #     type: dynamic
+    #     vip: 1.2.3.4  # public floating IP
+    #     cloud_properties:
+    #       net_id: XXX # internal subnet
+    # For Neutron/Internal IP:
+    #   network:
+    #     type: manual
+    #     vip: 10.10.10.3 # an IP in subnets range
+    #     cloud_properties:
+    #       net_id: XXX   # internal subnet
     def network_configuration
-      {"type"=>"dynamic",
-        "vip"=>public_ip
-      }
+      if nova?
+        {
+          "type"=>"dynamic",
+          "vip"=>public_ip
+        }
+      elsif neutron? && using_external_gateway?
+        {
+          "type"=>"dynamic",
+          "vip"=>public_ip,
+          "cloud_properties" => {
+            "net_id" => settings.address.subnet_id
+          }
+        }
+      else
+        {
+          "type"=>"manual",
+          "ip"=>public_ip,
+          "cloud_properties" => {
+            "net_id" => settings.address.subnet_id
+          }
+        }
+      end
+    end
+
+    def nova?
+      !neutron?
+    end
+
+    def neutron?
+      settings.exists?("address.subnet_id")
+    end
+
+    def using_external_gateway?
+      settings.exists?("address.pool_name")
     end
 
     def persistent_disk
@@ -70,11 +114,7 @@ module Bosh::Bootstrap::MicroboshProviders
     def security_groups
       ["ssh",
        "dns_server",
-       "bosh_agent_https",
-       "bosh_nats_server",
-       "bosh_blobstore",
-       "bosh_director",
-       "bosh_registry"]
+       "bosh"]
     end
 
     def stemcell_uri
