@@ -1,14 +1,14 @@
 module Bosh::Bootstrap::NetworkProviders
   class AWS
-    attr_reader :provider_client
+    attr_reader :cyoi_provider_client
 
-    def initialize(provider_client)
-      @provider_client = provider_client
+    def initialize(cyoi_provider_client)
+      @cyoi_provider_client = cyoi_provider_client
     end
 
     def perform
       security_groups.each do |name, ports|
-        provider_client.create_security_group(name.to_s, name.to_s, ports: ports)
+        cyoi_provider_client.create_security_group(name.to_s, name.to_s, ports: ports)
       end
     end
 

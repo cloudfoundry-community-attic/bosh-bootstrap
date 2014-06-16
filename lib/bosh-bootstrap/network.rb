@@ -4,11 +4,11 @@ require "bosh-bootstrap/network_providers/dummy"
 class Bosh::Bootstrap::Network
 
   attr_reader :provider_name
-  attr_reader :provider_client
+  attr_reader :cyoi_provider_client
 
-  def initialize(provider_name, provider_client)
+  def initialize(provider_name, cyoi_provider_client)
     @provider_name = provider_name
-    @provider_client = provider_client
+    @cyoi_provider_client = cyoi_provider_client
   end
 
   def deploy
@@ -25,9 +25,8 @@ class Bosh::Bootstrap::Network
       rescue LoadError
         klass = Bosh::Bootstrap::NetworkProviders.provider_class("dummy")
       end
-      klass.new(provider_client)
+      klass.new(cyoi_provider_client)
     end
   end
 
 end
-

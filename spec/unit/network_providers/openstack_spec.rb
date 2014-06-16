@@ -5,7 +5,7 @@ require "bosh-bootstrap/network_providers/openstack"
 describe Bosh::Bootstrap::NetworkProviders::OpenStack do
   include Bosh::Bootstrap::Cli::Helpers::Settings
 
-  let(:provider_client) { instance_double("Bosh::Bootstrap::NetworkProviders::OpenStack") }
+  let(:provider_client) { instance_double("Cyoi::Providers::Clients::OpenStackProviderClient") }
   subject { Bosh::Bootstrap::NetworkProviders::OpenStack.new(provider_client) }
 
   it "is registered" do
