@@ -41,7 +41,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       address.stub(:execute!)
       Cyoi::Cli::Address.should_receive(:new).with([settings_dir]).and_return(address)
 
-      microbosh_provider = stub()
+      microbosh_provider = instance_double("Bosh::Bootstrap::MicroboshProviders::AWS")
       microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("")
       microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("ami-123456")
       cmd.stub(:microbosh_provider).and_return(microbosh_provider)
@@ -82,7 +82,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       address.stub(:execute!)
       Cyoi::Cli::Address.should_receive(:new).with([settings_dir]).and_return(address)
 
-      microbosh_provider = stub()
+      microbosh_provider = instance_double("Bosh::Bootstrap::MicroboshProviders::AWS")
       microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("")
       microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("openstack.tgz")
       cmd.stub(:microbosh_provider).and_return(microbosh_provider)

@@ -29,6 +29,6 @@ EOS
   gem.add_dependency "redcard"
   gem.add_dependency "rbvmomi"
   gem.add_development_dependency "rake"
-  gem.add_development_dependency "rspec"
+  gem.add_development_dependency "rspec-fire"
   gem.add_development_dependency "fakeweb"
 end

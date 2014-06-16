@@ -3,8 +3,7 @@ require "bosh-bootstrap/network"
 describe Bosh::Bootstrap::Network do
   include Bosh::Bootstrap::Cli::Helpers::Settings
 
-  let(:aws_provider_client) { stub() }
-  let(:vsphere_provider_client) { stub() }
+  let(:aws_provider_client) { instance_double("Bosh::Bootstrap::NetworkProviders::AWS") }
 
   it "uses NetworkProvider if available" do
     network = Bosh::Bootstrap::Network.new("aws", aws_provider_client)
@@ -13,7 +12,7 @@ describe Bosh::Bootstrap::Network do
   end
 
   it "does nothing if no NetworkProvider for the infrastructure" do
-    network = Bosh::Bootstrap::Network.new("vsphere", vsphere_provider_client)
+    network = Bosh::Bootstrap::Network.new("vsphere", nil)
     network.deploy
   end
 end

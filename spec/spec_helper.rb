@@ -56,7 +56,7 @@ RSpec.configure do |c|
     setup_home_dir
   end
 
-  c.color_enabled = true
+  c.color = true
 end
 
 def get_tmp_file_path(content)
