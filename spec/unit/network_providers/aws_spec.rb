@@ -10,7 +10,7 @@ describe Bosh::Bootstrap::NetworkProviders::AWS do
   subject { Bosh::Bootstrap::NetworkProviders::AWS.new(cyoi_provider_client) }
 
   it "is registered" do
-    Bosh::Bootstrap::NetworkProviders.provider_class("aws").should == subject.class
+    expect(Bosh::Bootstrap::NetworkProviders.provider_class("aws")).to eq(subject.class)
   end
 
   it "creates security groups it needs" do
