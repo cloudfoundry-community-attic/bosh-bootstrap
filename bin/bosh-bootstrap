@@ -6,4 +6,8 @@ require "rubygems"
 require "bosh-bootstrap"
 require "bosh-bootstrap/thor_cli"
 
+# TODO: Only ignore SSL verification if requested by user
+require "fog"
+Excon.defaults[:ssl_verify_peer] = false
+
 Bosh::Bootstrap::ThorCli.start
