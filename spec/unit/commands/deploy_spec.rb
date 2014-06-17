@@ -29,35 +29,40 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
     end
 
     it "deploy creates provisions IP address micro_bosh.yml, discovers/downloads stemcell/AMI, runs 'bosh micro deploy'" do
-      provider = double(Cyoi::Cli::Provider)
-      provider.stub(:execute!)
-      Cyoi::Cli::Provider.should_receive(:new).with([settings_dir]).and_return(provider)
+      # select_provider
+      cli_provider = instance_double("Cyoi::Cli::Provider")
+      expect(cli_provider).to receive(:execute!)
+      expect(Cyoi::Cli::Provider).to receive(:new).with([settings_dir]).and_return(cli_provider)
 
-      provider_client = double(Cyoi::Providers::Clients::AwsProviderClient)
-      provider_client.stub(:create_security_group)
-      cmd.stub(:provider_client).and_return(provider_client)
+      cyoi_provider_client = instance_double("Cyoi::Providers::Clients::AwsProviderClient")
+      expect(cyoi_provider_client).to receive(:create_security_group).exactly(3).times
+      expect(Cyoi::Providers).to receive(:provider_client).with("name" => "aws").and_return(cyoi_provider_client)
 
-      address = double(Cyoi::Cli::Address)
-      address.stub(:execute!)
-      Cyoi::Cli::Address.should_receive(:new).with([settings_dir]).and_return(address)
+      # select_or_provision_public_networking
+      address = instance_double("Cyoi::Cli::Address")
+      expect(address).to receive(:execute!)
+      expect(Cyoi::Cli::Address).to receive(:new).with([settings_dir]).and_return(address)
 
-      microbosh_provider = stub()
-      microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("")
-      microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("ami-123456")
-      cmd.stub(:microbosh_provider).and_return(microbosh_provider)
+      # microbosh_provider & select_public_image_or_download_stemcell
+      microbosh_provider = instance_double("Bosh::Bootstrap::MicroboshProviders::AWS")
+      expect(microbosh_provider).to receive(:stemcell).exactly(1).times.and_return("")
+      expect(microbosh_provider).to receive(:stemcell).exactly(1).times.and_return("ami-123456")
+      expect(cmd).to receive(:microbosh_provider).and_return(microbosh_provider).exactly(3).times
 
-      key_pair = double(Cyoi::Cli::KeyPair)
-      key_pair.stub(:execute!)
-      Cyoi::Cli::KeyPair.should_receive(:new).with(["test-bosh", settings_dir]).and_return(key_pair)
+      # setup_keypair
+      key_pair = instance_double(Cyoi::Cli::KeyPair)
+      expect(key_pair).to receive(:execute!)
+      expect(Cyoi::Cli::KeyPair).to receive(:new).with(["test-bosh", settings_dir]).and_return(key_pair)
 
-      keypair = double(Bosh::Bootstrap::KeyPair)
-      keypair.should_receive(:execute!)
-      keypair.should_receive(:path).and_return(home_file(".microbosh/ssh/test-bosh"))
-      Bosh::Bootstrap::KeyPair.stub(:new).with(settings_dir, "test-bosh", "PRIVATE").and_return(keypair)
+      keypair = instance_double(Bosh::Bootstrap::KeyPair)
+      expect(keypair).to receive(:execute!)
+      expect(keypair).to receive(:path).and_return(home_file(".microbosh/ssh/test-bosh"))
+      expect(Bosh::Bootstrap::KeyPair).to receive(:new).with(settings_dir, "test-bosh", "PRIVATE").and_return(keypair)
 
-      microbosh = double(Bosh::Bootstrap::Microbosh)
-      microbosh.stub(:deploy)
-      Bosh::Bootstrap::Microbosh.stub(:new).with(settings_dir, microbosh_provider).and_return(microbosh)
+      # perform_microbosh_deploy
+      microbosh = instance_double(Bosh::Bootstrap::Microbosh)
+      expect(microbosh).to receive(:deploy)
+      expect(Bosh::Bootstrap::Microbosh).to receive(:new).with(settings_dir, microbosh_provider).and_return(microbosh)
 
       capture_stdout { cmd.perform }
     end
@@ -70,35 +75,40 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
       setting "key_pair.name", "test-bosh"
       setting "key_pair.private_key", "PRIVATE"
 
-      provider = double(Cyoi::Cli::Provider)
-      provider.stub(:execute!)
-      Cyoi::Cli::Provider.should_receive(:new).with([settings_dir]).and_return(provider)
+      # select_provider
+      cli_provider = instance_double("Cyoi::Cli::Provider")
+      expect(cli_provider).to receive(:execute!)
+      expect(Cyoi::Cli::Provider).to receive(:new).with([settings_dir]).and_return(cli_provider)
 
-      provider_client = double(Cyoi::Providers::Clients::OpenStackProviderClient)
-      provider_client.stub(:create_security_group)
-      cmd.stub(:provider_client).and_return(provider_client)
+      cyoi_provider_client = instance_double("Cyoi::Providers::Clients::OpenStackProviderClient")
+      expect(cyoi_provider_client).to receive(:create_security_group).exactly(3).times
+      expect(Cyoi::Providers).to receive(:provider_client).with("name" => "openstack").and_return(cyoi_provider_client)
 
-      address = double(Cyoi::Cli::Address)
-      address.stub(:execute!)
-      Cyoi::Cli::Address.should_receive(:new).with([settings_dir]).and_return(address)
+      # select_or_provision_public_networking
+      address = instance_double("Cyoi::Cli::Address")
+      expect(address).to receive(:execute!)
+      expect(Cyoi::Cli::Address).to receive(:new).with([settings_dir]).and_return(address)
 
-      microbosh_provider = stub()
-      microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("")
-      microbosh_provider.should_receive(:stemcell).exactly(1).times.and_return("openstack.tgz")
-      cmd.stub(:microbosh_provider).and_return(microbosh_provider)
+      # microbosh_provider & select_public_image_or_download_stemcell
+      microbosh_provider = instance_double("Bosh::Bootstrap::MicroboshProviders::OpenStack")
+      expect(microbosh_provider).to receive(:stemcell).exactly(1).times.and_return("")
+      expect(microbosh_provider).to receive(:stemcell).exactly(1).times.and_return("openstack.tgz")
+      expect(cmd).to receive(:microbosh_provider).and_return(microbosh_provider).exactly(3).times
 
-      key_pair = double(Cyoi::Cli::KeyPair)
-      key_pair.stub(:execute!)
-      Cyoi::Cli::KeyPair.should_receive(:new).with(["test-bosh", settings_dir]).and_return(key_pair)
+      # setup_keypair
+      key_pair = instance_double(Cyoi::Cli::KeyPair)
+      expect(key_pair).to receive(:execute!)
+      expect(Cyoi::Cli::KeyPair).to receive(:new).with(["test-bosh", settings_dir]).and_return(key_pair)
 
-      keypair = double(Bosh::Bootstrap::KeyPair)
-      keypair.should_receive(:execute!)
-      keypair.should_receive(:path).and_return(home_file(".microbosh/ssh/test-bosh"))
-      Bosh::Bootstrap::KeyPair.stub(:new).with(settings_dir, "test-bosh", "PRIVATE").and_return(keypair)
+      keypair = instance_double(Bosh::Bootstrap::KeyPair)
+      expect(keypair).to receive(:execute!)
+      expect(keypair).to receive(:path).and_return(home_file(".microbosh/ssh/test-bosh"))
+      expect(Bosh::Bootstrap::KeyPair).to receive(:new).with(settings_dir, "test-bosh", "PRIVATE").and_return(keypair)
 
-      microbosh = double(Bosh::Bootstrap::Microbosh)
-      microbosh.stub(:deploy)
-      Bosh::Bootstrap::Microbosh.stub(:new).with(settings_dir, microbosh_provider).and_return(microbosh)
+      # perform_microbosh_deploy
+      microbosh = instance_double(Bosh::Bootstrap::Microbosh)
+      expect(microbosh).to receive(:deploy)
+      expect(Bosh::Bootstrap::Microbosh).to receive(:new).with(settings_dir, microbosh_provider).and_return(microbosh)
 
       capture_stdout { cmd.perform }
     end

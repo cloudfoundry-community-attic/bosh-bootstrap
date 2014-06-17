@@ -31,7 +31,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     reload_settings!
   end
 
-  def provider_client
+  def cyoi_provider_client
     @provider_client ||= Cyoi::Providers.provider_client(settings.provider)
   end
 
@@ -42,7 +42,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     reload_settings!
 
     # TODO why passing provider_client rather than a Cyoi::Cli::Network object?
-    network = Bosh::Bootstrap::Network.new(settings.provider.name, provider_client)
+    network = Bosh::Bootstrap::Network.new(settings.provider.name, cyoi_provider_client)
     network.deploy
   end
 

@@ -22,13 +22,13 @@ EOS
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
 
-  gem.add_dependency "cyoi", "~> 0.8.1"
+  gem.add_dependency "cyoi", "~> 0.9.0"
   gem.add_dependency "fog", "~> 1.11"
   gem.add_dependency "readwritesettings", "~> 3.0"
   gem.add_dependency "thor", "~> 0.18"
   gem.add_dependency "redcard"
   gem.add_dependency "rbvmomi"
   gem.add_development_dependency "rake"
-  gem.add_development_dependency "rspec"
+  gem.add_development_dependency "rspec-fire"
   gem.add_development_dependency "fakeweb"
 end

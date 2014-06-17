@@ -6,7 +6,7 @@ describe Bosh::Bootstrap::Microbosh do
   let(:path_or_ami) { "/path/to/stemcell.tgz" }
   let(:base_path) { File.expand_path("~/.microbosh") }
   let(:settings_dir) { base_path }
-  let(:microbosh_provider) { stub(create_microbosh_yml: {}) }
+  let(:microbosh_provider) { instance_double("Bosh::Bootstrap::MicroboshProviders::AWS", create_microbosh_yml: {}) }
   subject { Bosh::Bootstrap::Microbosh.new(base_path, microbosh_provider) }
 
   it "deploys new microbosh" do

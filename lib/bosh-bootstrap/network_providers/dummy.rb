@@ -1,6 +1,6 @@
 module Bosh::Bootstrap::NetworkProviders
   class Dummy
-    def initialize(provider_client)
+    def initialize(cyoi_provider_client)
     end
 
     def perform

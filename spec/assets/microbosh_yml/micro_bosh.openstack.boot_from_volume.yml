@@ -3,8 +3,8 @@ name: test-bosh
 logging:
   level: DEBUG
 network:
-  type: dynamic
-  vip: 1.2.3.4
+  type: manual
+  ip: 10.10.10.3
   cloud_properties:
     net_id: 7b8788eb-b49e-4424-9065-75a6b07094ea
 resources:
@@ -26,13 +26,13 @@ cloud:
       - bosh
       default_key_name: test-bosh
       private_key: ~/.microbosh/ssh/test-bosh
-      boot_from_volume: false
+      boot_from_volume: true
 apply_spec:
   agent:
     blobstore:
-      address: 1.2.3.4
+      address: 10.10.10.3
     nats:
-      address: 1.2.3.4
+      address: 10.10.10.3
   properties:
     director:
       max_threads: 3

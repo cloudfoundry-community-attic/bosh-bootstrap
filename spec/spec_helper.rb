@@ -29,13 +29,13 @@ end
 def files_match(filename, expected_filename)
   file = File.read(filename)
   expected_file = File.read(expected_filename)
-  file.should == expected_file
+  expect(file).to eq(expected_file)
 end
 
 def yaml_files_match(filename, expected_filename)
   yaml = YAML.load_file(filename)
   expected_yaml = YAML.load_file(expected_filename)
-  yaml.should == expected_yaml
+  expect(yaml).to eq(expected_yaml)
 end
 
 def setup_home_dir
@@ -56,7 +56,7 @@ RSpec.configure do |c|
     setup_home_dir
   end
 
-  c.color_enabled = true
+  c.color = true
 end
 
 def get_tmp_file_path(content)

@@ -7,9 +7,9 @@ describe Bosh::Bootstrap::KeyPair do
 
   it "creates local private key file" do
     setup_home_dir
-    File.should_not be_exists(home_file(".microbosh", "ssh", "keyname"))
+    expect(File.exists?(home_file(".microbosh", "ssh", "keyname"))).to eq false
     subject.execute!
     keyfile = home_file(".microbosh", "ssh", "keyname")
-    File.read(keyfile).should == "PRIVATE"
+    expect(File.read(keyfile)).to eq "PRIVATE"
   end
 end

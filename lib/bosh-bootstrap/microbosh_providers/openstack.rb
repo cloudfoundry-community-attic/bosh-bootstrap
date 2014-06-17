@@ -101,7 +101,8 @@ module Bosh::Bootstrap::MicroboshProviders
         "region"=>region,
         "default_security_groups"=>security_groups,
         "default_key_name"=>microbosh_name,
-        "private_key"=>private_key_path}
+        "private_key"=>private_key_path,
+        "boot_from_volume"=>boot_from_volume}
     end
 
     def region
@@ -115,6 +116,10 @@ module Bosh::Bootstrap::MicroboshProviders
       ["ssh",
        "dns_server",
        "bosh"]
+    end
+
+    def boot_from_volume
+      !!(settings.provider["options"] && settings.provider.options.boot_from_volume)
     end
 
     def stemcell_uri
