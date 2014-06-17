@@ -102,6 +102,10 @@ module Bosh::Bootstrap::MicroboshProviders
         "default_security_groups"=>security_groups,
         "default_key_name"=>microbosh_name,
         "private_key"=>private_key_path,
+        # TODO: Only ignore SSL verification if requested by user
+        "connection_options"=>{
+          "ssl_verify_peer"=>false
+        },
         "boot_from_volume"=>boot_from_volume}
     end
 

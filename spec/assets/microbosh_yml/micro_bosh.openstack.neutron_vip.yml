@@ -26,6 +26,8 @@ cloud:
       - bosh
       default_key_name: test-bosh
       private_key: ~/.microbosh/ssh/test-bosh
+      connection_options:
+        ssl_verify_peer: false
       boot_from_volume: false
 apply_spec:
   agent:
