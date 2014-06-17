@@ -1,4 +1,5 @@
-# Bosh Bootstrap
+Bosh Bootstrap
+==============
 
 In order to deploy Cloud Foundry, and a growing number of other complex systems, you will need a bosh. bosh provides a complete lifecycle manager/deployer for complex systems. Cloud Foundry is a very complex system when it comes to deployment/upgrades.
 
@@ -53,23 +54,27 @@ $ bosh-bootstrap delete
 Deleting micro bosh VM...
 ```
 
-It is now very simple to bootstrap a micro bosh from a single, local CLI. 
+It is now very simple to bootstrap a micro bosh from a single, local CLI.
 
 To be cute about it, the Bosh Bootstrap aims to provide lifecycle management for the bosh lifecycle manager. Zing! See the "Deep dive into deploy command" section below for greater understanding why the Bosh Bootstrap is very useful.
 
 [![Gem Version](https://badge.fury.io/rb/bosh-bootstrap.png)](http://badge.fury.io/rb/bosh-bootstrap) [![Build Status](https://travis-ci.org/StarkAndWayne/bosh-bootstrap.png?branch=master)](https://travis-ci.org/StarkAndWayne/bosh-bootstrap) [![Code Climate](https://codeclimate.com/github/StarkAndWayne/bosh-bootstrap.png)](https://codeclimate.com/github/StarkAndWayne/bosh-bootstrap)
 
-## Installation
+Installation
+------------
 
 This bootstrap tool is distributed as a RubyGem for Ruby 1.9+.
 
 ```
 $ ruby -v
 ruby 1.9.3p385 ...
-$ gem install bosh-bootstrap
+$ gem install fog bosh-bootstrap
 ```
 
-## Usage
+NOTE: the `fog` gem is explicitly installed above to ensure you get a very recent version. It is a manual installation due to version conflicts with `bosh` own dependency on fog.
+
+Usage
+-----
 
 Bosh Bootstrap is available primarily as a standalone CLI `bosh-bootstrap`. If you have the bosh CLI installed, then it is also available as a bosh plugin via `bosh bootstrap`. This readme assumes the former usage.
 
@@ -130,17 +135,17 @@ Deployment set to '/Users/drnic/.microbosh/deployments/firstbosh/micro_bosh.yml'
 bundle exec bosh -n micro deploy ami-43f49d2a
 
 Deploy Micro BOSH
-  using existing stemcell (00:00:00)                                                                
-  creating VM from ami-43f49d2a (00:01:10)                                                          
-  waiting for the agent (00:02:34)                                                                  
-  create disk (00:00:02)                                                                            
-  mount disk (00:00:19)                                                                             
-  fetching apply spec (00:00:00)                                                                    
-  stopping agent services (00:00:02)                                                                
-  applying micro BOSH spec (00:00:16)                                                               
-  starting agent services (00:00:00)                                                                
-  waiting for the director (00:00:59)                                                               
-Done                    11/11 00:05:40                                                              
+  using existing stemcell (00:00:00)
+  creating VM from ami-43f49d2a (00:01:10)
+  waiting for the agent (00:02:34)
+  create disk (00:00:02)
+  mount disk (00:00:19)
+  fetching apply spec (00:00:00)
+  stopping agent services (00:00:02)
+  applying micro BOSH spec (00:00:16)
+  starting agent services (00:00:00)
+  waiting for the director (00:00:59)
+Done                    11/11 00:05:40
 WARNING! Your target has been changed to `https://107.21.94.132:25555'!
 Deployment set to '/Users/drnic/.microbosh/deployments/firstbosh/micro_bosh.yml'
 Deployed `firstbosh/micro_bosh.yml' to `https://firstbosh:25555', took 00:05:40 to complete
@@ -171,7 +176,8 @@ provider:
   az: us-east-1c
 ```
 
-## SSH access
+SSH access
+----------
 
 You can open an SSH shell to your micro bosh:
 
@@ -179,7 +185,8 @@ You can open an SSH shell to your micro bosh:
 $ bosh-bootstrap ssh
 ```
 
-## Deleting micro bosh
+Deleting micro bosh
+-------------------
 
 The `bosh-bootstrap delete` command will delete the target micro-bosh.
 
@@ -187,7 +194,8 @@ The `bosh-bootstrap delete` command will delete the target micro-bosh.
 $ bosh-bootstrap delete
 ```
 
-## Deep dive into the Bosh Bootstrap deploy command
+Deep dive into the Bosh Bootstrap deploy command
+------------------------------------------------
 
 What is actually happening when you run `bosh-bootstrap deploy`?
 
@@ -201,9 +209,9 @@ $ bosh micro deploy ami-43f49d2a
 
 Unfortunately for this simple scenario, there are many little prerequisite steps before those three commands. Bosh Bootstrap replaces pages and pages of step-by-step instructions with a single command line that does everything. It even allows you to upgrade your micro bosh with newer bosh releases:
 
-* public machine images (AMIs on AWS)
-* publicly available stemcells
-* custom stemcells generated from the bosh repository.
+- public machine images (AMIs on AWS)
+- publicly available stemcells
+- custom stemcells generated from the bosh repository.
 
 To understand exactly what the `bosh-bootstrap deploy` command is doing, let's start with what the running parts of bosh are and how `bosh micro deploy` deploys them.
 
@@ -211,14 +219,14 @@ To understand exactly what the `bosh-bootstrap deploy` command is doing, let's s
 
 A running bosh, whether it is running on a single server or a cluster of servers, is a collection of processes. The core of bosh is the Director and the Blobstore. The remaining processes provide support, storage or messaging.
 
-* The Director, the public API for the bosh CLI and coordinator of bosh behavior
-* The Blobstore, to store and retrieve precompiled packages
-* Agents, run on each server within deployments
-* The Health Manager, to track the state of deployed systems (the infrastructure and running jobs)
-* Internal DNS, called PowerDNS, for internal unique naming of servers within bosh deployments
-* Registry, for example AWS Registry, for tracking the infrastructure that has been provisioned (servers, persistent disks)
-* PostgreSQL
-* Redis
+- The Director, the public API for the bosh CLI and coordinator of bosh behavior
+- The Blobstore, to store and retrieve precompiled packages
+- Agents, run on each server within deployments
+- The Health Manager, to track the state of deployed systems (the infrastructure and running jobs)
+- Internal DNS, called PowerDNS, for internal unique naming of servers within bosh deployments
+- Registry, for example AWS Registry, for tracking the infrastructure that has been provisioned (servers, persistent disks)
+- PostgreSQL
+- Redis
 
 When you deploy a bosh using the bosh micro deployer (`bosh micro deploy`) or indirectly via the Bosh Bootstrap, you are actually deploying a bosh release that describes a bosh (see [release](https://github.com/cloudfoundry/bosh/tree/master/release) folder). The processes listed above are called "jobs" and you can see the full list of jobs inside a bosh within the [jobs/ directory](https://github.com/cloudfoundry/bosh/tree/master/release/jobs) of the `bosh` repository.
 
@@ -234,15 +242,14 @@ A micro bosh server is a normal running server built from a base OS image that a
 
 In bosh terminology, call these pre-packaged base OS images "stemcells".
 
-
 ### Configuring a micro bosh
 
 The command above will not work without first providing bosh micro deployer with configuration details. The stemcell file alone is not sufficient information. When we deploy or update a micro bosh we need to provide the following:
 
-* A static IP address - this IP address will be bound to the initial micro bosh server, and when the micro bosh is updated in future and the server is thrown away and replaced, then it is bound to the replacement servers
-* Server properties - the instance type (such as m1.large on AWS) or RAM/CPU combination (on vSphere)
-* Server persistent disk - a single persistent, attached disk volume will be provisioned and mounted at `/var/vcap/store`; when the micro bosh is updated is is unmounted, unattached from the current server and then reattached and remounted to the upgraded server
-* Infrastructure API credentials - the magic permissions for the micro bosh to provision servers and persistent disks for its bosh deployments
+- A static IP address - this IP address will be bound to the initial micro bosh server, and when the micro bosh is updated in future and the server is thrown away and replaced, then it is bound to the replacement servers
+- Server properties - the instance type (such as m1.large on AWS) or RAM/CPU combination (on vSphere)
+- Server persistent disk - a single persistent, attached disk volume will be provisioned and mounted at `/var/vcap/store`; when the micro bosh is updated is is unmounted, unattached from the current server and then reattached and remounted to the upgraded server
+- Infrastructure API credentials - the magic permissions for the micro bosh to provision servers and persistent disks for its bosh deployments
 
 This information is to go into a file called `/path/to/deployments/NAME/micro_bosh.yml`. Before `bosh micro deploy` is run, we first need to tell bosh micro deployer which file contains the micro bosh deployment manifest.
 
@@ -278,15 +285,15 @@ This process takes the majority of the time to deploy a new/replacement micro bo
 
 One of the feature of the Bosh Bootstrap is that you can run it from your local laptop if you:
 
-* Use AWS region us-east-1 (where there is a public AMI available)
-* Use OpenStack or vSphere
+- Use AWS region us-east-1 (where there is a public AMI available)
+- Use OpenStack or vSphere
 
 ### When do I need an inception server?
 
 There are occasions when it is preferable or required to provision a initial server (called an [inception server](https://github.com/drnic/inception-server)) and to run Bosh Bootstrap (`bosh-bootstrap deploy`) within that.
 
-* Using a AWS region other than us-east-1 (you need to be in that region to create an AMI)
-* You want much faster internet between your terminal (an ssh session into your inception server) and your micro bosh and deployed servers
+- Using a AWS region other than us-east-1 (you need to be in that region to create an AMI)
+- You want much faster internet between your terminal (an ssh session into your inception server) and your micro bosh and deployed servers
 
 To provision an [inception server](https://github.com/drnic/inception-server):
 
@@ -299,7 +306,8 @@ $ inception ssh
 
 Like Bosh Bootstrap, it will prompt for the infrastructure/cloud provider that you want, your credentials and then do everything for you automatically.
 
-## Internal configuration/settings
+Internal configuration/settings
+-------------------------------
 
 Once you've used the CLI it stores your settings for your bosh, so that you can re-run the tool for upgrades or other future functionality.
 
@@ -307,20 +315,20 @@ By default, the settings file is stored at `~/.microbosh/settings.yml`.
 
 For an AWS bosh it looks like:
 
-``` yaml
---- 
-bosh: 
+```yaml
+---
+bosh:
   name: firstbosh
-provider: 
+provider:
   name: aws
-  credentials: 
+  credentials:
     provider: AWS
     aws_access_key_id: ACCESS
     aws_secret_access_key: SECRET
   region: us-east-1
-address: 
+address:
   ip: 107.21.194.123
-key_pair: 
+key_pair:
   name: firstbosh
   fingerprint: 3c:09:26:84:df:43:92:d7:bb:31:05:e2:77:84:58:c7:d0:aa:27:18
   private_key: |-
@@ -332,7 +340,8 @@ key_pair:
     -----END RSA PRIVATE KEY-----
 ```
 
-## Contributing
+Contributing
+------------
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
@@ -340,10 +349,12 @@ key_pair:
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
-## Copyright
+Copyright
+---------
 
 All documentation and source code is copyright of Stark & Wayne LLC.
 
-## Subscription and Support
+Subscription and Support
+------------------------
 
 This documentation & tool is freely available to all people and companies coming to Cloud Foundry and bosh.
