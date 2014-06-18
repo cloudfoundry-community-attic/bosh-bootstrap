@@ -16,6 +16,7 @@ v0.13
 - only create 3 security groups instead of many (fix for new AWS accounts and OpenStack tenants with small quotas)
 - testing for ruby 2.1.0; though BOSH still requires 1.9.3 at time of writing
 - upgrade rspec for 3.0 and using expect/to syntax
+- ignore SSL verification [v0.13.1] - to be made optional in future
 
 v0.12
 -----
