@@ -17,6 +17,7 @@ v0.13
 - testing for ruby 2.1.0; though BOSH still requires 1.9.3 at time of writing
 - upgrade rspec for 3.0 and using expect/to syntax
 - ignore SSL verification [v0.13.1] - to be made optional in future
+- loosen requirement on cyoi to major version [v0.13.2]
 
 v0.12
 -----
