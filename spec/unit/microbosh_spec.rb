@@ -12,7 +12,6 @@ describe Bosh::Bootstrap::Microbosh do
   it "deploys new microbosh" do
     setting "bosh.name", "test-bosh"
     setting "bosh.stemcell", path_or_ami
-    subject.should_receive(:sh).with("bundle install")
     subject.should_receive(:sh).with("bundle exec bosh micro deployment test-bosh")
     subject.should_receive(:sh).with("bundle exec bosh -n micro deploy --update-if-exists #{path_or_ami}")
     subject.deploy(settings)
