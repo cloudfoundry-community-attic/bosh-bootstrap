@@ -27,8 +27,8 @@ class Bosh::Bootstrap::MicroboshProviders::Base
 
   def to_hash
     {"name"=>microbosh_name,
-     "logging"=>{"level"=>"DEBUG"}
-    }
+     "logging"=>{"level"=>"DEBUG"},
+    }.merge(default_apply_spec)
   end
 
   def microbosh_name
@@ -70,5 +70,15 @@ class Bosh::Bootstrap::MicroboshProviders::Base
 
   def stemcell_dir
     File.dirname(manifest_path)
+  end
+
+  def default_apply_spec
+    return {} unless  settings.exists?("recursor")
+    {"apply_spec"=>
+      {"properties"=>
+       {"dns"=>{
+         "recursor"=>settings.recursor} }
+      }
+    }
   end
 end

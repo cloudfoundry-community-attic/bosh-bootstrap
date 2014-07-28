@@ -1,0 +1,4 @@
+---
+name: test-bosh
+logging:
+  level: DEBUG
