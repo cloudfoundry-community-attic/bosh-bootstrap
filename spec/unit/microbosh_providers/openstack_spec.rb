@@ -28,6 +28,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
     end
 
 
+
     it "on neutron with public gateway & floating IP" do
       setting "provider.name", "openstack"
       setting "provider.credentials.openstack_auth_url", "http://10.0.0.2:5000/v2.0/tokens"
@@ -92,6 +93,29 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       subject.create_microbosh_yml(settings)
       File.should be_exists(microbosh_yml)
       yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.boot_from_volume.yml"))
+    end
+
+    it "adds recursor if present" do
+      setting "provider.name", "openstack"
+      setting "provider.credentials.openstack_auth_url", "http://10.0.0.2:5000/v2.0/tokens"
+      setting "provider.credentials.openstack_username", "USER"
+      setting "provider.credentials.openstack_api_key", "PASSWORD"
+      setting "provider.credentials.openstack_tenant", "TENANT"
+      setting "provider.credentials.openstack_region", "REGION"
+      setting "address.subnet_id", "7b8788eb-b49e-4424-9065-75a6b07094ea"
+      setting "address.pool_name", "INTERNET"
+      setting "address.ip", "1.2.3.4" # network.vip
+      setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
+      setting "bosh.name", "test-bosh"
+      setting "bosh.salted_password", "salted_password"
+      setting "bosh.persistent_disk", 16384
+      setting "recursor", "4.5.6.7"
+
+      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings)
+
+      subject.create_microbosh_yml(settings)
+      File.should be_exists(microbosh_yml)
+      yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.with_recursor.yml"))
     end
   end
 end

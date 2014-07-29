@@ -9,7 +9,8 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def to_hash
-      super.merge({
+      puts super
+      super.deep_merge({
        "network"=>network_configuration,
        "resources"=>
         {"persistent_disk"=>persistent_disk,
