@@ -22,7 +22,6 @@ describe "AWS deployment using gems and publish stemcells" do
     cli.deploy
 
     # creates ~/.microbosh/settings.yml
-    # creates ~/.microbosh/Gemfile
     # creates ~/.microbosh/ssh/microbosh-test-bosh
     # creates ~/.microbosh/deployments/test-bosh/micro_bosh.yml
 

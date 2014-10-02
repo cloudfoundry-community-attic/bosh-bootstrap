@@ -13,8 +13,8 @@ describe Bosh::Bootstrap::Cli::Commands::Delete do
   it "deletes microbosh VM" do
     setting "bosh.name", "test-bosh"
     mkdir_p(File.join(settings_dir, "deployments"))
-    subject.should_receive(:sh).with("bundle exec bosh -n micro deployment test-bosh")
-    subject.should_receive(:sh).with("bundle exec bosh -n micro delete")
+    subject.should_receive(:sh).with("bosh -n micro deployment test-bosh")
+    subject.should_receive(:sh).with("bosh -n micro delete")
     subject.perform
   end
 end
