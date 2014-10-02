@@ -100,9 +100,16 @@ module Bosh::Bootstrap::MicroboshProviders
       }
     end
 
-    def stemcell_uri
-      "http://#{jenkins_bucket}.s3.amazonaws.com/bosh-stemcell/vsphere/bosh-stemcell-latest-vsphere-esxi-ubuntu.tgz"
+    # @return Bosh::Cli::PublicStemcell latest stemcell for vsphere/trusty
+    def latest_stemcell
+      @latest_stemcell ||= begin
+        trusty_stemcells = recent_stemcells.select do |s|
+          s.name =~ /vsphere/ && s.name =~ /trusty/
+        end
+        trusty_stemcells.sort {|s1, s2| s2.version <=> s1.version}.first
+      end
     end
+
   end
 end
 Bosh::Bootstrap::MicroboshProviders.register_provider("vsphere", Bosh::Bootstrap::MicroboshProviders::VSphere)

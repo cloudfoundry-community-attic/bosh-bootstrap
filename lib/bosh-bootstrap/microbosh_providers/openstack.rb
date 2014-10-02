@@ -2,11 +2,6 @@ require "bosh-bootstrap/microbosh_providers/base"
 
 module Bosh::Bootstrap::MicroboshProviders
   class OpenStack < Base
-    def stemcell
-      unless settings.exists?("bosh.stemcell")
-        download_stemcell
-      end
-    end
 
     def to_hash
       super.merge({
@@ -126,9 +121,16 @@ module Bosh::Bootstrap::MicroboshProviders
       !!(settings.provider["options"] && settings.provider.options.boot_from_volume)
     end
 
-    def stemcell_uri
-      "http://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/openstack/bosh-stemcell-latest-openstack-kvm-ubuntu.tgz"
+    # @return Bosh::Cli::PublicStemcell latest stemcell for openstack/trusty
+    def latest_stemcell
+      @latest_stemcell ||= begin
+        trusty_stemcells = recent_stemcells.select do |s|
+          s.name =~ /openstack/ && s.name =~ /trusty/
+        end
+        trusty_stemcells.sort {|s1, s2| s2.version <=> s1.version}.first
+      end
     end
+
   end
 end
 Bosh::Bootstrap::MicroboshProviders.register_provider("openstack", Bosh::Bootstrap::MicroboshProviders::OpenStack)
