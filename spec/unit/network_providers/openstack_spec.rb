@@ -21,6 +21,6 @@ describe Bosh::Bootstrap::NetworkProviders::OpenStack do
     expected_groups.each do |security_group_name, description, ports|
       expect(provider_client).to receive(:create_security_group).with(security_group_name, description, ports)
     end
-    subject.perform
+    subject.perform(settings)
   end
 end
