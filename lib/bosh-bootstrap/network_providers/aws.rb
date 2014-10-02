@@ -6,9 +6,13 @@ module Bosh::Bootstrap::NetworkProviders
       @cyoi_provider_client = cyoi_provider_client
     end
 
-    def perform
+    def perform(settings)
+      attributes = {}
+      if vpc_id = settings.exists?("address.vpc_id")
+        attributes[:vpc_id] = vpc_id
+      end
       security_groups.each do |name, ports|
-        cyoi_provider_client.create_security_group(name.to_s, name.to_s, ports: ports)
+        cyoi_provider_client.create_security_group(name.to_s, name.to_s, {ports: ports}, attributes)
       end
     end
 

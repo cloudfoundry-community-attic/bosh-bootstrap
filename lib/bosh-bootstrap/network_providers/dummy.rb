@@ -3,7 +3,7 @@ module Bosh::Bootstrap::NetworkProviders
     def initialize(cyoi_provider_client)
     end
 
-    def perform
+    def perform(settings)
     end
   end
 end

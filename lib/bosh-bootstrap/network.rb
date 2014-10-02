@@ -5,14 +5,16 @@ class Bosh::Bootstrap::Network
 
   attr_reader :provider_name
   attr_reader :cyoi_provider_client
+  attr_reader :settings
 
-  def initialize(provider_name, cyoi_provider_client)
+  def initialize(provider_name, cyoi_provider_client, settings)
     @provider_name = provider_name
     @cyoi_provider_client = cyoi_provider_client
+    @settings = settings
   end
 
   def deploy
-    network_provider.perform
+    network_provider.perform(settings)
   end
 
   # Attempt to load and instantiate a NetworkProviders class
