@@ -45,8 +45,8 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
 
       # microbosh_provider & select_public_image_or_download_stemcell
       microbosh_provider = instance_double("Bosh::Bootstrap::MicroboshProviders::AWS")
-      expect(microbosh_provider).to receive(:stemcell).exactly(1).times.and_return("")
-      expect(microbosh_provider).to receive(:stemcell).exactly(1).times.and_return("ami-123456")
+      expect(microbosh_provider).to receive(:stemcell_path).exactly(1).times.and_return("")
+      expect(microbosh_provider).to receive(:stemcell_path).exactly(1).times.and_return("ami-123456")
       expect(cmd).to receive(:microbosh_provider).and_return(microbosh_provider).exactly(3).times
 
       # setup_keypair
@@ -91,8 +91,8 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
 
       # microbosh_provider & select_public_image_or_download_stemcell
       microbosh_provider = instance_double("Bosh::Bootstrap::MicroboshProviders::OpenStack")
-      expect(microbosh_provider).to receive(:stemcell).exactly(1).times.and_return("")
-      expect(microbosh_provider).to receive(:stemcell).exactly(1).times.and_return("openstack.tgz")
+      expect(microbosh_provider).to receive(:stemcell_path).exactly(1).times.and_return("")
+      expect(microbosh_provider).to receive(:stemcell_path).exactly(1).times.and_return("openstack.tgz")
       expect(cmd).to receive(:microbosh_provider).and_return(microbosh_provider).exactly(3).times
 
       # setup_keypair
