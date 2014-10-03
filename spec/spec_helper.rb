@@ -39,10 +39,22 @@ def yaml_files_match(filename, expected_filename)
 end
 
 def setup_home_dir
-  home_dir = File.expand_path("../../tmp/home", __FILE__)
   FileUtils.rm_rf(home_dir)
   FileUtils.mkdir_p(home_dir)
   ENV['HOME'] = home_dir
+end
+
+def setup_work_dir
+  FileUtils.mkdir_p(work_dir)
+  FileUtils.chdir(work_dir)
+end
+
+def work_dir
+  File.join(home_dir, "workspace/deployments/microbosh")
+end
+
+def home_dir
+  File.expand_path("../../tmp/home", __FILE__)
 end
 
 # returns the file path to a file
@@ -51,9 +63,16 @@ def home_file(*path)
   File.join(ENV['HOME'], *path)
 end
 
+# returns the file path to a file
+# in the fake ~/workspace/deployments/microbosh folder
+def work_file(*path)
+  File.join(work_dir, *path)
+end
+
 RSpec.configure do |c|
   c.before(:each) do
     setup_home_dir
+    setup_work_dir
   end
 
   c.color = true

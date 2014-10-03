@@ -8,6 +8,15 @@ gem install bosh-bootstrap
 bosh-bootstrap deploy
 ```
 
+v0.15
+
+- [aws] VPC support - detects if VPCs available and allows selection, then select of subset, then creates security groups into the VPC
+- default target directory is current director, rather than `~/.microbosh`
+
+v0.14
+
+- ???
+
 v0.13
 -----
 

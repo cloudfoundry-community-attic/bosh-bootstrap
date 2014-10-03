@@ -7,10 +7,10 @@ module Bosh::Bootstrap::Cli::Helpers::Settings
   # The base directory for holding the manifest settings file
   # and private keys
   #
-  # Defaults to ~/.bosh_inception; and can be overridden with either:
+  # Defaults to current directory; and can be overridden:
   # * $SETTINGS - to a folder (supported method)
   def settings_dir
-    @settings_dir ||= File.expand_path(ENV["SETTINGS"] || "~/.microbosh")
+    @settings_dir ||= File.expand_path(ENV["SETTINGS"] || ".")
   end
 
   def settings_dir=(settings_dir)
