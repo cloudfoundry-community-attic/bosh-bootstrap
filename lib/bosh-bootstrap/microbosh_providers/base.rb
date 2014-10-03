@@ -1,4 +1,5 @@
 require "bosh-bootstrap/microbosh_providers"
+require "bosh-bootstrap/public_stemcells"
 
 # for the #sh helper
 require "rake"
@@ -56,13 +57,26 @@ class Bosh::Bootstrap::MicroboshProviders::Base
     "bosh-jenkins-artifacts"
   end
 
+  def stemcell_path
+    unless settings.exists?("bosh.stemcell_path")
+      download_stemcell
+    end
+  end
+
+  def recent_stemcells
+    @recent_stemcells ||= begin
+      public_stemcells = Bosh::Bootstrap::PublicStemcells.new
+      public_stemcells.recent
+    end
+  end
+
   # downloads latest stemcell & returns path
   def download_stemcell
     mkdir_p(stemcell_dir)
     chdir(stemcell_dir) do
-      stemcell_path = File.expand_path(File.basename(stemcell_uri))
+      stemcell_path = File.expand_path(latest_stemcell.name)
       unless File.exists?(stemcell_path)
-        sh "curl -O '#{stemcell_uri}'"
+        sh "curl -O '#{latest_stemcell.url}'"
       end
       return stemcell_path
     end

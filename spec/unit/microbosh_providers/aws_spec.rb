@@ -5,10 +5,9 @@ require "bosh-bootstrap/microbosh_providers/aws"
 describe Bosh::Bootstrap::MicroboshProviders::AWS do
   include Bosh::Bootstrap::Cli::Helpers::Settings
 
-  let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
-  let(:aws_jenkins_bucket) { "bosh-jenkins-artifacts" }
-  let(:latest_ami_uri) { "http://#{aws_jenkins_bucket}.s3.amazonaws.com/last_successful-bosh-stemcell-aws_ami_us-east-1" }
-  let(:latest_stemcell_uri) { "http://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/aws/bosh-stemcell-latest-aws-xen-ubuntu.tgz" }
+  let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml") }
+  let(:artifacts_base) { "https://bosh-jenkins-artifacts.s3.amazonaws.com" }
+  let(:http_client) { instance_double("HTTPClient") }
 
   it "creates micro_bosh.yml manifest" do
     setting "provider.name", "aws"
@@ -24,7 +23,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
 
     subject.create_microbosh_yml(settings)
-    File.should be_exists(microbosh_yml)
+    expect(File).to be_exists(microbosh_yml)
     yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_ec2.yml"))
   end
 
@@ -43,7 +42,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
 
     subject.create_microbosh_yml(settings)
-    File.should be_exists(microbosh_yml)
+    expect(File).to be_exists(microbosh_yml)
     yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_ec2.us-west-2a.yml"))
   end
 
@@ -52,24 +51,52 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
       setting "provider.name", "aws"
     end
 
-    it "is an AMI if us-east-1 target region" do
-      setting "provider.region", "us-east-1"
-      FakeWeb.register_uri(:get, latest_ami_uri, body: "ami-234567")
-
-      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
-      subject.stemcell.should == "ami-234567"
+    before(:each) do
+      body = <<-XML
+<?xml version="1.0" encoding="UTF-8"?>
+<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+  <Name>bosh-jenkins-artifacts</Name>
+  <Prefix>bosh-stemcell</Prefix>
+  <Marker/>
+  <MaxKeys>1000</MaxKeys>
+  <IsTruncated>false</IsTruncated>
+  <Contents>
+    <Key>bosh-stemcell/aws/bosh-stemcell-2719-aws-xen-centos-go_agent.tgz</Key>
+    <LastModified>2014-09-22T04:59:16.000Z</LastModified>
+    <ETag>"7621366406eeb0a9d88242a664206cc3"</ETag>
+    <Size>557556059</Size>
+    <StorageClass>STANDARD</StorageClass>
+  </Contents>
+  <Contents>
+    <Key>bosh-stemcell/aws/bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz</Key>
+    <LastModified>2014-09-22T04:59:16.000Z</LastModified>
+    <ETag>"18cb27adc889e71c97e39b1c57f85027"</ETag>
+    <Size>467288141</Size>
+    <StorageClass>STANDARD</StorageClass>
+  </Contents>
+  <Contents>
+    <Key>bosh-stemcell/aws/light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz</Key>
+    <LastModified>2014-09-22T04:59:16.000Z</LastModified>
+    <ETag>"18cb27adc889e71c97e39b1c57f85027"</ETag>
+    <Size>467288141</Size>
+    <StorageClass>STANDARD</StorageClass>
+  </Contents>
+</ListBucketResult>
+      XML
+      expect(Bosh::Bootstrap::PublicStemcells).to receive(:http_client).and_return(http_client)
+      expect(http_client).to receive(:get).
+        with(artifacts_base, {'prefix' => 'bosh-stemcell'}).
+        and_return(OpenStruct.new(body: body))
     end
 
-    it "retries to get AMI if initially fails" do
+    it "light stemcell if us-east-1 target region" do
       setting "provider.region", "us-east-1"
-      FakeWeb.register_uri(:get, latest_ami_uri, [
-        { status: 404 },
-        { body: "ami-234567"}
-      ])
 
       subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
-      subject.stemcell.should == ""
-      subject.stemcell.should == "ami-234567"
+
+      latest_stemcell_uri = "#{artifacts_base}/bosh-stemcell/aws/light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz"
+      expect(subject).to receive(:sh).with("curl -O '#{latest_stemcell_uri}'")
+      expect(subject.stemcell_path).to match /light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
     end
 
     xit "errors if AMI not available and not running within target region" do
@@ -78,10 +105,15 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
 
     it "downloads latest stemcell and returns path if running in target AWS region" do
       setting "provider.region", "us-west-2"
-      
+
       subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
-      subject.stub(:sh).with("curl -O '#{latest_stemcell_uri}'")
-      subject.stemcell.should =~ %r{deployments/bosh-stemcell-latest-aws-xen-ubuntu.tgz$}
+
+      latest_stemcell_uri = "#{artifacts_base}/bosh-stemcell/aws/bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz"
+
+      expect(subject).to receive(:sh).with("curl -O '#{latest_stemcell_uri}'")
+      stemcell_path = subject.stemcell_path
+      expect(stemcell_path).to match /bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
+      expect(stemcell_path).to_not match /light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
     end
   end
 end

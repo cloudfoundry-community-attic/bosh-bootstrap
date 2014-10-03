@@ -2,18 +2,6 @@ require "bosh-bootstrap/microbosh_providers/base"
 
 module Bosh::Bootstrap::MicroboshProviders
   class AWS < Base
-    # if us-east-1 -> ami
-    # if not running in target aws region -> error "Must either use us-east-1 or run 'bosh bootstrap deploy' within target AWS region"
-    # else download stemcell & return path
-    def stemcell
-      unless settings.exists?("bosh.stemcell")
-        if ami_region?
-          fetch_ami
-        else
-          download_stemcell
-        end
-      end
-    end
 
     def to_hash
       data = super.merge({
@@ -64,22 +52,28 @@ module Bosh::Bootstrap::MicroboshProviders
       settings.provider.region
     end
 
-    # only us-east-1 has AMIs published currently
-    def ami_region?
+    # @return Bosh::Cli::PublicStemcell latest stemcell for aws/trusty
+    # If us-east-1 region, then return light stemcell
+    def latest_stemcell
+      @latest_stemcell ||= begin
+        trusty_stemcells = if light_stemcell?
+          recent_stemcells.select do |s|
+            s.name =~ /aws/ && s.name =~ /trusty/ && s.name =~ /^light/
+          end
+        else
+          recent_stemcells.select do |s|
+            s.name =~ /aws/ && s.name =~ /trusty/ && s.name =~ /^bosh/
+          end
+        end
+        trusty_stemcells.sort {|s1, s2| s2.version <=> s1.version}.first
+      end
+    end
+
+    # only us-east-1 has light stemcells published
+    def light_stemcell?
       aws_region == "us-east-1"
     end
 
-    def fetch_ami
-      Net::HTTP.get("#{jenkins_bucket}.s3.amazonaws.com", ami_uri_path(aws_region)).strip
-    end
-
-    def ami_uri_path(region)
-      "/last_successful-bosh-stemcell-aws_ami_#{region}"
-    end
-
-    def stemcell_uri
-      "http://bosh-jenkins-artifacts.s3.amazonaws.com/bosh-stemcell/aws/bosh-stemcell-latest-aws-xen-ubuntu.tgz"
-    end
   end
 end
 Bosh::Bootstrap::MicroboshProviders.register_provider("aws", Bosh::Bootstrap::MicroboshProviders::AWS)

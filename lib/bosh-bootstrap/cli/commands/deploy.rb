@@ -59,14 +59,14 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
   # download if stemcell
   def select_public_image_or_download_stemcell
     print "Determining stemcell image/file to use... "
-    stemcell = microbosh_provider.stemcell
-    while (stemcell || "").size == 0
+    stemcell_path = microbosh_provider.stemcell_path
+    while (stemcell_path || "").size == 0
       puts "failed. Retrying..."
       print "Determining stemcell image/file to use... "
-      stemcell = microbosh_provider.stemcell
+      stemcell_path = microbosh_provider.stemcell_path
     end
-    settings.set("bosh.stemcell", stemcell)
-    puts settings.bosh.stemcell
+    settings.set("bosh.stemcell_path", stemcell_path)
+    puts settings.bosh.stemcell_path
   end
 
   def perform_microbosh_deploy

@@ -40,7 +40,7 @@ class Bosh::Bootstrap::Microbosh
     chdir(base_path) do
       setup_gems
       create_microbosh_yml(settings)
-      deploy_or_update(settings.bosh.name, settings.bosh.stemcell)
+      deploy_or_update(settings.bosh.name, settings.bosh.stemcell_path)
     end
   end
 
@@ -52,7 +52,6 @@ class Bosh::Bootstrap::Microbosh
       f << <<-RUBY
 source 'https://rubygems.org'
 
-gem "bosh-bootstrap", path: "#{gempath}"
 gem "bosh_cli_plugin_micro"
       RUBY
     end
