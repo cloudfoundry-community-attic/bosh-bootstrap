@@ -1,7 +1,7 @@
 Change Log
 ==========
 
-`bosh-bootstrap` is a command line tool that you can run on your laptop and automatically get a microbosh (and an inception VM) deployed on AWS (with OpenStack & vSphere coming soon).
+`bosh-bootstrap` is a command line tool that you can run on your laptop and automatically get a Micro BOSH deployed on AWS, OpenStack, or vSphere.
 
 ```
 gem install bosh-bootstrap
