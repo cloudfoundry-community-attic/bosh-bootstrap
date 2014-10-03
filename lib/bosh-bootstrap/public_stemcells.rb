@@ -16,13 +16,13 @@ module Bosh::Bootstrap
     end
 
     def all
-      response = HTTPClient.new.get(PUBLIC_STEMCELLS_BASE_URL, {'prefix' => 'bosh-stemcell'})
+      response = self.class.http_client.get(PUBLIC_STEMCELLS_BASE_URL, {'prefix' => 'bosh-stemcell'})
       doc = REXML::Document.new(response.body)
       stemcells_tags = parse_document(doc)
       stemcells = parse_stemcells(stemcells_tags)
 
       while is_truncated(doc)
-        response = HTTPClient.new.get(PUBLIC_STEMCELLS_BASE_URL, {
+        response = self.class.http_client.get(PUBLIC_STEMCELLS_BASE_URL, {
           'prefix' => 'bosh-stemcell',
           'marker' => stemcells_tags.last.get_text('Key').value
         })
@@ -57,6 +57,10 @@ module Bosh::Bootstrap
 
     def is_truncated(doc)
       REXML::XPath.match(doc, "/ListBucketResult/IsTruncated").first.get_text == 'true'
+    end
+
+    def self.http_client
+      @http_client ||= HTTPClient.new
     end
   end
 end
