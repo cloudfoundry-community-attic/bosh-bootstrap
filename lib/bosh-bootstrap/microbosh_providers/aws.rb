@@ -29,7 +29,7 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def resources_cloud_properties
-      {"instance_type"=>"m1.medium"}
+      {"instance_type"=>"m3.medium"}
     end
 
     def cloud_properties
