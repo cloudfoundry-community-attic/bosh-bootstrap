@@ -6,8 +6,6 @@ describe Bosh::Bootstrap::Cli::Commands::Delete do
   include StdoutCapture
   include Bosh::Bootstrap::Cli::Helpers
 
-  let(:settings_dir) { File.expand_path("~/.microbosh") }
-
   subject { Bosh::Bootstrap::Cli::Commands::Delete.new }
 
   it "deletes microbosh VM" do

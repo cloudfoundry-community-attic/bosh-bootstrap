@@ -7,7 +7,7 @@ describe Bosh::Bootstrap::Cli::Commands::Deploy do
   include StdoutCapture
   include Bosh::Bootstrap::Cli::Helpers
 
-  let(:settings_dir) { File.expand_path("~/.microbosh") }
+  let(:settings_dir) { work_dir }
 
   before do
     FileUtils.mkdir_p(@stemcells_dir = File.join(Dir.mktmpdir, "stemcells"))
