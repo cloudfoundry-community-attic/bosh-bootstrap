@@ -3,10 +3,12 @@ name: test-bosh
 logging:
   level: DEBUG
 network:
-  type: dynamic
-  vip: 1.2.3.4
+  type: manual
+  ip: 1.2.3.4
+  dns:
+  - 1.2.0.2
   cloud_properties:
-    subnet: $SUBNET_ID$
+    subnet: subnet-123456
 resources:
   persistent_disk: 16384
   cloud_properties:

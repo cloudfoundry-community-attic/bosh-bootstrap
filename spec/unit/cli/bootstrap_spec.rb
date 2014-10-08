@@ -26,21 +26,21 @@ begin
 
     it "runs deploy command" do
       cmd = double(Bosh::Bootstrap::Cli::Commands::Deploy)
-      cmd.should_receive(:perform)
+      expect(cmd).to receive(:perform)
       Bosh::Bootstrap::Cli::Commands::Deploy.stub(:new).and_return(cmd)
       cli.deploy
     end
 
     it "runs delete command" do
       cmd = double(Bosh::Bootstrap::Cli::Commands::Delete)
-      cmd.should_receive(:perform)
+      expect(cmd).to receive(:perform)
       Bosh::Bootstrap::Cli::Commands::Delete.stub(:new).and_return(cmd)
       cli.delete
     end
 
     it "runs ssh command" do
       cmd = double(Bosh::Bootstrap::Cli::Commands::SSH)
-      cmd.should_receive(:perform)
+      expect(cmd).to receive(:perform)
       Bosh::Bootstrap::Cli::Commands::SSH.stub(:new).and_return(cmd)
       cli.ssh
     end

@@ -5,7 +5,7 @@ module Bosh::Bootstrap::MicroboshProviders
 
     def to_hash
       data = super.merge({
-       "network"=>{"type"=>"dynamic", "vip"=>public_ip},
+      "network"=>network_configuration,
        "resources"=>
         {"persistent_disk"=>persistent_disk,
          "cloud_properties"=>resources_cloud_properties},
@@ -22,6 +22,25 @@ module Bosh::Bootstrap::MicroboshProviders
         data["resources"]["cloud_properties"]["availability_zone"] = az
       end
       data
+    end
+
+    def network_configuration
+      if vpc?
+        {
+          "type" =>"manual",
+          "ip"   => public_ip,
+          "dns"  => [vpc_dns(public_ip)],
+          "cloud_properties" => {
+            "subnet" => settings.address.subnet_id
+          }
+        }
+
+      else
+        {
+          "type"=>"dynamic",
+          "vip"=>public_ip
+        }
+      end
     end
 
     def persistent_disk
@@ -74,6 +93,13 @@ module Bosh::Bootstrap::MicroboshProviders
       aws_region == "us-east-1"
     end
 
+    def vpc?
+      settings.address["subnet_id"]
+    end
+
+    def vpc_dns(ip_address)
+      ip_address.gsub(/^(\d+)\.(\d+)\..*/, '\1.\2.0.2')
+    end
   end
 end
 Bosh::Bootstrap::MicroboshProviders.register_provider("aws", Bosh::Bootstrap::MicroboshProviders::AWS)
