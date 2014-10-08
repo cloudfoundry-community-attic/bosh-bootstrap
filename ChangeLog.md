@@ -14,6 +14,7 @@ v0.14
 - fixed to use new stemcells
 - [aws] VPC support - detects if VPCs available and allows selection, then select of subset, then creates security groups into the VPC
 - [aws] Using m3.medium instead of m1.medium
+- [aws vpc] network type: manual for vpc
 
 v0.13
 -----
