@@ -9,7 +9,7 @@ describe Bosh::Bootstrap::NetworkProviders::OpenStack do
   subject { Bosh::Bootstrap::NetworkProviders::OpenStack.new(provider_client) }
 
   it "is registered" do
-    Bosh::Bootstrap::NetworkProviders.provider_class("openstack").should == subject.class
+    expect(Bosh::Bootstrap::NetworkProviders.provider_class("openstack")).to equal subject.class
   end
 
   it "creates security groups it needs" do

@@ -41,7 +41,7 @@ describe Bosh::Bootstrap::MicroboshProviders::VSphere do
     subject = Bosh::Bootstrap::MicroboshProviders::VSphere.new(microbosh_yml, settings)
 
     subject.create_microbosh_yml(settings)
-    File.should be_exists(microbosh_yml)
+    expect(File).to be_exists(microbosh_yml)
     yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.vsphere.yml"))
   end
 end
