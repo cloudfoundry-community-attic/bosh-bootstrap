@@ -97,7 +97,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
   <Contents>
     <Key>bosh-stemcell/aws/light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz</Key>
     <LastModified>2014-09-22T04:59:16.000Z</LastModified>
-    <ETag>"18cb27adc889e71c97e39b1c57f85027"</ETag>
+    <ETag>"28cb27adc889e71c97e39b1c57f85027"</ETag>
     <Size>467288141</Size>
     <StorageClass>STANDARD</StorageClass>
   </Contents>
@@ -114,13 +114,14 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
 
       subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
 
-      latest_stemcell_uri = "#{artifacts_base}/bosh-stemcell/aws/light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz"
+      latest_stemcell_uri = "#{artifacts_base}/bosh-stemcell/aws/" +
+        "light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz"
       expect(subject).to receive(:sh).with("curl -O '#{latest_stemcell_uri}'")
-      expect(subject.stemcell_path).to match /light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
-    end
+      expect(subject).to receive(:find_ami_for_stemcell).
+        with("bosh-aws-xen-ubuntu-trusty-go_agent", "2719").
+        and_return(nil)
 
-    xit "errors if AMI not available and not running within target region" do
-      setting "provider.region", "us-west-2"
+      expect(subject.stemcell_path).to match /light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
     end
 
     it "downloads latest stemcell and returns path if running in target AWS region" do
@@ -128,12 +129,60 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
 
       subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
 
-      latest_stemcell_uri = "#{artifacts_base}/bosh-stemcell/aws/bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz"
-
+      latest_stemcell_uri = "#{artifacts_base}/bosh-stemcell/aws/" +
+        "bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz"
       expect(subject).to receive(:sh).with("curl -O '#{latest_stemcell_uri}'")
+      expect(subject).to receive(:find_ami_for_stemcell).
+        with("bosh-aws-xen-ubuntu-trusty-go_agent", "2719").
+        and_return(nil)
+
       stemcell_path = subject.stemcell_path
       expect(stemcell_path).to match /bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
       expect(stemcell_path).to_not match /light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
+    end
+
+    it "discovers pre-created AMI and uses it instead" do
+      setting "provider.region", "us-west-2"
+
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+
+      expect(subject).to_not receive(:sh)
+      expect(subject).to receive(:find_ami_for_stemcell).
+        with("bosh-aws-xen-ubuntu-trusty-go_agent", "2719").and_return("ami-123456")
+
+      stemcell_path = subject.stemcell_path
+      expect(stemcell_path).to match /ami-123456$/
+    end
+  end
+
+  describe "existing stemcells as AMIs" do
+    before do
+      setting "provider.region", "us-west-2"
+    end
+
+    it "finds match" do
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+      expect(subject).to receive(:owned_images).and_return([
+        {
+          "description" => "bosh-aws-xen-ubuntu-trusty-go_agent 2222",
+          "imageId" => "ami-wrong-one"
+        },
+        {
+          "description" => "bosh-aws-xen-ubuntu-trusty-go_agent 2732",
+          "imageId" => "ami-123456"
+        },
+        {
+          "description" => "bosh-aws-xen-ubuntu-trusty-go_agent 2732",
+          "imageId" => "ami-some-other"
+        }
+      ])
+      expect(subject.find_ami_for_stemcell("bosh-aws-xen-ubuntu-trusty-go_agent", "2732")).to eq "ami-123456"
+    end
+
+    it "doesn't find match" do
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+      expect(subject).to receive(:owned_images).and_return([])
+      expect(subject.find_ami_for_stemcell("xxxx", "12345")).to be_nil
     end
   end
 end

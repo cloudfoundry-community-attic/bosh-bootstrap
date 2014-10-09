@@ -59,6 +59,9 @@ class Bosh::Bootstrap::MicroboshProviders::Base
 
   def stemcell_path
     unless settings.exists?("bosh.stemcell_path")
+      if image = discover_if_stemcell_image_already_uploaded
+        return image
+      end
       download_stemcell
     end
   end
@@ -70,15 +73,21 @@ class Bosh::Bootstrap::MicroboshProviders::Base
     end
   end
 
+  # override if infrastructure has enough information to
+  # discover if stemcell already uploaded and can be used
+  # via its image ID/AMI
+  def discover_if_stemcell_image_already_uploaded
+  end
+
   # downloads latest stemcell & returns path
   def download_stemcell
     mkdir_p(stemcell_dir)
     chdir(stemcell_dir) do
-      stemcell_path = File.expand_path(latest_stemcell.name)
-      unless File.exists?(stemcell_path)
+      path = File.expand_path(latest_stemcell.name)
+      unless File.exists?(path)
         sh "curl -O '#{latest_stemcell.url}'"
       end
-      return stemcell_path
+      return path
     end
   end
 

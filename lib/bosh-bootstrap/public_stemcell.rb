@@ -14,11 +14,20 @@ module Bosh::Bootstrap
     end
 
     def version
-      @parsed_version.gsub('_', '.').to_f
+      @parsed_version.gsub('_', '.')
     end
 
     def variety
       name.gsub(/(.tgz)|(bosh-stemcell-)|(#{@parsed_version})/, '').split('-').reject { |c| c.empty? }.join('-')
+    end
+
+    # @return [String] guesses ultimate stemcell name from file name
+    # light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz into bosh-aws-xen-ubuntu-trusty-go_agent
+    def stemcell_name
+      name.
+        gsub(/(.tgz)|(#{@parsed_version})/, '').
+        gsub(/^.*bosh-stemcell-/, 'bosh-').
+        split('-').reject { |c| c.empty? }.join('-')
     end
 
     def url
