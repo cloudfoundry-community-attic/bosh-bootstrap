@@ -5,6 +5,7 @@ describe Bosh::Bootstrap::MicroboshProviders::VSphere do
   include Bosh::Bootstrap::Cli::Helpers::Settings
 
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
+  let(:fog_compute) { instance_double("Fog::Compute::VSphere") }
 
   it "creates micro_bosh.yml manifest" do
     setting "provider.name", "vsphere"
@@ -38,7 +39,7 @@ describe Bosh::Bootstrap::MicroboshProviders::VSphere do
     setting "bosh.password", "password"
     setting "bosh.salted_password", "salted_password"
 
-    subject = Bosh::Bootstrap::MicroboshProviders::VSphere.new(microbosh_yml, settings)
+    subject = Bosh::Bootstrap::MicroboshProviders::VSphere.new(microbosh_yml, settings, fog_compute)
 
     subject.create_microbosh_yml(settings)
     expect(File).to be_exists(microbosh_yml)

@@ -5,6 +5,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
   include Bosh::Bootstrap::Cli::Helpers::Settings
 
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
+  let(:fog_compute) { instance_double("Fog::Compute::OpenStack") }
 
   context "creates micro_bosh.yml manifest" do
     it "on nova with floating IP" do
@@ -20,7 +21,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       setting "bosh.salted_password", "salted_password"
       setting "bosh.persistent_disk", 16384
 
-      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings, fog_compute)
 
       subject.create_microbosh_yml(settings)
       expect(File).to be_exists(microbosh_yml)
@@ -43,7 +44,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       setting "bosh.salted_password", "salted_password"
       setting "bosh.persistent_disk", 16384
 
-      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings, fog_compute)
 
       subject.create_microbosh_yml(settings)
       expect(File).to be_exists(microbosh_yml)
@@ -64,7 +65,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       setting "bosh.salted_password", "salted_password"
       setting "bosh.persistent_disk", 16384
 
-      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings, fog_compute)
 
       subject.create_microbosh_yml(settings)
       expect(File).to be_exists(microbosh_yml)
@@ -87,7 +88,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
 
       setting "provider.options.boot_from_volume", true
 
-      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings, fog_compute)
 
       subject.create_microbosh_yml(settings)
       expect(File).to be_exists(microbosh_yml)

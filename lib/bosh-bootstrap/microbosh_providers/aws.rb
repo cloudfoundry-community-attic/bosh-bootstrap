@@ -100,6 +100,48 @@ module Bosh::Bootstrap::MicroboshProviders
     def vpc_dns(ip_address)
       ip_address.gsub(/^(\d+)\.(\d+)\..*/, '\1.\2.0.2')
     end
+
+    # @return [Hash] description of each self-owned AMI
+    # {"blockDeviceMapping"=>
+    #  [{"deviceName"=>"/dev/sda",
+    #    "snapshotId"=>"snap-56c7089e",
+    #    "volumeSize"=>2,
+    #    "deleteOnTermination"=>"true"},
+    #   {"deviceName"=>"/dev/sdb", "virtualName"=>"ephemeral0"}],
+    # "productCodes"=>[],
+    # "stateReason"=>{},
+    # "tagSet"=>{"Name"=>"bosh-aws-xen-ubuntu-trusty-go_agent 2732"},
+    # "imageId"=>"ami-c19ed3f1",
+    # "imageLocation"=>"357913607455/BOSH-64a71269-18a2-450b-9e61-713ed70fa62a",
+    # "imageState"=>"available",
+    # "imageOwnerId"=>"357913607455",
+    # "isPublic"=>false,
+    # "architecture"=>"x86_64",
+    # "imageType"=>"machine",
+    # "kernelId"=>"aki-94e26fa4",
+    # "name"=>"BOSH-64a71269-18a2-450b-9e61-713ed70fa62a",
+    # "description"=>"bosh-aws-xen-ubuntu-trusty-go_agent 2732",
+    # "rootDeviceType"=>"ebs",
+    # "rootDeviceName"=>"/dev/sda1",
+    # "virtualizationType"=>"paravirtual",
+    # "hypervisor"=>"xen"}
+    def owned_images
+      my_images_raw = fog_compute.describe_images('Owner' => 'self')
+      my_images_raw.body["imagesSet"]
+    end
+
+    # @return [String] Any AMI imageID, e.g. "ami-c19ed3f1" for given BOSH stemcell name/version
+    # Usage: find_ami_for_stemcell("bosh-aws-xen-ubuntu-trusty-go_agent", "2732")
+    def find_ami_for_stemcell(name, version)
+      image = owned_images.find do |image|
+        image["description"] == "#{name} #{version}"
+      end
+      image["imageId"] if image
+    end
+
+    def discover_if_stemcell_image_already_uploaded
+      find_ami_for_stemcell(latest_stemcell.stemcell_name, latest_stemcell.version)
+    end
   end
 end
 Bosh::Bootstrap::MicroboshProviders.register_provider("aws", Bosh::Bootstrap::MicroboshProviders::AWS)

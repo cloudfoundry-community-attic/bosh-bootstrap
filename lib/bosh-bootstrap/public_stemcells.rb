@@ -50,7 +50,6 @@ module Bosh::Bootstrap
       stemcell_tags.map do |stemcell_tag|
         stemcell_key = stemcell_tag.get_text('Key').value
         stemcell_size = Integer(stemcell_tag.get_text('Size').value)
-
         PublicStemcell.new(stemcell_key, stemcell_size)
       end
     end
