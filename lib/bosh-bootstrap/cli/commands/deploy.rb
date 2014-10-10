@@ -68,6 +68,7 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
     end
     settings.set("bosh.stemcell_path", stemcell_path)
     puts settings.bosh.stemcell_path
+    save_settings!
   end
 
   def perform_microbosh_deploy
