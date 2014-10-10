@@ -10,9 +10,11 @@ class Bosh::Bootstrap::MicroboshProviders::Base
 
   attr_reader :manifest_path
   attr_reader :settings
+  attr_reader :fog_compute
 
-  def initialize(manifest_path, settings)
+  def initialize(manifest_path, settings, fog_compute)
     @manifest_path = manifest_path
+    @fog_compute = fog_compute
     @settings = settings.is_a?(Hash) ? ReadWriteSettings.new(settings) : settings
     raise "@settings must be ReadWriteSettings (or Hash)" unless @settings.is_a?(ReadWriteSettings)
   end

@@ -52,7 +52,8 @@ class Bosh::Bootstrap::Cli::Commands::Deploy
       provider_name = settings.provider.name
       require "bosh-bootstrap/microbosh_providers/#{provider_name}"
       klass = Bosh::Bootstrap::MicroboshProviders.provider_class(provider_name)
-      klass.new(File.join(settings_dir, "deployments/#{settings.bosh.name}/micro_bosh.yml"), settings)
+      fog_compute = cyoi_provider_client.fog_compute
+      klass.new(File.join(settings_dir, "deployments/#{settings.bosh.name}/micro_bosh.yml"), settings, fog_compute)
     end
   end
 

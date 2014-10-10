@@ -8,6 +8,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml") }
   let(:artifacts_base) { "https://bosh-jenkins-artifacts.s3.amazonaws.com" }
   let(:http_client) { instance_double("HTTPClient") }
+  let(:fog_compute) { instance_double("Fog::Compute::AWS") }
 
   it "creates micro_bosh.yml manifest" do
     setting "provider.name", "aws"
@@ -20,7 +21,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     setting "bosh.salted_password", "salted_password"
     setting "bosh.persistent_disk", 16384
 
-    subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+    subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
 
     subject.create_microbosh_yml(settings)
     expect(File).to be_exists(microbosh_yml)
@@ -39,7 +40,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     setting "bosh.salted_password", "salted_password"
     setting "bosh.persistent_disk", 16384
 
-    subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+    subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
 
     subject.create_microbosh_yml(settings)
     expect(File).to be_exists(microbosh_yml)
@@ -59,7 +60,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     setting "bosh.salted_password", "salted_password"
     setting "bosh.persistent_disk", 16384
 
-    subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+    subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
 
     subject.create_microbosh_yml(settings)
     expect(File).to be_exists(microbosh_yml)
@@ -112,7 +113,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     it "light stemcell if us-east-1 target region" do
       setting "provider.region", "us-east-1"
 
-      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
 
       latest_stemcell_uri = "#{artifacts_base}/bosh-stemcell/aws/" +
         "light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz"
@@ -121,13 +122,14 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
         with("bosh-aws-xen-ubuntu-trusty-go_agent", "2719").
         and_return(nil)
 
-      expect(subject.stemcell_path).to match /light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
+      stemcell_path = subject.stemcell_path
+      expect(stemcell_path).to match /light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
     end
 
     it "downloads latest stemcell and returns path if running in target AWS region" do
       setting "provider.region", "us-west-2"
 
-      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
 
       latest_stemcell_uri = "#{artifacts_base}/bosh-stemcell/aws/" +
         "bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz"
@@ -144,7 +146,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     it "discovers pre-created AMI and uses it instead" do
       setting "provider.region", "us-west-2"
 
-      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
 
       expect(subject).to_not receive(:sh)
       expect(subject).to receive(:find_ami_for_stemcell).
@@ -161,7 +163,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     end
 
     it "finds match" do
-      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
       expect(subject).to receive(:owned_images).and_return([
         {
           "description" => "bosh-aws-xen-ubuntu-trusty-go_agent 2222",
@@ -180,7 +182,7 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     end
 
     it "doesn't find match" do
-      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
       expect(subject).to receive(:owned_images).and_return([])
       expect(subject.find_ami_for_stemcell("xxxx", "12345")).to be_nil
     end
