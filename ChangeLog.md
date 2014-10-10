@@ -14,7 +14,7 @@ v0.14
 -	fixed to use new stemcells
 -	[aws] VPC support - detects if VPCs available and allows selection, then select of subset, then creates security groups into the VPC
 -	[aws vpc] network type: manual for vpc
--	[aws] reuse existing bosh stemcell AMIs - automatically detects if a stemcell has been uploaded/converted into an AMI[v0.14.2]
+-	[aws] reuse existing bosh stemcell AMIs - automatically detects if a stemcell has been uploaded/converted into an AMI [v0.14.2]
 
 v0.13
 -----
