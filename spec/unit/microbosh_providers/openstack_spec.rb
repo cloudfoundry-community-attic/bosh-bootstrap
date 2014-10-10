@@ -95,4 +95,29 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.boot_from_volume.yml"))
     end
   end
+
+  describe "existing stemcells as openstack images" do
+
+    it "finds match" do
+      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings, fog_compute)
+      expect(subject).to receive(:owned_images).and_return([
+        instance_double("Fog::Compute::OpenStack::Image",
+          name: "BOSH-14c85f35-3dd3-4200-af85-ada65216b2de",
+          metadata: [
+            instance_double("Fog::Compute::OpenStack::Metadata",
+              key: "name", value: "bosh-openstack-kvm-ubuntu-trusty-go_agent"),
+            instance_double("Fog::Compute::OpenStack::Metadata",
+              key: "version", value: "2732"),
+        ])
+      ])
+      expect(subject.find_image_for_stemcell("bosh-openstack-kvm-ubuntu-trusty-go_agent", "2732")).to eq("BOSH-14c85f35-3dd3-4200-af85-ada65216b2de")
+    end
+
+    it "doesn't find match" do
+      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings, fog_compute)
+      expect(subject).to receive(:owned_images).and_return([])
+      expect(subject.find_image_for_stemcell("xxxx", "12345")).to be_nil
+    end
+  end
+
 end
