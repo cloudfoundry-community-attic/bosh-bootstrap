@@ -131,6 +131,26 @@ module Bosh::Bootstrap::MicroboshProviders
       end
     end
 
+    def owned_images
+      fog_compute.images
+    end
+
+    # @return [String] Any AMI imageID
+    # e.g. "BOSH-14c85f35-3dd3-4200-af85-ada65216b2de" for given BOSH stemcell name/version
+    # Usage: find_ami_for_stemcell("bosh-openstack-kvm-ubuntu-trusty-go_agent", "2732")
+    def find_image_for_stemcell(name, version)
+      image = owned_images.find do |image|
+        metadata = image.metadata
+        metadata_name = metadata.find { |m| m.key == "name" }
+        metadata_version = metadata.find { |m| m.key == "version" }
+        metadata_name && metadata_version && metadata_name.value == name && metadata_version.value == version
+      end
+      image.name if image
+    end
+
+    def discover_if_stemcell_image_already_uploaded
+      find_image_for_stemcell(latest_stemcell.stemcell_name, latest_stemcell.version)
+    end
   end
 end
 Bosh::Bootstrap::MicroboshProviders.register_provider("openstack", Bosh::Bootstrap::MicroboshProviders::OpenStack)

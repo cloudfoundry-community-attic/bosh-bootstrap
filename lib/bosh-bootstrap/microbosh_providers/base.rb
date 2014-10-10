@@ -60,7 +60,7 @@ class Bosh::Bootstrap::MicroboshProviders::Base
   end
 
   def stemcell_path
-    unless settings.exists?("bosh.stemcell_path")
+    settings.exists?("bosh.stemcell_path") || begin
       if image = discover_if_stemcell_image_already_uploaded
         return image
       end
