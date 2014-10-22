@@ -14,7 +14,8 @@ module Bosh::Bootstrap::NetworkProviders
         sg_suffix = "-#{vpc_id}"
       end
       security_groups.each do |name, ports|
-        cyoi_provider_client.create_security_group("#{name}#{sg_suffix}", name.to_s, {ports: ports}, attributes)
+        sg_name = "#{name}#{sg_suffix}"
+        cyoi_provider_client.create_security_group(sg_name, name.to_s, {ports: ports}, attributes)
       end
     end
 
