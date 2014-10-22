@@ -62,9 +62,15 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def security_groups
-      ["ssh",
-       "dns-server",
-       "bosh"]
+      sg_suffix=""
+      if vpc?
+        sg_suffix="-#{settings.address.vpc_id}"
+      end
+      [
+        "ssh#{sg_suffix}",
+        "dns-server#{sg_suffix}",
+        "bosh#{sg_suffix}"
+      ]
     end
 
     def aws_region

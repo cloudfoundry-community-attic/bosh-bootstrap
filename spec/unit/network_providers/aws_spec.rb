@@ -28,9 +28,9 @@ describe Bosh::Bootstrap::NetworkProviders::AWS do
   it "creates VPC security groups it needs" do
     setting "address.vpc_id", "vpc-id-1234"
     expected_groups = [
-      ["ssh", "ssh", ports: 22],
-      ["dns-server", "dns-server", ports: { protocol: "udp", ports: (53..53) }],
-      ["bosh", "bosh", ports: [4222, 6868, 25250, 25555, 25777]]
+      ["ssh-vpc-id-1234", "ssh", ports: 22],
+      ["dns-server-vpc-id-1234", "dns-server", ports: { protocol: "udp", ports: (53..53) }],
+      ["bosh-vpc-id-1234", "bosh", ports: [4222, 6868, 25250, 25555, 25777]]
     ]
     expected_groups.each do |security_group_name, description, ports|
       expect(cyoi_provider_client).to receive(:create_security_group).

@@ -22,9 +22,9 @@ cloud:
       region: us-west-2
       ec2_endpoint: ec2.us-west-2.amazonaws.com
       default_security_groups:
-      - ssh
-      - dns-server
-      - bosh
+      - ssh-vpc-123456
+      - dns-server-vpc-123456
+      - bosh-vpc-123456
       default_key_name: test-bosh
       ec2_private_key: ~/.microbosh/ssh/test-bosh
 apply_spec:

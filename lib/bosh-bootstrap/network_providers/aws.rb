@@ -8,11 +8,13 @@ module Bosh::Bootstrap::NetworkProviders
 
     def perform(settings)
       attributes = {}
+      sg_suffix = ""
       if vpc_id = settings.exists?("address.vpc_id")
         attributes[:vpc_id] = vpc_id
+        sg_suffix = "-#{vpc_id}"
       end
       security_groups.each do |name, ports|
-        cyoi_provider_client.create_security_group(name.to_s, name.to_s, {ports: ports}, attributes)
+        cyoi_provider_client.create_security_group("#{name}#{sg_suffix}", name.to_s, {ports: ports}, attributes)
       end
     end
 
