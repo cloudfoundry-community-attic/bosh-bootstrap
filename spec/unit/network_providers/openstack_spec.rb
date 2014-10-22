@@ -15,7 +15,7 @@ describe Bosh::Bootstrap::NetworkProviders::OpenStack do
   it "creates security groups it needs" do
     expected_groups = [
       ["ssh", "ssh", 22],
-      ["dns_server", "dns_server", { protocol: "udp", ports: (53..53) }],
+      ["dns-server", "dns-server", { protocol: "udp", ports: (53..53) }],
       ["bosh", "bosh", [4222, 6868, 25250, 25555, 25777]]
     ]
     expected_groups.each do |security_group_name, description, ports|

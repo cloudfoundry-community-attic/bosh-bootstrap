@@ -19,9 +19,9 @@ module Bosh::Bootstrap::NetworkProviders
     protected
     def security_groups
       {
-        ssh: 22,
-        dns_server: { protocol: "udp", ports: (53..53) },
-        bosh: [4222, 6868, 25250, 25555, 25777]
+        "ssh" => 22,
+        "dns-server" => { protocol: "udp", ports: (53..53) },
+        "bosh" => [4222, 6868, 25250, 25555, 25777]
       }
     end
   end
