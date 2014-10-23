@@ -113,7 +113,7 @@ module Bosh::Bootstrap::MicroboshProviders
 
     def security_groups
       ["ssh",
-       "dns_server",
+       "dns-server",
        "bosh"]
     end
 

@@ -20,7 +20,7 @@ cloud:
       ec2_endpoint: ec2.us-west-2.amazonaws.com
       default_security_groups:
       - ssh
-      - dns_server
+      - dns-server
       - bosh
       default_key_name: test-bosh
       ec2_private_key: ~/.microbosh/ssh/test-bosh

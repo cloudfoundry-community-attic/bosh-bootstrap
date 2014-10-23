@@ -20,7 +20,7 @@ cloud:
       region: REGION
       default_security_groups:
       - ssh
-      - dns_server
+      - dns-server
       - bosh
       default_key_name: test-bosh
       private_key: ~/.microbosh/ssh/test-bosh
