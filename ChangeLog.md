@@ -17,6 +17,7 @@ v0.14
 -	[aws vpc] network type: manual for vpc
 -	[aws] reuse existing bosh stemcell AMIs - automatically detects if a stemcell has been uploaded/converted into an AMI [v0.14.2]
 -	[openstack] reuse existing bosh stemcell images - automatically detects if a stemcell has been uploaded/converted into an OpenStack image [v0.14.3]
+-	[aws vpc] security groups are uniquely named per VPC [v0.14.4]
 
 v0.13
 -----
