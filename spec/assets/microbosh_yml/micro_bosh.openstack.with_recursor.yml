@@ -1,0 +1,47 @@
+---
+name: test-bosh
+logging:
+  level: DEBUG
+network:
+  type: dynamic
+  vip: 1.2.3.4
+  cloud_properties:
+    net_id: 7b8788eb-b49e-4424-9065-75a6b07094ea
+resources:
+  persistent_disk: 16384
+  cloud_properties:
+    instance_type: m1.medium
+cloud:
+  plugin: openstack
+  properties:
+    openstack:
+      auth_url: http://10.0.0.2:5000/v2.0/tokens
+      username: USER
+      api_key: PASSWORD
+      tenant: TENANT
+      region: REGION
+      default_security_groups:
+      - ssh
+      - dns_server
+      - bosh
+      default_key_name: test-bosh
+      private_key: ~/.microbosh/ssh/test-bosh
+      connection_options:
+        ssl_verify_peer: false
+      boot_from_volume: false
+apply_spec:
+  agent:
+    blobstore:
+      address: 1.2.3.4
+    nats:
+      address: 1.2.3.4
+  properties:
+    dns:
+      recursor: 4.5.6.7
+    director:
+      max_threads: 3
+    hm:
+      resurrector_enabled: true
+    ntp:
+      - 0.north-america.pool.ntp.org
+      - 1.north-america.pool.ntp.org
