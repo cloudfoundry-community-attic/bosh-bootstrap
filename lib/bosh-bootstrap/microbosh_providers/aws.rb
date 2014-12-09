@@ -106,7 +106,8 @@ module Bosh::Bootstrap::MicroboshProviders
     def vpc?
       settings.address["subnet_id"]
     end
-
+    
+    # Note: this should work for all /16 vpcs and may run into issues with other blocks
     def vpc_dns(ip_address)
       ip_address.gsub(/^(\d+)\.(\d+)\..*/, '\1.\2.0.2')
     end
