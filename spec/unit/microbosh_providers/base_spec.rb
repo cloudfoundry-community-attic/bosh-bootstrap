@@ -6,7 +6,8 @@ describe Bosh::Bootstrap::MicroboshProviders::Base do
   include Bosh::Bootstrap::Cli::Helpers::Settings
 
   let(:microbosh_yml) { File.expand_path("~/.microbosh/deployments/micro_bosh.yml")}
-  subject{ Bosh::Bootstrap::MicroboshProviders::Base.new(microbosh_yml, settings ) }
+  let(:fog_compute) { instance_double("Fog::Compute::Base") }
+  subject{ Bosh::Bootstrap::MicroboshProviders::Base.new(microbosh_yml, settings, fog_compute ) }
 
 
   context "creates micro_bosh.yml manifest" do
@@ -31,5 +32,3 @@ describe Bosh::Bootstrap::MicroboshProviders::Base do
     end
   end
 end
-
-

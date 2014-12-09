@@ -112,7 +112,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       setting "bosh.persistent_disk", 16384
       setting "recursor", "4.5.6.7"
 
-      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings)
+      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings, fog_compute)
 
       subject.create_microbosh_yml(settings)
       File.should be_exists(microbosh_yml)

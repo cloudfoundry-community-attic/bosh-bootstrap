@@ -4,7 +4,6 @@ module Bosh::Bootstrap::MicroboshProviders
   class OpenStack < Base
 
     def to_hash
-      puts super
       super.deep_merge({
        "network"=>network_configuration,
        "resources"=>
