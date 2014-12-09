@@ -21,6 +21,10 @@ module Bosh::Bootstrap::MicroboshProviders
       if az = settings.exists?("provider.az")
         data["resources"]["cloud_properties"]["availability_zone"] = az
       end
+      if vpc?
+        data["apply_spec"]["properties"]["dns"] = {}
+        data["apply_spec"]["properties"]["dns"]["recursor"] = vpc_dns(public_ip)
+      end
       data
     end
 

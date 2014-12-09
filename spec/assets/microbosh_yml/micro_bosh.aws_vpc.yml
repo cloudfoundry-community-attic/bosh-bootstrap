@@ -36,3 +36,5 @@ apply_spec:
   properties:
     aws_registry:
       address: 1.2.3.4
+    dns:
+      recursor: 1.2.0.2
