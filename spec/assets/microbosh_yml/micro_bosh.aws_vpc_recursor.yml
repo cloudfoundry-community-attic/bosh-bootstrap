@@ -1,0 +1,40 @@
+---
+name: test-bosh
+logging:
+  level: DEBUG
+network:
+  type: manual
+  ip: 1.2.3.4
+  dns:
+  - 1.2.0.2
+  cloud_properties:
+    subnet: subnet-123456
+resources:
+  persistent_disk: 16384
+  cloud_properties:
+    instance_type: m1.medium
+cloud:
+  plugin: aws
+  properties:
+    aws:
+      access_key_id: ACCESS
+      secret_access_key: SECRET
+      region: us-west-2
+      ec2_endpoint: ec2.us-west-2.amazonaws.com
+      default_security_groups:
+      - ssh-vpc-123456
+      - dns-server-vpc-123456
+      - bosh-vpc-123456
+      default_key_name: test-bosh
+      ec2_private_key: ~/.microbosh/ssh/test-bosh
+apply_spec:
+  agent:
+    blobstore:
+      address: 1.2.3.4
+    nats:
+      address: 1.2.3.4
+  properties:
+    aws_registry:
+      address: 1.2.3.4
+    dns:
+      recursor: 4.5.6.7

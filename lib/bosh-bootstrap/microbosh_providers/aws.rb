@@ -22,8 +22,9 @@ module Bosh::Bootstrap::MicroboshProviders
         data["resources"]["cloud_properties"]["availability_zone"] = az
       end
       if vpc?
+        dns = settings.exists?("recursor") ? settings.recursor : vpc_dns(public_ip)
         data["apply_spec"]["properties"]["dns"] = {}
-        data["apply_spec"]["properties"]["dns"]["recursor"] = vpc_dns(public_ip)
+        data["apply_spec"]["properties"]["dns"]["recursor"] = dns
       end
       data
     end
@@ -106,7 +107,7 @@ module Bosh::Bootstrap::MicroboshProviders
     def vpc?
       settings.address["subnet_id"]
     end
-    
+
     # Note: this should work for all /16 vpcs and may run into issues with other blocks
     def vpc_dns(ip_address)
       ip_address.gsub(/^(\d+)\.(\d+)\..*/, '\1.\2.0.2')
