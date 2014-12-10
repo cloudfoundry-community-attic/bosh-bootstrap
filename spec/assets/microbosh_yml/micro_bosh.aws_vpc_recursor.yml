@@ -37,4 +37,4 @@ apply_spec:
     aws_registry:
       address: 1.2.3.4
     dns:
-      recursor: 1.2.0.2
+      recursor: 4.5.6.7

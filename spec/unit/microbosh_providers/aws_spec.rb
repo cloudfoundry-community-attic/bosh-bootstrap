@@ -186,5 +186,26 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
       expect(subject).to receive(:owned_images).and_return([])
       expect(subject.find_ami_for_stemcell("xxxx", "12345")).to be_nil
     end
+
+    it "adds recursor if present" do
+      setting "provider.name", "aws"
+      setting "provider.region", "us-west-2"
+      setting "provider.credentials.aws_access_key_id", "ACCESS"
+      setting "provider.credentials.aws_secret_access_key", "SECRET"
+      setting "address.ip", "1.2.3.4"
+      setting "address.vpc_id", "vpc-123456"
+      setting "address.subnet_id", "subnet-123456"
+      setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
+      setting "bosh.name", "test-bosh"
+      setting "bosh.salted_password", "salted_password"
+      setting "bosh.persistent_disk", 16384
+      setting "recursor", "4.5.6.7"
+
+      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
+
+      subject.create_microbosh_yml(settings)
+      expect(File).to be_exists(microbosh_yml)
+      yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.aws_vpc_recursor.yml"))
+    end
   end
 end
