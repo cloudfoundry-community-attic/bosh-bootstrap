@@ -8,6 +8,12 @@ gem install bosh-bootstrap
 bosh-bootstrap deploy
 ```
 
+v0.15
+-----
+
+-	No more separate Gemfile and ugly `bundle install` step; thanks to BOSH CLI upgrading its dependencies sufficiently so as not to clash with bosh-bootstrap
+-	This allows inclusion in the [traveling-bosh](https://github.com/cloudfoundry-community/traveling-bosh) project
+
 v0.14
 -----
 
@@ -18,8 +24,8 @@ v0.14
 -	[aws] reuse existing bosh stemcell AMIs - automatically detects if a stemcell has been uploaded/converted into an AMI [v0.14.2]
 -	[openstack] reuse existing bosh stemcell images - automatically detects if a stemcell has been uploaded/converted into an OpenStack image [v0.14.3]
 -	[aws vpc] security groups are uniquely named per VPC [v0.14.4]
-- [aws vpc] added dns recursor to vpc [v0.14.5]
-- added ability to set dns recursor [v0.14.5]
+-	[aws vpc] added dns recursor to vpc [v0.14.5]
+-	added ability to set dns recursor [v0.14.5]
 
 v0.13
 -----
@@ -47,7 +53,7 @@ v0.11
 -	Accessing settings is much cleaner; functionality moved into fork of settingslogic called [readwritesettings](https://github.com/drnic/readwritesettings)
 -	Inception VM/server is now provisioned via separate CLI project [inception-server](https://github.com/drnic/inception-server)
 -	AWS/us-east-1 uses public AMIs; other regions & other CPIs use stemcells
--	CLI via bosh plugin (`bosh bootstrap`) rather than a stand alone CLI (`bosh-bootstrap`)
+-	CLI via bosh plugin (`bosh bootstrap`) rather than a stand alone CLI (`bosh-bootstrap`\)
 -	Added `ssh` action to ssh into the microbosh
 -	Added `delete` actions to delete the microbosh (but not the IP address and security groups)
 -	Add back `bosh-bootstrap` CLI & remove bosh_cli dependency (v0.11.1)
