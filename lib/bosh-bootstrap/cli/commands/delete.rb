@@ -10,8 +10,8 @@ class Bosh::Bootstrap::Cli::Commands::Delete
 
   def perform
     chdir(deployment_dir) do
-      bundle "exec bosh -n micro deployment #{bosh_name}"
-      bundle "exec bosh -n micro delete"
+      run "bosh", "-n", "micro", "deployment", bosh_name
+      run "bosh", "-n", "micro", "delete"
     end
   end
 

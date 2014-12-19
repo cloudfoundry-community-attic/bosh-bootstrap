@@ -12,9 +12,8 @@ describe Bosh::Bootstrap::Microbosh do
   it "deploys new microbosh" do
     setting "bosh.name", "test-bosh"
     setting "bosh.stemcell_path", stemcell_path
-    expect(subject).to receive(:sh).with("bundle install")
-    expect(subject).to receive(:sh).with("bundle exec bosh micro deployment test-bosh")
-    expect(subject).to receive(:sh).with("bundle exec bosh -n micro deploy --update-if-exists #{stemcell_path}")
+    expect(subject).to receive(:sh).with("bosh", "micro", "deployment", "test-bosh")
+    expect(subject).to receive(:sh).with("bosh", "-n", "micro", "deploy", "--update-if-exists", stemcell_path)
     subject.deploy(settings)
   end
 

@@ -11,4 +11,11 @@ module Bosh::Bootstrap::Cli::Helpers::Bundle
       sh "bundle #{args.join(' ')}"
     }
   end
+
+  def run(*args)
+    Bundler.with_clean_env {
+      ENV.delete 'RUBYOPT'
+      sh *args
+    }
+  end
 end
