@@ -2,6 +2,9 @@ source 'https://rubygems.org'
 
 gemspec
 
+# Ensure bosh-bootstrap & bosh micro support same gems for traveling-bosh
+gem "bosh_cli_plugin_micro"
+
 if File.directory?("../cyoi")
   gem "cyoi", path: "../cyoi"
 end
