@@ -68,10 +68,8 @@ This bootstrap tool is distributed as a RubyGem for Ruby 1.9+.
 ```
 $ ruby -v
 ruby 1.9.3p385 ...
-$ gem install fog bosh-bootstrap
+$ gem install bosh-bootstrap
 ```
-
-NOTE: the `fog` gem is explicitly installed above to ensure you get a very recent version. It is a manual installation due to version conflicts with `bosh` own dependency on fog.
 
 Usage
 -----
