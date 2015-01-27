@@ -34,6 +34,8 @@ apply_spec:
     nats:
       address: 1.2.3.4
   properties:
+    hm:
+      resurrector_enabled: true
     aws_registry:
       address: 1.2.3.4
     dns:
