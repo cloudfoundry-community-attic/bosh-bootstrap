@@ -17,7 +17,10 @@ module Bosh::Bootstrap::MicroboshProviders
         {"agent"=>
           {"blobstore"=>{"address"=>public_ip},
            "nats"=>{"address"=>public_ip}},
-         "properties"=>{"aws_registry"=>{"address"=>public_ip}}}})
+          "properties"=>
+            {"aws_registry"=>{"address"=>public_ip},
+            "hm"=>{"resurrector_enabled" => true}}},
+      })
       if az = settings.exists?("provider.az")
         data["resources"]["cloud_properties"]["availability_zone"] = az
       end
