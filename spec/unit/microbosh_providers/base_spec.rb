@@ -18,7 +18,7 @@ describe Bosh::Bootstrap::MicroboshProviders::Base do
         setting "recursor", "4.5.6.7"
 
         subject.create_microbosh_yml(settings)
-        File.should be_exists(microbosh_yml)
+        expect(File).to be_exists(microbosh_yml)
         yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.base.with_recursor.yml"))
       end
     end
@@ -26,7 +26,7 @@ describe Bosh::Bootstrap::MicroboshProviders::Base do
     context "when recursor is not provided" do
       it "does not adds the recursor to the yml" do
         subject.create_microbosh_yml(settings)
-        File.should be_exists(microbosh_yml)
+        expect(File).to be_exists(microbosh_yml)
         yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.base.without_recursor.yml"))
       end
     end
