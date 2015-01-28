@@ -8,6 +8,14 @@ gem install bosh-bootstrap
 bosh-bootstrap deploy
 ```
 
+v0.16
+-----
+
+- [aws] Enable the resurrector by default
+- Bump the size of the permanent disk on the microbosh from 16GB to 32GB
+- Fix deprecated calls to :should in tests
+- Remove instructions regarding explicit install of fog, as it is no longer necessary
+
 v0.15
 -----
 
