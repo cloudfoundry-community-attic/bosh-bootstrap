@@ -44,7 +44,7 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     # resources:
-    #  persistent_disk: 16384
+    #  persistent_disk: 32768
     #  cloud_properties:
     #    ram: 4096
     #    disk: 10240
