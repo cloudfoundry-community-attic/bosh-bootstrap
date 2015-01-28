@@ -8,7 +8,7 @@ network:
   cloud_properties:
     net_id: 7b8788eb-b49e-4424-9065-75a6b07094ea
 resources:
-  persistent_disk: 16384
+  persistent_disk: 32768
   cloud_properties:
     instance_type: m1.medium
 cloud:

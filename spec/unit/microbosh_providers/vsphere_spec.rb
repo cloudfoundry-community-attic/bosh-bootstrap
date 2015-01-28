@@ -13,9 +13,9 @@ describe Bosh::Bootstrap::MicroboshProviders::VSphere do
     setting "provider.credentials.vsphere_username", "user"
     setting "provider.credentials.vsphere_password", "TempP@ss"
 
-    setting "provider.resources.persistent_disk", "16384"
+    setting "provider.resources.persistent_disk", "32768"
     setting "provider.resources.ram", "2048"
-    setting "provider.resources.disk", "16384"
+    setting "provider.resources.disk", "32768"
     setting "provider.resources.cpu", "2"
 
     # TODO - perhaps network.ip_address is better?

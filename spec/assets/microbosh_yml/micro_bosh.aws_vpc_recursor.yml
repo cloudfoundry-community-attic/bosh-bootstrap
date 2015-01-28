@@ -10,7 +10,7 @@ network:
   cloud_properties:
     subnet: subnet-123456
 resources:
-  persistent_disk: 16384
+  persistent_disk: 32768
   cloud_properties:
     instance_type: m1.medium
 cloud:
