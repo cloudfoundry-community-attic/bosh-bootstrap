@@ -115,7 +115,7 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings, fog_compute)
 
       subject.create_microbosh_yml(settings)
-      File.should be_exists(microbosh_yml)
+      expect(File).to be_exists(microbosh_yml)
       yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.with_recursor.yml"))
     end
   end
