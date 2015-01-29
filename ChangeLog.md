@@ -15,6 +15,7 @@ v0.16
 - Bump the size of the permanent disk on the microbosh from 16GB to 32GB
 - Fix deprecated calls to :should in tests
 - Remove instructions regarding explicit install of fog, as it is no longer necessary
+- Require cyoi 0.11.3 for a bug fix regarding microbosh security groups [v0.16.1]
 
 v0.15
 -----
