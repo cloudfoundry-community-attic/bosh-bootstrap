@@ -25,6 +25,7 @@ cloud:
       - dns-server
       - bosh
       default_key_name: test-bosh
+      state_timeout: 300
       private_key: ~/.microbosh/ssh/test-bosh
       connection_options:
         ssl_verify_peer: false

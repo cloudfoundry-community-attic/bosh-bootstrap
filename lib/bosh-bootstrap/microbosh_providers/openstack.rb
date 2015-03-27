@@ -87,6 +87,10 @@ module Bosh::Bootstrap::MicroboshProviders
       {"instance_type"=>"m1.medium"}
     end
 
+    def provider_state_timeout
+      settings.exists?("provider") && settings.provider.exists?("state_timeout") ? settings.provider.state_timeout : 300
+    end
+
     def cloud_properties
       {
         "auth_url"=>settings.provider.credentials.openstack_auth_url,
@@ -96,6 +100,7 @@ module Bosh::Bootstrap::MicroboshProviders
         "region"=>region,
         "default_security_groups"=>security_groups,
         "default_key_name"=>microbosh_name,
+        "state_timeout"=>provider_state_timeout,
         "private_key"=>private_key_path,
         # TODO: Only ignore SSL verification if requested by user
         "connection_options"=>{

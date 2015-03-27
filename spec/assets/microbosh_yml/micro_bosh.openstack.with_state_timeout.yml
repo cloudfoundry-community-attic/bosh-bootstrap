@@ -5,6 +5,8 @@ logging:
 network:
   type: dynamic
   vip: 1.2.3.4
+  cloud_properties:
+    net_id: 7b8788eb-b49e-4424-9065-75a6b07094ea
 resources:
   persistent_disk: 32768
   cloud_properties:
@@ -23,7 +25,7 @@ cloud:
       - dns-server
       - bosh
       default_key_name: test-bosh
-      state_timeout: 300
+      state_timeout: 600
       private_key: ~/.microbosh/ssh/test-bosh
       connection_options:
         ssl_verify_peer: false

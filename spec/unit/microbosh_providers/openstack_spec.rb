@@ -118,6 +118,28 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       expect(File).to be_exists(microbosh_yml)
       yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.with_recursor.yml"))
     end
+
+    it "adds state_timeout if provided" do
+      setting "provider.name", "openstack"
+      setting "provider.credentials.openstack_auth_url", "http://10.0.0.2:5000/v2.0/tokens"
+      setting "provider.credentials.openstack_username", "USER"
+      setting "provider.credentials.openstack_api_key", "PASSWORD"
+      setting "provider.credentials.openstack_tenant", "TENANT"
+      setting "provider.credentials.openstack_region", "REGION"
+      setting "provider.state_timeout", 600
+      setting "address.subnet_id", "7b8788eb-b49e-4424-9065-75a6b07094ea"
+      setting "address.pool_name", "INTERNET"
+      setting "address.ip", "1.2.3.4" # network.vip
+      setting "key_pair.path", "~/.microbosh/ssh/test-bosh"
+      setting "bosh.name", "test-bosh"
+      setting "bosh.salted_password", "salted_password"
+      setting "bosh.persistent_disk", 32768
+
+      subject = Bosh::Bootstrap::MicroboshProviders::OpenStack.new(microbosh_yml, settings, fog_compute)
+      subject.create_microbosh_yml(settings)
+      expect(File).to be_exists(microbosh_yml)
+      yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.with_state_timeout.yml"))
+    end
   end
 
   describe "existing stemcells as openstack images" do
@@ -143,5 +165,4 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
       expect(subject.find_image_for_stemcell("xxxx", "12345")).to be_nil
     end
   end
-
 end
