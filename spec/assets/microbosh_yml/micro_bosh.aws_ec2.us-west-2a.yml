@@ -8,7 +8,10 @@ network:
 resources:
   persistent_disk: 32768
   cloud_properties:
-    instance_type: m1.medium
+    instance_type: m3.medium
+    ephemeral_disk:
+      size: 163840
+      type: gp2
     availability_zone: us-west-2a
 cloud:
   plugin: aws
