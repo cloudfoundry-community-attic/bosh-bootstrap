@@ -29,6 +29,9 @@ module Bosh::Bootstrap::MicroboshProviders
         data["apply_spec"]["properties"]["dns"] = {}
         data["apply_spec"]["properties"]["dns"]["recursor"] = dns
       end
+      if proxy?
+        data["apply_spec"]["properties"]["director"] = {"env" => proxy}
+      end
       data
     end
 
