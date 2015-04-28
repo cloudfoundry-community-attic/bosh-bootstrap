@@ -55,6 +55,14 @@ class Bosh::Bootstrap::MicroboshProviders::Base
     settings.key_pair.path
   end
 
+  def proxy
+    settings.proxy.to_hash
+  end
+
+  def proxy?
+    settings.exists?("proxy")
+  end
+
   def jenkins_bucket
     "bosh-jenkins-artifacts"
   end

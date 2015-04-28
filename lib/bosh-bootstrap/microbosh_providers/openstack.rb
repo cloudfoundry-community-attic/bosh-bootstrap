@@ -4,7 +4,7 @@ module Bosh::Bootstrap::MicroboshProviders
   class OpenStack < Base
 
     def to_hash
-      super.deep_merge({
+      data = super.deep_merge({
        "network"=>network_configuration,
        "resources"=>
         {"persistent_disk"=>persistent_disk,
@@ -23,6 +23,10 @@ module Bosh::Bootstrap::MicroboshProviders
             "hm"=>{"resurrector_enabled" => true},
             "ntp"=>["0.north-america.pool.ntp.org","1.north-america.pool.ntp.org"]}}
       })
+      if proxy?
+        data["apply_spec"]["properties"]["director"]["env"] = proxy
+      end
+      data
     end
 
     # For Nova/Floating IP:
