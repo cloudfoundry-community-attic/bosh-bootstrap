@@ -89,13 +89,6 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
     <StorageClass>STANDARD</StorageClass>
   </Contents>
   <Contents>
-    <Key>bosh-stemcell/aws/bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz</Key>
-    <LastModified>2014-09-22T04:59:16.000Z</LastModified>
-    <ETag>"18cb27adc889e71c97e39b1c57f85027"</ETag>
-    <Size>467288141</Size>
-    <StorageClass>STANDARD</StorageClass>
-  </Contents>
-  <Contents>
     <Key>bosh-stemcell/aws/light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz</Key>
     <LastModified>2014-09-22T04:59:16.000Z</LastModified>
     <ETag>"28cb27adc889e71c97e39b1c57f85027"</ETag>
@@ -124,23 +117,6 @@ describe Bosh::Bootstrap::MicroboshProviders::AWS do
 
       stemcell_path = subject.stemcell_path
       expect(stemcell_path).to match /light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
-    end
-
-    it "downloads latest stemcell and returns path if running in target AWS region" do
-      setting "provider.region", "us-west-2"
-
-      subject = Bosh::Bootstrap::MicroboshProviders::AWS.new(microbosh_yml, settings, fog_compute)
-
-      latest_stemcell_uri = "#{artifacts_base}/bosh-stemcell/aws/" +
-        "bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz"
-      expect(subject).to receive(:sh).with("curl -O '#{latest_stemcell_uri}'")
-      expect(subject).to receive(:find_ami_for_stemcell).
-        with("bosh-aws-xen-ubuntu-trusty-go_agent", "2719").
-        and_return(nil)
-
-      stemcell_path = subject.stemcell_path
-      expect(stemcell_path).to match /bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
-      expect(stemcell_path).to_not match /light-bosh-stemcell-2719-aws-xen-ubuntu-trusty-go_agent.tgz$/
     end
 
     it "discovers pre-created AMI and uses it instead" do

@@ -93,14 +93,8 @@ module Bosh::Bootstrap::MicroboshProviders
     # If us-east-1 region, then return light stemcell
     def latest_stemcell
       @latest_stemcell ||= begin
-        trusty_stemcells = if light_stemcell?
-          recent_stemcells.select do |s|
+        trusty_stemcells = recent_stemcells.select do |s|
             s.name =~ /aws/ && s.name =~ /trusty/ && s.name =~ /^light/
-          end
-        else
-          recent_stemcells.select do |s|
-            s.name =~ /aws/ && s.name =~ /trusty/ && s.name =~ /^bosh/
-          end
         end
         trusty_stemcells.sort {|s1, s2| s2.version <=> s1.version}.first
       end
