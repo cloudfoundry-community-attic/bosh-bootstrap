@@ -12,6 +12,8 @@ v0.17
 -----
 - [aws-openstack] Added proxy support
 - Bump vm size to m3
+- [aws] use light stemcell
+
 
 v0.16
 -----
