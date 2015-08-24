@@ -15,7 +15,7 @@ module Bosh::Bootstrap::MicroboshProviders
         "cloud"=>
          {"plugin"=>"vsphere",
           "properties"=>{
-            "agent"=>{"ntp"=>ntps},
+            "agent"=>{"ntp"=>ntp_servers},
             "vcenters"=>[vcenter_configuration]
           }}})
     end
@@ -58,12 +58,6 @@ module Bosh::Bootstrap::MicroboshProviders
           "cpu"=>settings.provider.resources.cpu
         }
       }
-    end
-
-    def ntps
-      ntp_servers = settings.provider.ntps
-      ntp_servers = ntp_servers.split(",") if ntp_servers.is_a?(String)
-      ntp_servers
     end
 
     # vcenters:

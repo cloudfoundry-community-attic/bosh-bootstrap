@@ -66,6 +66,11 @@ class Bosh::Bootstrap::MicroboshProviders::Base
   end
 
   def ntp_servers
+    if settings.exists?("provider.ntps")
+      servers = settings.provider.ntps
+      return servers.is_a?(String) ? servers.split(",") : servers
+    end
+
     settings.exists?("ntp") ? settings.ntp : DEFAULT_NTP_SERVERS
   end
 
