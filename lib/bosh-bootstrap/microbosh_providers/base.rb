@@ -8,6 +8,8 @@ require "rake/file_utils"
 class Bosh::Bootstrap::MicroboshProviders::Base
   include FileUtils
 
+  DEFAULT_NTP_SERVERS = %w[0.pool.ntp.org 1.pool.ntp.org]
+
   attr_reader :manifest_path
   attr_reader :settings
   attr_reader :fog_compute
@@ -61,6 +63,10 @@ class Bosh::Bootstrap::MicroboshProviders::Base
 
   def proxy?
     settings.exists?("proxy")
+  end
+
+  def ntp_servers
+    settings.exists?("ntp") ? settings.ntp : DEFAULT_NTP_SERVERS
   end
 
   def jenkins_bucket

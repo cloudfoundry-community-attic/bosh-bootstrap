@@ -21,7 +21,7 @@ module Bosh::Bootstrap::MicroboshProviders
            {"director"=>
              {"max_threads"=>3},
             "hm"=>{"resurrector_enabled" => true},
-            "ntp"=>["0.north-america.pool.ntp.org","1.north-america.pool.ntp.org"]}}
+            "ntp"=> ntp_servers }}
       })
       if proxy?
         data["apply_spec"]["properties"]["director"]["env"] = proxy

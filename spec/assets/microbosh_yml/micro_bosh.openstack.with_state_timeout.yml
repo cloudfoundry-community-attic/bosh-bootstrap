@@ -3,8 +3,8 @@ name: test-bosh
 logging:
   level: DEBUG
 network:
-  type: dynamic
-  vip: 1.2.3.4
+  type: manual
+  ip: 10.10.10.3
   cloud_properties:
     net_id: 7b8788eb-b49e-4424-9065-75a6b07094ea
 resources:
@@ -33,14 +33,14 @@ cloud:
 apply_spec:
   agent:
     blobstore:
-      address: 1.2.3.4
+      address: 10.10.10.3
     nats:
-      address: 1.2.3.4
+      address: 10.10.10.3
   properties:
     director:
       max_threads: 3
     hm:
       resurrector_enabled: true
     ntp:
-      - 0.north-america.pool.ntp.org
-      - 1.north-america.pool.ntp.org
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
