@@ -8,6 +8,15 @@ gem install bosh-bootstrap
 bosh-bootstrap deploy
 ```
 
+v0.18
+-----
+- [aws-openstack] added support for custom ntp servers
+- [all] configure ntp for microbosh VM as well as for VM's spawned by the director
+
+v0.17.1
+-------
+- use light stemcells by default in aws
+
 v0.17
 -----
 - [aws-openstack] Added proxy support
