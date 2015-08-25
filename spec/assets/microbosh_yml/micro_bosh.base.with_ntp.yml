@@ -6,11 +6,11 @@ cloud:
   properties:
     agent:
       ntp:
-        - 0.pool.ntp.org
-        - 1.pool.ntp.org
+        - 0.foo.pool.ntp.org
+        - 1.foo.pool.ntp.org
 apply_spec:
   properties:
     ntp:
-      - 0.pool.ntp.org
-      - 1.pool.ntp.org
+      - 0.foo.pool.ntp.org
+      - 1.foo.pool.ntp.org
 

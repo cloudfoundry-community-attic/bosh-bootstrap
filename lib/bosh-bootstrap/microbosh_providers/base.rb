@@ -33,7 +33,7 @@ class Bosh::Bootstrap::MicroboshProviders::Base
   def to_hash
     {"name"=>microbosh_name,
      "logging"=>{"level"=>"DEBUG"},
-    }.merge(default_apply_spec)
+    }.merge(default_spec)
   end
 
   def microbosh_name
@@ -66,12 +66,10 @@ class Bosh::Bootstrap::MicroboshProviders::Base
   end
 
   def ntp_servers
-    if settings.exists?("provider.ntps")
-      servers = settings.provider.ntps
-      return servers.is_a?(String) ? servers.split(",") : servers
-    end
-
-    settings.exists?("ntp") ? settings.ntp : DEFAULT_NTP_SERVERS
+    servers = DEFAULT_NTP_SERVERS
+    servers = settings.provider.ntps if settings.exists?("provider.ntps")
+    servers = settings.ntp if settings.exists?("ntp")
+    return servers.is_a?(String) ? servers.split(",") : servers
   end
 
   def jenkins_bucket
@@ -116,13 +114,17 @@ class Bosh::Bootstrap::MicroboshProviders::Base
     File.dirname(manifest_path)
   end
 
-  def default_apply_spec
-    return {} unless  settings.exists?("recursor")
-    {"apply_spec"=>
-      {"properties"=>
-       {"dns"=>{
-         "recursor"=>settings.recursor} }
-      }
+  def default_spec
+    spec = {
+      "cloud" => { "properties" => { "agent" => { "ntp" => ntp_servers } } },
+      "apply_spec" => { "properties" => { "ntp" => ntp_servers } }
     }
+
+    if settings.exists?("recursor")
+      spec["apply_spec"]["properties"]["dns"] = {
+        "recursor" => settings.recursor
+      }
+    end
+    spec
   end
 end

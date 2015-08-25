@@ -30,6 +30,10 @@ cloud:
       connection_options:
         ssl_verify_peer: false
       boot_from_volume: true
+    agent:
+      ntp:
+        - 0.pool.ntp.org
+        - 1.pool.ntp.org
 apply_spec:
   agent:
     blobstore:

@@ -4,7 +4,7 @@ module Bosh::Bootstrap::MicroboshProviders
   class AWS < Base
 
     def to_hash
-      data = super.merge({
+      data = super.deep_merge({
       "network"=>network_configuration,
        "resources"=>
         {"persistent_disk"=>persistent_disk,

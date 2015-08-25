@@ -26,6 +26,10 @@ cloud:
       - bosh
       default_key_name: test-bosh
       ec2_private_key: ~/.microbosh/ssh/test-bosh
+    agent:
+      ntp:
+        - 0.pool.ntp.org
+        - 1.pool.ntp.org
 apply_spec:
   agent:
     blobstore:
@@ -37,3 +41,6 @@ apply_spec:
       resurrector_enabled: true
     aws_registry:
       address: 1.2.3.4
+    ntp:
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org

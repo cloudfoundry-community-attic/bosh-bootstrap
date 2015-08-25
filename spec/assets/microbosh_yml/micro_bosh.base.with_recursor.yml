@@ -2,7 +2,16 @@
 name: test-bosh
 logging:
   level: DEBUG
+cloud:
+  properties:
+    agent:
+      ntp:
+        - 0.pool.ntp.org
+        - 1.pool.ntp.org
 apply_spec:
   properties:
+    ntp:
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org
     dns:
       recursor: 4.5.6.7
