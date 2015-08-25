@@ -30,6 +30,10 @@ cloud:
       - bosh-vpc-123456
       default_key_name: test-bosh
       ec2_private_key: ~/.microbosh/ssh/test-bosh
+    agent:
+      ntp:
+        - 0.pool.ntp.org
+        - 1.pool.ntp.org
 apply_spec:
   agent:
     blobstore:
@@ -47,3 +51,6 @@ apply_spec:
       env:
         http_proxy: http://192.168.1.100:8080
         https_proxy: https://192.168.1.100:8080
+    ntp:
+      - 0.pool.ntp.org
+      - 1.pool.ntp.org

@@ -20,8 +20,7 @@ module Bosh::Bootstrap::MicroboshProviders
          "properties"=>
            {"director"=>
              {"max_threads"=>3},
-            "hm"=>{"resurrector_enabled" => true},
-            "ntp"=> ntp_servers }}
+            "hm"=>{"resurrector_enabled" => true}}}
       })
       if proxy?
         data["apply_spec"]["properties"]["director"]["env"] = proxy

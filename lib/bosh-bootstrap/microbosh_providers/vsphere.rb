@@ -9,13 +9,12 @@ module Bosh::Bootstrap::MicroboshProviders
     end
 
     def to_hash
-      super.merge({
+      super.deep_merge({
         "network" => network_configuration,
         "resources" => resource_configuration,
         "cloud"=>
          {"plugin"=>"vsphere",
           "properties"=>{
-            "agent"=>{"ntp"=>ntp_servers},
             "vcenters"=>[vcenter_configuration]
           }}})
     end
