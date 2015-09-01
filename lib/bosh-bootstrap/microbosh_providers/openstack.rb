@@ -109,7 +109,8 @@ module Bosh::Bootstrap::MicroboshProviders
         "connection_options"=>{
           "ssl_verify_peer"=>false
         },
-        "boot_from_volume"=>boot_from_volume}
+        "boot_from_volume"=>boot_from_volume,
+        "ignore_server_availability_zone"=>ignore_server_availability_zone}
     end
 
     def region
@@ -127,6 +128,10 @@ module Bosh::Bootstrap::MicroboshProviders
 
     def boot_from_volume
       !!(settings.provider["options"] && settings.provider.options.boot_from_volume)
+    end
+
+    def ignore_server_availability_zone
+      !!(settings.provider["options"] && settings.provider.options.ignore_server_availability_zone)
     end
 
     # @return Bosh::Cli::PublicStemcell latest stemcell for openstack/trusty
