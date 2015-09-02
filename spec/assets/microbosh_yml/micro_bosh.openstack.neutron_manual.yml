@@ -30,6 +30,7 @@ cloud:
       connection_options:
         ssl_verify_peer: false
       boot_from_volume: false
+      ignore_server_availability_zone: false
     agent:
       ntp:
         - 0.pool.ntp.org
