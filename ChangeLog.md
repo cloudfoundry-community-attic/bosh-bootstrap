@@ -8,6 +8,10 @@ gem install bosh-bootstrap
 bosh-bootstrap deploy
 ```
 
+v0.18.1
+-------
+- [all] unping fog version
+
 v0.18
 -----
 - [aws-openstack] added support for custom ntp servers
