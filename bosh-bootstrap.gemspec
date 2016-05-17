@@ -28,7 +28,7 @@ EOS
   gem.add_dependency "fog-aws"
   gem.add_dependency "readwritesettings", "~> 3.0"
   gem.add_dependency "thor", "~> 0.18"
-  gem.add_dependency "httpclient", '=2.4.0'
+  gem.add_dependency "httpclient", '=2.7.1'
 
   gem.add_dependency "redcard"
   gem.add_dependency "rbvmomi"
