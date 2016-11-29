@@ -80,6 +80,14 @@ describe Bosh::Bootstrap::MicroboshProviders::OpenStack do
         yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.boot_from_volume.yml"))
       end
 
+      it "ignores server availability zone" do
+        setting "provider.options.ignore_server_availability_zone", true
+
+        subject.create_microbosh_yml(settings)
+        expect(File).to be_exists(microbosh_yml)
+        yaml_files_match(microbosh_yml, spec_asset("microbosh_yml/micro_bosh.openstack.ignore_server_availability_zone.yml"))
+      end
+
       it "adds recursor if present" do
         setting "recursor", "4.5.6.7"
 
