@@ -296,8 +296,10 @@ There are occasions when it is preferable or required to provision a initial ser
 To provision an [inception server](https://github.com/drnic/inception-server):
 
 ```
-$ gem install inception-server
-$ inception deploy
+$ git clone https://github.com/cloudfoundry-community/inception-server.git
+$ cd inception-server
+$ bundle
+$ bundle exec bin/inception deploy
 $ inception ssh
 > gem install bosh-bootstrap
 ```
